@@ -1,12 +1,12 @@
 package whenweekly
 
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import whenweekly.plugins.*
+import io.ktor.server.application.*
+import whenweekly.plugins.configureRouting
+import whenweekly.plugins.configureSecurity
 
-fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-        configureSecurity()
-        configureRouting()
-    }.start(wait = true)
+fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+fun Application.module() {
+    configureRouting()
+    configureSecurity()
+    configureRouting()
 }
