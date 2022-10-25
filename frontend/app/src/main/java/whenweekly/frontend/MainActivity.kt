@@ -2,6 +2,7 @@ package whenweekly.frontend
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import whenweekly.frontend.api.Api
 import whenweekly.frontend.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -11,8 +12,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.hamboog.setOnClickListener{
+        Api().base {
+            println(it)
+        }
 
+        binding.hamboog.setOnClickListener {
 
         }
 
