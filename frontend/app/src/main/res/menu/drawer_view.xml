@@ -1,0 +1,32 @@
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group> <!-- Home -->
+        <item android:title="Home">
+        <menu>
+        <item
+            android:id="@+id/nav_first_fragment"
+            android:icon="@drawable/item_one"
+            android:checked="true"
+            android:title="Lobbies" />
+        </menu>
+        </item>
+
+
+
+
+        <item android:title="Actions">
+            <menu>
+                <item
+                    android:id="@+id/nav_second_fragment"
+                    android:icon="@drawable/item_two"
+                    android:title="Join" />
+                <item
+                    android:id="@+id/nav_third_fragment"
+                    android:icon="@drawable/item_three"
+                    android:title="Create" />
+            </menu>
+        </item>
+    </group>
+
+</menu>
+
