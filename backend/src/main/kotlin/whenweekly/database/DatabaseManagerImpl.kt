@@ -1,10 +1,7 @@
 package whenweekly.database
 
 import org.ktorm.dsl.*
-import org.ktorm.entity.add
-import org.ktorm.entity.find
-import org.ktorm.entity.sequenceOf
-import org.ktorm.entity.toList
+import org.ktorm.entity.*
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.domain.manager.DatabaseManager
