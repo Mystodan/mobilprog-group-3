@@ -23,6 +23,9 @@
             android:name=".DrawerBaseActivity"
             android:exported="false" />
         <activity
+            android:name=".EventActivity"
+            android:exported="false" />
+        <activity
             android:name=".PlanListActivity"
             android:exported="true">
             <intent-filter>
