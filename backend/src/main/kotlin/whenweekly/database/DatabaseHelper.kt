@@ -1,8 +1,7 @@
 package whenweekly.database
 
 import io.ktor.server.application.*
-import org.jetbrains.exposed.dao.*
-import org.jetbrains.exposed.sql.Database
+import org.ktorm.database.Database
 import whenweekly.database.Constants.DATABASE_PASSWORD
 import whenweekly.database.Constants.DATABASE_URL
 import whenweekly.database.Constants.DATABASE_USERNAME
@@ -17,7 +16,7 @@ object DatabaseHelper {
         username = environment.config.property(DATABASE_USERNAME).getString()
         password = environment.config.property(DATABASE_PASSWORD).getString()
     }
-    fun connect() = Database.connect(
+    fun database() = Database.connect(
         url = url,
         user = username,
         password = password

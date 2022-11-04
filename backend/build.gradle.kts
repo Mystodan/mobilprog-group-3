@@ -1,7 +1,7 @@
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
-val exposed_version: String by project
+val ktorm_version: String by project
 val mysql_connector_version: String by project
 
 plugins {
@@ -34,11 +34,8 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 
-    // exposed
-    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
-
-    // MySQL
-    implementation("mysql:mysql-connector-java:$mysql_connector_version")
+    // ktorm
+    implementation("org.ktorm:ktorm-core:$ktorm_version")
+    implementation("org.ktorm:ktorm-support-mysql:$ktorm_version")
+    implementation("org.ktorm:ktorm-jackson:$ktorm_version")
 }

@@ -1,8 +1,8 @@
 package whenweekly.database.repository
 
 import whenweekly.database.DatabaseManagerImpl
+import whenweekly.database.entities.Event
 import whenweekly.domain.manager.DatabaseManager
-import whenweekly.domain.models.Event
 import whenweekly.domain.repository.EventRepository
 
 class EventDbRepository : EventRepository {

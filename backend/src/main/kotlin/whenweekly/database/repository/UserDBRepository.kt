@@ -1,8 +1,8 @@
 package whenweekly.database.repository
 
 import whenweekly.database.DatabaseManagerImpl
+import whenweekly.database.entities.User
 import whenweekly.domain.manager.DatabaseManager
-import whenweekly.domain.models.User
 import whenweekly.domain.repository.UserRepository
 
 class UserDBRepository : UserRepository {
@@ -14,5 +14,9 @@ class UserDBRepository : UserRepository {
 
     override fun getAllUsers(): List<User> {
         return database.getAllUsers()
+    }
+
+    override fun getUserById(id: Int): User? {
+        return database.getUserById(id)
     }
 }

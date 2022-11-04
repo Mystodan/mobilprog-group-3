@@ -1,8 +1,11 @@
 package whenweekly.database.schemas
 
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.ktorm.schema.Table
+import org.ktorm.schema.*
+import whenweekly.database.entities.User
 
-object Users: IntIdTable() {
-    val uuid = binary("uuid", 16)
-    val name = varchar("name", 50)
+object Users: Table<User>("users") {
+    val id = int("id").primaryKey().bindTo{ it.id }
+    val uuid = bytes("uuid").bindTo{ it.uuid }
+    val name = varchar("name").bindTo{ it.name }
 }

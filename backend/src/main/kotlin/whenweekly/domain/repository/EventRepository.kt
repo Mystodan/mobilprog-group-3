@@ -1,6 +1,7 @@
 package whenweekly.domain.repository
 
-import whenweekly.domain.models.Event
+import whenweekly.database.entities.Event
+
 
 interface EventRepository {
     fun addEvent(event: Event): Event

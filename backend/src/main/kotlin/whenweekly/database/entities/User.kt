@@ -1,15 +1,9 @@
 package whenweekly.database.entities
 
-import org.jetbrains.exposed.dao.*
-import org.jetbrains.exposed.dao.id.EntityID
-import whenweekly.database.schemas.Users
-import whenweekly.domain.models.User
+import org.ktorm.entity.Entity
 
-class UserDAO(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<UserDAO>(Users)
-
-    var uuid by Users.uuid
-    var name by Users.name
-
-    fun toModel() = User(id.value, uuid, name)
+interface User: Entity<User> {
+    val id: Int
+    val uuid: ByteArray
+    val name: String
 }
