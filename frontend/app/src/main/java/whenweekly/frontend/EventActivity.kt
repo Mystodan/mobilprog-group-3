@@ -6,7 +6,7 @@ import whenweekly.frontend.databinding.ActivityEventBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class EventActivity : AppCompatActivity() {
+class EventActivity : DrawerBaseActivity() {
     /**
      * Variable to be initiated later
      */
@@ -28,6 +28,7 @@ class EventActivity : AppCompatActivity() {
         intent?.let {
             val model:EventModel = intent.getParcelableExtra(Consts.EventsConstants.information)!!
 
+            setActivityTitle(model.eventName)
             binding.eventTitle.text = model.eventName
             binding.eventStartDate.text = SimpleDateFormat("yyyy.MM.dd HH:mm").format(Date(model.eventStart))
             binding.eventEndDate.text = SimpleDateFormat("yyyy.MM.dd HH:mm").format(Date(model.eventEnd))
