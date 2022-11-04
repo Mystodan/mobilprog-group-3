@@ -10,13 +10,16 @@ import whenweekly.database.fromJson
 import whenweekly.database.json
 import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.UserRepository
+import whenweekly.plugins.auth
 
 fun Route.userRouting() {
     val repository: UserRepository = UserDBRepository()
     route("/users") {
-        addUser(repository)
-        getUsers(repository)
-        getUserById(repository)
+        auth {
+            addUser(repository)
+            getUsers(repository)
+            getUserById(repository)
+        }
     }
 }
 
