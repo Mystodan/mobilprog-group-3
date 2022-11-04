@@ -16,6 +16,7 @@ object DatabaseHelper {
         username = environment.config.property(DATABASE_USERNAME).getString()
         password = environment.config.property(DATABASE_PASSWORD).getString()
     }
+
     fun database() = Database.connect(
         url = url,
         user = username,

@@ -1,11 +1,15 @@
 package whenweekly.database
 
-import org.ktorm.dsl.*
-import org.ktorm.entity.*
+import org.ktorm.dsl.eq
+import org.ktorm.entity.add
+import org.ktorm.entity.find
+import org.ktorm.entity.sequenceOf
+import org.ktorm.entity.toList
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
+import whenweekly.database.schemas.Events
+import whenweekly.database.schemas.Users
 import whenweekly.domain.manager.DatabaseManager
-import whenweekly.database.schemas.*
 
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()

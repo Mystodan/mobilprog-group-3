@@ -1,12 +1,10 @@
 package whenweekly.routes
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.ktorm.jackson.KtormModule
 import whenweekly.database.entities.User
 import whenweekly.database.fromJson
 import whenweekly.database.json
