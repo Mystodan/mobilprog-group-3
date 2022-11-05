@@ -2,6 +2,8 @@ package whenweekly.frontend
 
 import android.os.Parcel
 import android.os.Parcelable
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * The data model for a single event using parcelables to "send" information to a receiver that can use that data to put into their layout XML
@@ -11,6 +13,7 @@ data class EventModel(
     var eventStart: Long,
     var eventEnd: Long
 ) : Parcelable {
+    fun formatDate(format:String, date:Long): String = SimpleDateFormat(format).format(Date(date))
     /**
      * Constructor for the parcels that sets values for the EventModel parcel
      *

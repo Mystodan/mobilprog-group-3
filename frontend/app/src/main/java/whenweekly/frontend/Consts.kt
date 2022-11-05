@@ -1,5 +1,8 @@
 package whenweekly.frontend
 
+import java.text.SimpleDateFormat
+import java.util.*
+
 /**
  * Constants for event title, event startDate, event endDate and information for parcelables
  */
@@ -17,4 +20,5 @@ class Consts {
             EventModel("Eat at a restaurant", 1667433600000, 1668038400000)
         )
     }
+
 }
