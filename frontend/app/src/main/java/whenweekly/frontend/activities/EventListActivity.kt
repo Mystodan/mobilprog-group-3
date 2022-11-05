@@ -1,17 +1,20 @@
-package whenweekly.frontend
+package whenweekly.frontend.activities
 
 import android.content.Intent
 import android.os.Bundle
-import whenweekly.frontend.databinding.ActivityLobbyBinding
+import whenweekly.frontend.adapters.EventAdapter
+import whenweekly.frontend.models.EventModel
+import whenweekly.frontend.app.Globals
+import whenweekly.frontend.databinding.ActivityEventListBinding
 
-class PlanListActivity : DrawerBaseActivity() {
-    private val eventList = Consts.EventsConstants.EVENTS
-    private lateinit var binding: ActivityLobbyBinding
+class EventListActivity : DrawerBaseActivity() {
+    private val eventList = Globals.Constants.EVENTS
+    private lateinit var binding: ActivityEventListBinding
     private var adapter = EventAdapter(eventList) {changeActivity(eventList[it])}
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityLobbyBinding.inflate(layoutInflater)
+        binding = ActivityEventListBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setActivityTitle("Event List")
@@ -23,7 +26,7 @@ class PlanListActivity : DrawerBaseActivity() {
 
     private fun changeActivity(input: EventModel) {
         val intent = Intent(this, EventActivity::class.java)
-        intent.putExtra(Consts.EventsConstants.information, input)
+        intent.putExtra(Globals.Constants.INFO, input)
         startActivity(intent)
     }
 }

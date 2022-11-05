@@ -1,9 +1,9 @@
-package whenweekly.frontend
+package whenweekly.frontend.models
 
 import android.content.Context
 import java.util.*
 
-class UserID(private val context : Context) {
+class UserIDModel(private val context : Context) {
     private var key = "177013"
     var uuid: String? = null
     private var sharedPref = context.getSharedPreferences("WhenWeekly",Context.MODE_PRIVATE)

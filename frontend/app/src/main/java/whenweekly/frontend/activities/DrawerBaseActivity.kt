@@ -1,9 +1,6 @@
-package whenweekly.frontend
-
+package whenweekly.frontend.activities
 
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.MenuItem
@@ -16,7 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import whenweekly.frontend.databinding.ActivityDrawerBaseBinding
+import whenweekly.frontend.R
+import whenweekly.frontend.app.Globals
 
 open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var toggle : ActionBarDrawerToggle
@@ -26,16 +24,18 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     lateinit var navView: NavigationView
     lateinit var container : FrameLayout
 
-
     override fun setContentView(view: View?) {
         drawerLayout = layoutInflater.inflate(R.layout.activity_drawer_base,null) as DrawerLayout
         container  = drawerLayout.findViewById(R.id.activityContainer)
         container.addView(view)
         super.setContentView(drawerLayout)
-
+        println(Globals.Constants.MOCKED_EXTERNAL_EVENTS.first().invCode)
         toolbar= drawerLayout.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        toggle = ActionBarDrawerToggle(this,drawerLayout,toolbar, R.string.drawer_open, R.string.drawer_close)
+        toggle = ActionBarDrawerToggle(this,drawerLayout,toolbar,
+            R.string.drawer_open,
+            R.string.drawer_close
+        )
         drawerLayout.addDrawerListener(toggle)
 
         toolbar.setNavigationIconColor(resources.getColor(R.color.white))
@@ -52,15 +52,26 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         toggle.syncState()
     }
     override fun onNavigationItemSelected(@NonNull item: MenuItem): Boolean {
-        val activityClass: Class<*> = when (item.itemId){
-            R.id.nav_second_fragment -> JoinPlanActivity::class.java
+        val activityClass: Class<*>? = compareToCurrentActivity(when (item.itemId){
+            R.id.nav_second_fragment -> EventJoinActivity::class.java
             R.id.nav_third_fragment -> CreatePlanActivity::class.java
-            else -> PlanListActivity::class.java
-        }
+            else -> EventListActivity::class.java
+        })
         overridePendingTransition(0,0)
-        startActivity(Intent(this,activityClass))
+        if (activityClass != null) startActivity(Intent(this,activityClass))
         return false
     }
+
+
+
+
+
+    private fun compareToCurrentActivity(activity:Class<*>):Class<*>?{
+        if(javaClass == activity) return null
+        return activity
+    }
+
+
     private fun Toolbar.setNavigationIconColor(@ColorInt color: Int) = navigationIcon?.setTint(color)
     fun setActivityTitle(title: String){
         if (supportActionBar == null) return

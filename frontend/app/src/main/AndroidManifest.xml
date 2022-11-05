@@ -10,7 +10,7 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:name=".ApplicationMain"
+        android:name=".app.ApplicationMain"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -18,19 +18,19 @@
         android:theme="@style/Theme.Frontend"
         tools:targetApi="31">
         <activity
-            android:name=".CreatePlanActivity"
+            android:name=".activities.CreatePlanActivity"
             android:exported="false" />
         <activity
-            android:name=".JoinPlanActivity"
+            android:name=".activities.EventJoinActivity"
             android:exported="false" />
         <activity
-            android:name=".DrawerBaseActivity"
+            android:name=".activities.DrawerBaseActivity"
             android:exported="false" />
         <activity
-            android:name=".EventActivity"
+            android:name=".activities.EventActivity"
             android:exported="false" />
         <activity
-            android:name=".PlanListActivity"
+            android:name=".activities.EventListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

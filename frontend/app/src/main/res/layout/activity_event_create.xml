@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CreatePlanActivity">
+    tools:context=".activities.CreatePlanActivity">
 
     <Button
         android:id="@+id/btnCreateEvent"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
 
-                android:text="  /  /  "
+                android:text="@string/defaultDateHolder"
                 android:textSize="20dp" />
 
         </androidx.cardview.widget.CardView>
@@ -80,7 +80,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
 
-            android:text="  /  /  "
+            android:text="@string/defaultDateHolder"
             android:textSize="20dp" />
     </androidx.cardview.widget.CardView>
         <Button

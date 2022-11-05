@@ -3,5 +3,5 @@
     <string name="drawer_open">Drawer Open</string>
     <string name="drawer_close">Drawer Close</string>
     <string name="userID">UUID</string>
-    <string name= "defaultDateHolder">"  /  /  "</string>
+    <string name= "defaultDateHolder">""</string>
 </resources>
