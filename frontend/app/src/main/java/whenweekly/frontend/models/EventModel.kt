@@ -1,8 +1,7 @@
-package whenweekly.frontend
+package whenweekly.frontend.models
 
 import android.os.Parcel
 import android.os.Parcelable
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -13,7 +12,19 @@ data class EventModel(
     var eventStart: Long,
     var eventEnd: Long
 ) : Parcelable {
-    fun formatDate(format:String, date:Long): String = SimpleDateFormat(format).format(Date(date))
+    var invCode:String = ""
+
+    private fun genInvCode(){
+        fun getRandNum(min:Int, max:Int):Int = Random().nextInt(max+1)+min
+        invCode = ""
+        var symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        for (i in 0..20){
+            invCode += symbols[getRandNum(0,symbols.length-1)]
+        }
+    }
+    init {
+        genInvCode()
+    }
     /**
      * Constructor for the parcels that sets values for the EventModel parcel
      *
@@ -66,4 +77,5 @@ data class EventModel(
             return arrayOfNulls(size)
         }
     }
+
 }
