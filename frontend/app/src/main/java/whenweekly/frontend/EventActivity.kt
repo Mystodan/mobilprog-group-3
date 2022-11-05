@@ -27,11 +27,10 @@ class EventActivity : DrawerBaseActivity() {
          */
         intent?.let {
             val model:EventModel = intent.getParcelableExtra(Consts.EventsConstants.information)!!
-
             setActivityTitle(model.eventName)
             binding.eventTitle.text = model.eventName
-            binding.eventStartDate.text = SimpleDateFormat("yyyy.MM.dd HH:mm").format(Date(model.eventStart))
-            binding.eventEndDate.text = SimpleDateFormat("yyyy.MM.dd HH:mm").format(Date(model.eventEnd))
+            binding.eventStartDate.text = model.formatDate("yyyy.MM.dd", model.eventStart)
+            binding.eventEndDate.text = model.formatDate("yyyy.MM.dd", model.eventEnd)
         }
     }
 }

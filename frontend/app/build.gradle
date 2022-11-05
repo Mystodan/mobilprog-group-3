@@ -1,6 +1,7 @@
 
 buildscript {
     ext.ktor_version = '2.1.2'
+    ext.versions_work = '2.7.1'
 }
 
 plugins {
@@ -43,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation "androidx.work:work-runtime-ktx:$versions_work"
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
