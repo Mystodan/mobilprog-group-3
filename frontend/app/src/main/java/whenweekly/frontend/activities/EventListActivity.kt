@@ -2,6 +2,7 @@ package whenweekly.frontend.activities
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.recyclerview.widget.DividerItemDecoration
 import whenweekly.frontend.adapters.EventAdapter
 import whenweekly.frontend.models.EventModel
 import whenweekly.frontend.app.Globals
@@ -18,6 +19,10 @@ class EventListActivity : DrawerBaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setActivityTitle("Event List")
+
+        binding.rvEvents.addItemDecoration( // Adds separator between items
+            DividerItemDecoration(binding.rvEvents.context,DividerItemDecoration.VERTICAL)
+        )
 
         binding.rvEvents.adapter = adapter
 

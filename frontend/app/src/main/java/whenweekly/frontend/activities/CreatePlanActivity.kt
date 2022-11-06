@@ -9,18 +9,18 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import whenweekly.frontend.models.EventModel
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.R
-import whenweekly.frontend.databinding.ActivityCreatePlanBinding
+import whenweekly.frontend.databinding.ActivityEventCreateBinding
 
 
 
 class CreatePlanActivity : DrawerBaseActivity() {
 
-    private lateinit var binding: ActivityCreatePlanBinding
+    private lateinit var binding: ActivityEventCreateBinding
     private var startDate: Long = 0L
     private var endDate: Long = 0L
     private val invCodes = mutableListOf<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityCreatePlanBinding.inflate(layoutInflater)
+        binding = ActivityEventCreateBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setActivityTitle("Event Planner")

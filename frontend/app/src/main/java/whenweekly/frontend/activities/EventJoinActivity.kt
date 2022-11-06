@@ -3,12 +3,12 @@ package whenweekly.frontend.activities
 import android.os.Bundle
 import android.widget.Toast
 import whenweekly.frontend.app.Globals
-import whenweekly.frontend.databinding.ActivityJoinPlanBinding
+import whenweekly.frontend.databinding.ActivityEventJoinBinding
 
 class EventJoinActivity : DrawerBaseActivity() {
-    private lateinit var binding: ActivityJoinPlanBinding
+    private lateinit var binding: ActivityEventJoinBinding
     override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityJoinPlanBinding.inflate(layoutInflater)
+        binding = ActivityEventJoinBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setActivityTitle("Event Invite Code")
