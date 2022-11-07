@@ -6,20 +6,17 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import whenweekly.database.entities.User
-import whenweekly.database.fromJson
-import whenweekly.database.json
 import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.UserRepository
-import whenweekly.plugins.auth
 
 fun Route.userRouting() {
     val repository: UserRepository = UserDBRepository()
     route("/users") {
-        auth {
+        //auth {
             addUser(repository)
             getUsers(repository)
             getUserById(repository)
-        }
+        //}
     }
 }
 
@@ -28,7 +25,7 @@ fun Route.getUsers(repository: UserRepository) {
         val users = repository.getAllUsers()
         call.respond(
             HttpStatusCode.OK,
-            users.json()
+            users
         )
     }
 }
@@ -38,18 +35,18 @@ fun Route.getUserById(repository: UserRepository) {
         val id = call.parameters["id"]?.toInt() ?: 0
         val user = repository.getUserById(id)
         user?.let {
-            call.respond(HttpStatusCode.Found, it.json())
+            call.respond(HttpStatusCode.Found, it)
         } ?: call.respond(HttpStatusCode.NotFound, "user not found with id $id")
     }
 }
 
 fun Route.addUser(repository: UserRepository) {
     post {
-        val newUser = fromJson<User>(call.receiveText())
+        val newUser = call.receive<User>()
         val addedUser = repository.addUser(newUser)
         call.respond(
             HttpStatusCode.Created,
-            addedUser.json()
+            addedUser
         )
     }
 }

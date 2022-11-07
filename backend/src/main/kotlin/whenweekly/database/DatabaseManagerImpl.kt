@@ -33,4 +33,12 @@ class DatabaseManagerImpl : DatabaseManager {
         events.add(event)
         return event
     }
+
+    override fun getEventById(id: Int): Event? {
+        return events.find { it.id eq id }
+    }
+
+    override fun getAllEvents(): List<Event> {
+        return events.toList()
+    }
 }
