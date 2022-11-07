@@ -16,18 +16,17 @@ class EventJoinActivity : DrawerBaseActivity() {
         //binding.joinEvent// btn
         //binding.inputCode// edittext
         binding.joinEvent.setOnClickListener{
-            tryAddEvent(binding.inputCode.text.toString())
+            //tryAddEvent(binding.inputCode.text.toString())
         }
     }
-
+/*
     private fun tryAddEvent(strInn:String){
 
-        Globals.Constants.MOCKED_EXTERNAL_EVENTS.forEach{
-            if(strInn == it.invCode && !Globals.Constants.EVENTS.contains(it)){
-                Globals.Constants.EVENTS.add(it)
+
+                Globals.EventHolder.Events.add()
                 return
-            }
+
             Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show()
         }
-    }
+    }*/
 }

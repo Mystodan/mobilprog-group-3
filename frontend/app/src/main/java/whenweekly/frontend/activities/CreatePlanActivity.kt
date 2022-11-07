@@ -18,16 +18,13 @@ class CreatePlanActivity : DrawerBaseActivity() {
     private lateinit var binding: ActivityEventCreateBinding
     private var startDate: Long = 0L
     private var endDate: Long = 0L
-    private val invCodes = mutableListOf<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityEventCreateBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setActivityTitle("Event Planner")
         // gets all inv codes
-        Globals.Constants.MOCKED_EXTERNAL_EVENTS.forEach{
-            invCodes.add(it.invCode)
-        }
+
         // sets the functionality for picking dates
         binding.selectDates.setOnClickListener { showDataRangePicker() }
         // sets the functionality for creating an event
@@ -62,7 +59,7 @@ class CreatePlanActivity : DrawerBaseActivity() {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             Thread.sleep(1_00)
         }; return }
-        Globals.Constants.EVENTS.add(createEvent(binding.etEventName.text.toString(), startDate, endDate))
+        Globals.EventHolder.Events.add(createEvent(binding.etEventName.text.toString(), startDate, endDate))
         Toast.makeText(this, "Event added successfully!", Toast.LENGTH_SHORT).show()
 
         resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
@@ -83,7 +80,7 @@ class CreatePlanActivity : DrawerBaseActivity() {
     }
     private fun createEvent(eventName:String, eventStart:Long, eventEnd:Long): EventModel {
         val ret = EventModel(eventName,eventStart,eventEnd)
-        if(invCodes.contains(ret.invCode))createEvent(eventName, eventStart, eventEnd)
+        if(Globals.Utils.getAllInvCodes().contains(ret.invCode))createEvent(eventName, eventStart, eventEnd)
         return ret
     }
 
