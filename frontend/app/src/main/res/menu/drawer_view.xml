@@ -4,24 +4,20 @@
         <item android:title="Home">
         <menu>
         <item
-            android:id="@+id/nav_first_fragment"
+            android:id="@+id/nav_lobby"
             android:icon="@drawable/item_one"
-            android:checked="true"
             android:title="Lobbies" />
         </menu>
         </item>
 
-
-
-
         <item android:title="Actions">
             <menu>
                 <item
-                    android:id="@+id/nav_second_fragment"
+                    android:id="@+id/nav_join"
                     android:icon="@drawable/item_two"
                     android:title="Join" />
                 <item
-                    android:id="@+id/nav_third_fragment"
+                    android:id="@+id/nav_create"
                     android:icon="@drawable/item_three"
                     android:title="Create" />
             </menu>

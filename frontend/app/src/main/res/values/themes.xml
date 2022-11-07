@@ -1,18 +1,18 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.Frontend" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">#673AB7</item>
-        <item name="colorPrimaryDark">#512DA8</item>
-        <item name="colorAccent">#FF4081</item>
-    </style>
 
-    <style name="MaterialDatePickerTheme" parent="Theme.MaterialComponents.DayNight">
-        <item name="colorPrimary">#673AB7</item>
-        <item name="colorPrimaryDark">#512DA8</item>
-        <item name="colorAccent">#FF4081</item>
-
+    <!-- Date Picker theme. -->
+    <style name="MaterialDatePickerTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="materialCalendarStyle">@style/Widget.MaterialComponents.MaterialCalendar</item>
         <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
         <item name="materialCalendarTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar</item>
     </style>
+
+    <!-- Base application theme. -->
+    <style name="Theme.Frontend" parent="MaterialDatePickerTheme">
+        <item name="colorPrimary">@color/font_brown_light</item>
+        <item name="colorPrimaryVariant">@color/font_brown</item>
+        <item name="colorPrimaryDark">@color/font_brown</item>
+        <item name="colorAccent">#FF4081</item>
+    </style>
+
 </resources>

@@ -3,7 +3,19 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/activity_create_plan.xml" value="0.28894927536231885" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/activity_dashboard.xml" value="0.36666666666666664" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/activity_drawer_base.xml" value="0.20878623188405798" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/activity_join_plan.xml" value="0.2765625" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/activity_lobby.xml" value="0.20878623188405798" />
         <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/activity_main.xml" value="0.36666666666666664" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/activity_menu.xml" value="0.28894927536231885" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/content_layout.xml" value="0.20878623188405798" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/fragment_create_event_plan.xml" value="0.33" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/fragment_join_event_plan.xml" value="0.1" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/main_drawer_header.xml" value="0.20878623188405798" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/layout/toolbar.xml" value="0.4222222222222222" />
+        <entry key="..\:/GITLAB/mobileprog/mobile-programming-group-3/frontend/app/src/main/res/menu/drawer_view.xml" value="0.36666666666666664" />
       </map>
     </option>
   </component>

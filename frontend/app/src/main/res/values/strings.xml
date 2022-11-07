@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">Frontend</string>
+    <string name="app_name">WhenWeekly</string>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
+    <string name="userID">UUID</string>
+    <string name= "defaultDateHolder">""</string>
 </resources>
