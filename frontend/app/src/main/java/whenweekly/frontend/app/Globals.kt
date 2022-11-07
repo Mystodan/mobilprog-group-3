@@ -11,16 +11,7 @@ class Globals {
 
     object Constants {
         const val INFO = "info"
-        val EVENTS = mutableListOf<EventModel>(
-            EventModel("Grocery shopping", 1667433600000, 1668038400000),
-            EventModel("Watch movie", 1667433600000, 1668038400000),
-            EventModel("Play games", 1667433600000, 1668038400000),
-            EventModel("Clean the house", 1667433600000, 1668038400000),
-            EventModel("Workout", 1667433600000, 1668038400000),
-            EventModel("Project work", 1667433600000, 1668038400000),
-            EventModel("Play golf", 1667433600000, 1668038400000),
-            EventModel("Eat at a restaurant", 1667433600000, 1668038400000)
-        )
+        val EVENTS = mutableListOf<EventModel>()
         val MOCKED_EXTERNAL_EVENTS = mutableListOf<EventModel>(
             EventModel("sucking", 1667433600000, 1668038400000),
         )
