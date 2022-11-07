@@ -9,8 +9,8 @@ import java.util.*
  */
 data class EventModel(
     var eventName: String,
-    var eventStart: Long,
-    var eventEnd: Long
+    var startDate: Long,
+    var endDate: Long
 ) : Parcelable {
     var invCode:String = ""
 
@@ -44,8 +44,8 @@ data class EventModel(
      */
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(eventName)
-        parcel.writeLong(eventStart)
-        parcel.writeLong(eventEnd)
+        parcel.writeLong(startDate)
+        parcel.writeLong(endDate)
     }
 
     /**

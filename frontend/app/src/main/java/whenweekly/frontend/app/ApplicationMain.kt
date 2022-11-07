@@ -10,15 +10,6 @@ class ApplicationMain : Application(){
         super.onCreate()
         val user = UserIDModel(applicationContext)
         println(user.uuid)
-        Globals.Constants.MOCKED_EXTERNAL_EVENTS.addAll(Globals.Constants.EVENTS)
     }
 
-    private var mCurrentActivity: Activity? = null
-    fun getCurrentActivity(): Activity? {
-        return mCurrentActivity
-    }
-
-    fun setCurrentActivity(mCurrentActivity: Activity?) {
-        this.mCurrentActivity = mCurrentActivity
-    }
 }

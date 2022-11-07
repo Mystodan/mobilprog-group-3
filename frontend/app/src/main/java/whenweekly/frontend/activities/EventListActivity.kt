@@ -31,7 +31,7 @@ class EventListActivity : DrawerBaseActivity() {
 
     private fun changeActivity(input: EventModel) {
         val intent = Intent(this, EventActivity::class.java)
-        intent.putExtra(Globals.Constants.INFO, input)
+        intent.putExtra(Globals.Constants.LABEL_PARCEL_INFO, input)
         startActivity(intent)
     }
 }

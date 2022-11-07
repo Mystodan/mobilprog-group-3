@@ -18,7 +18,6 @@ class EventJoinActivity : DrawerBaseActivity() {
         binding.joinEvent.setOnClickListener{
             tryAddEvent(binding.inputCode.text.toString())
         }
-
     }
 
     private fun tryAddEvent(strInn:String){
@@ -30,9 +29,5 @@ class EventJoinActivity : DrawerBaseActivity() {
             }
             Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show()
         }
-
-
-
     }
-
 }

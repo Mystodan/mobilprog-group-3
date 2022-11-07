@@ -1,5 +1,6 @@
 package whenweekly.frontend.app
 
+import whenweekly.frontend.R
 import whenweekly.frontend.models.EventModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -10,7 +11,9 @@ import java.util.*
 class Globals {
 
     object Constants {
-        const val INFO = "info"
+        const val USERID_KEY = (R.string.UIDKEY)
+        const val LABEL_PARCEL_INFO = "EventActivityInformation"
+        const val LABEL_CLIP_INV = "EventActivityInviteCode"
         val EVENTS = mutableListOf<EventModel>(
             EventModel("Grocery shopping", 1667433600000, 1668038400000),
             EventModel("Watch movie", 1667433600000, 1668038400000),
