@@ -22,8 +22,10 @@ class EventAdapter(private var dataList: List<EventModel>, val onClick:(Int)->Un
      */
     inner class EventViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val textView: TextView
+        val openText: TextView
         init {
             textView = view.findViewById(R.id.tv_text)
+            openText = view.findViewById(R.id.enter_event)
         }
     }
 
@@ -47,7 +49,7 @@ class EventAdapter(private var dataList: List<EventModel>, val onClick:(Int)->Un
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val item = dataList[holder.adapterPosition]
         holder.textView.text = item.eventName
-        holder.textView.setOnClickListener {onClick(holder.adapterPosition)}
+        holder.openText.setOnClickListener {onClick(holder.adapterPosition)}
     }
 
     /**

@@ -1,5 +1,6 @@
 package whenweekly.frontend.activities
 
+import androidx.appcompat.R.anim.*
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -38,6 +39,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         )
         drawerLayout.addDrawerListener(toggle)
 
+
         toolbar.setNavigationIconColor(resources.getColor(R.color.white))
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -53,12 +55,12 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     }
     override fun onNavigationItemSelected(@NonNull item: MenuItem): Boolean {
         val activityClass: Class<*>? = compareToCurrentActivity(when (item.itemId){
-            R.id.nav_second_fragment -> EventJoinActivity::class.java
-            R.id.nav_third_fragment -> CreatePlanActivity::class.java
+            R.id.nav_join -> EventJoinActivity::class.java
+            R.id.nav_create -> CreatePlanActivity::class.java
             else -> EventListActivity::class.java
         })
-        overridePendingTransition(0,0)
         if (activityClass != null) startActivity(Intent(this,activityClass))
+        overridePendingTransition(abc_fade_in, abc_fade_out)
         return false
     }
 

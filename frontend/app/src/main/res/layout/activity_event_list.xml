@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.EventListActivity"
+    android:background="@color/white"
     android:orientation="vertical">
 
         <TextView
@@ -15,12 +16,15 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:text="Your events"
+            android:textStyle="bold"
+            android:fontFamily="serif"
             android:textSize="40sp"
             app:layout_constraintBottom_toTopOf="@+id/rv_events"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
+            android:divider="@color/white"
             android:id="@+id/rv_events"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
