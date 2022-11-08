@@ -9,4 +9,8 @@ interface EventRepository {
     fun getEventById(id: Int): Event?
 
     fun getAllEvents(): List<Event>
+
+    fun addUserToEvent(eventId: Int, userId: Int): Boolean
+
+    fun getEventsByUserId(userId: Int): List<Event>
 }
