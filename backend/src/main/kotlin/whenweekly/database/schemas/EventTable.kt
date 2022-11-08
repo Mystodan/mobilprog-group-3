@@ -13,4 +13,5 @@ object EventTable : Table<Event>("events") {
     val startDate = datetime("start_date").bindTo { it.start_date }
     val endDate = datetime("end_date").bindTo { it.end_date }
     val owner = int("owner").references(UserTable) { it.owner }
+    val inviteCode = varchar("invite_code").bindTo { it.inviteCode }
 }

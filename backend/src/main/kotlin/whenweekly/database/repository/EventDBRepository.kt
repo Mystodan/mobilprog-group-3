@@ -6,10 +6,21 @@ import whenweekly.domain.manager.DatabaseManager
 import whenweekly.domain.repository.EventRepository
 import java.util.*
 
+// TODO: move somewhere else
+private fun genInvCode(): String {
+    fun getRandNum(min:Int, max:Int):Int = Random().nextInt(max+1)+min
+    var invCode = ""
+    val symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+    for (i in 0..19){
+        invCode += symbols[getRandNum(0,symbols.length-1)]
+    }
+    return invCode
+}
 class EventDBRepository : EventRepository {
     private val database: DatabaseManager = DatabaseManagerImpl()
 
     override fun addEvent(event: Event): Event {
+        event.inviteCode = genInvCode()
         return database.addEvent(event)
     }
 
