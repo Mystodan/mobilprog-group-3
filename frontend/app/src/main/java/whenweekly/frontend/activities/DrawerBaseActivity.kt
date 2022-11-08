@@ -1,7 +1,7 @@
 package whenweekly.frontend.activities
 
-import androidx.appcompat.R.anim.*
 import android.content.Intent
+import androidx.appcompat.R.anim.*
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.MenuItem
@@ -13,6 +13,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.google.android.material.navigation.NavigationView
 import whenweekly.frontend.R
 
@@ -24,6 +26,9 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     lateinit var drawerLayout: DrawerLayout
     lateinit var navView: NavigationView
     lateinit var container : FrameLayout
+
+    private var currFragment: Fragment? = null
+    private val fragmentManager: FragmentManager = supportFragmentManager
 
     override fun setContentView(view: View?) {
         drawerLayout = layoutInflater.inflate(R.layout.activity_drawer_base,null) as DrawerLayout
@@ -54,14 +59,36 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     }
 
     override fun onNavigationItemSelected(@NonNull item: MenuItem): Boolean {
-        val activityClass: Class<*>? = when (item.itemId){
+        val componentClass: Class<*>? = when (item.itemId){
             R.id.nav_join -> EventJoinActivity::class.java
             R.id.nav_create -> EventCreateActivity::class.java
             else -> EventListActivity::class.java
         }
-        if (activityClass != javaClass) startActivity(Intent(this,activityClass))
+        //
+
+       loadFragment(componentClass)
+
         overridePendingTransition(abc_fade_in, abc_fade_out)
+
         return false
+    }
+
+    private fun loadActivity(activityClass:Class<*>?) = when(activityClass == javaClass) {
+        false -> startActivity(Intent(this,activityClass))
+        else -> {}
+    }
+    private fun loadFragment(fragmentClass:Class<*>?){
+        var fragment: Fragment? = null
+        try {
+            fragment = fragmentClass?.newInstance() as Fragment
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        if (fragment != null) {
+            fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit()
+            currFragment = fragment
+        }
     }
 
     fun Toolbar.setNavigationIconColor(@ColorInt color: Int) = navigationIcon?.setTint(color)
