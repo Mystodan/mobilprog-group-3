@@ -1,10 +1,7 @@
 package whenweekly.database
 
 import org.ktorm.dsl.*
-import org.ktorm.entity.add
-import org.ktorm.entity.find
-import org.ktorm.entity.sequenceOf
-import org.ktorm.entity.toList
+import org.ktorm.entity.*
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.database.schemas.EventUserJoinedTable
@@ -12,7 +9,9 @@ import whenweekly.database.schemas.EventTable
 import whenweekly.database.schemas.EventUserAvailableTable
 import whenweekly.database.schemas.UserTable
 import whenweekly.domain.manager.DatabaseManager
+import java.nio.ByteBuffer
 import java.time.LocalDateTime
+import java.util.*
 
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
@@ -60,6 +59,17 @@ class DatabaseManagerImpl : DatabaseManager {
                 .innerJoin(EventUserJoinedTable, on = EventTable.id eq EventUserJoinedTable.event).select()
                 .where { EventUserJoinedTable.user eq userId }
                 .map { EventTable.createEntity(it) }
+    }
+
+    private fun UUID.asBytes(): ByteArray{
+        val b = ByteBuffer.wrap(ByteArray(16))
+        b.putLong(this.mostSignificantBits)
+        b.putLong(this.leastSignificantBits)
+        return b.array()
+    }
+    override fun getUserByUUID(uuid: String): User? {
+        val uuidBytes = UUID.fromString(uuid).asBytes()
+        return users.find { it.uuid eq uuidBytes }
     }
 
     override fun resetDatabase() {

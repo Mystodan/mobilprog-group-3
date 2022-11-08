@@ -19,4 +19,8 @@ class UserDBRepository : UserRepository {
     override fun getUserById(id: Int): User? {
         return database.getUserById(id)
     }
+
+    override fun getUserByUUID(uuid: String): User? {
+        return database.getUserByUUID(uuid)
+    }
 }

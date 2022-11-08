@@ -8,22 +8,36 @@ import io.ktor.server.routing.*
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.database.repository.EventDBRepository
+import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.EventRepository
+import whenweekly.domain.repository.UserRepository
 import whenweekly.routes.Constants.EVENTS_ROUTE
+import java.util.*
+
+fun getUserId(request: ApplicationRequest, userRepository: UserRepository): Int {
+    val uuid = request.headers["UUID"] ?: return -1
+    userRepository.getUserByUUID(uuid)?.let {
+        return it.id
+    }
+    return -1
+}
 
 fun Route.eventRouting() {
     val repository: EventRepository = EventDBRepository()
+    val userRepository: UserRepository = UserDBRepository()
     route(EVENTS_ROUTE) {
-        getEvents(repository)
+        getEvents(repository, userRepository)
         getEventById(repository)
         addEvent(repository)
         userJoinEvent(repository)
     }
 }
 
-fun Route.getEvents(repository: EventRepository){
+fun Route.getEvents(repository: EventRepository, userRepository: UserRepository) {
     get {
         val users = repository.getAllEvents()
+        val userId = getUserId(call.request, userRepository)
+        println("userId: $userId")
         call.respond(
             HttpStatusCode.OK,
             users

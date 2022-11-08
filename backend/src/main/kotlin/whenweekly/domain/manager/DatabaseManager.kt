@@ -18,5 +18,7 @@ interface DatabaseManager {
 
     fun getEventsByUserId(userId: Int): List<Event>
 
+    fun getUserByUUID(uuid: String): User?
+
     fun resetDatabase()
 }

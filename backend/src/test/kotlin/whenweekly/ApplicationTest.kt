@@ -41,6 +41,7 @@ data class EventTest(
     val start_date: LocalDateTime = LocalDateTime.now(),
     val end_date: LocalDateTime = LocalDateTime.now(),
     val owner: UserTest = UserTest(-1),
+    val inviteCode: String = ""
 )
 
 fun ApplicationTestBuilder.getClient(): HttpClient {
@@ -73,7 +74,8 @@ class ApplicationTest {
 
         val client = getClient()
 
-        createUser(client, "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]", "bob")
+        //createUser(client, "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]", "bob")
+        createUser(client, "[201,123,54,73,139,77,65,46,138,134,93,119,24,17,127,69]", "bob")
 
         val users = getUsers(client)
         assertEquals(1, users.size)
