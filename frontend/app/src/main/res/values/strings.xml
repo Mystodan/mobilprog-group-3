@@ -4,5 +4,7 @@
     <string name="drawer_close">Drawer Close</string>
     <string name="userID">UUID</string>
     <string name="UIDKEY">177013</string>
-    <string name= "defaultDateHolder">""</string>
+    <string name="defaultDateHolder">""</string>
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
