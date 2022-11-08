@@ -39,4 +39,8 @@ class EventDBRepository : EventRepository {
     override fun getEventsByUserId(userId: Int): List<Event> {
         return database.getEventsByUserId(userId)
     }
+
+    override fun deleteEventByID(eventId: Int) {
+        return database.deleteEventByID(eventId)
+    }
 }

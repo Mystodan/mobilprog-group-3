@@ -78,4 +78,11 @@ class DatabaseManagerImpl : DatabaseManager {
         database.deleteAll(EventTable)
         database.deleteAll(UserTable)
     }
+
+    override fun deleteEventByID(eventId: Int) {
+        //EventTable has a Primary key with ON DELETE CASCADE, should delete the child tables as well
+        database.delete(EventTable) { it.id eq eventId }
+        //database.delete(EventUserJoinedTable) { it.event eq eventId }
+        //database.delete(EventUserAvailableTable) { it.event eq eventId }
+    }
 }

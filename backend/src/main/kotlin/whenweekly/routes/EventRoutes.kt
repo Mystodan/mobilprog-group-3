@@ -30,6 +30,7 @@ fun Route.eventRouting() {
         getEventById(repository)
         addEvent(repository)
         userJoinEvent(repository)
+        deleteEvent(repository)
     }
 }
 
@@ -75,6 +76,19 @@ fun Route.userJoinEvent(repository: EventRepository) {
         } else {
             call.respond(HttpStatusCode.NotFound, "event not found with id $id")
         }
+    }
+}
+
+
+fun Route.deleteEvent(eventRepository: EventRepository){
+    delete("{id}") {
+        val id = call.parameters["id"]?.toInt() ?: 0
+        eventRepository.deleteEventByID(id)
+
+        call.respond(
+            HttpStatusCode.OK,
+            "Event $id deleted"
+        )
     }
 }
 
