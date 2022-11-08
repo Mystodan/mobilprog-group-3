@@ -1,9 +1,13 @@
 package whenweekly.frontend.activities
 
-import androidx.appcompat.app.AppCompatActivity
+
 import android.os.Bundle
+import androidx.fragment.app.Fragment
+import whenweekly.frontend.EventListFragment
 import whenweekly.frontend.R
+import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.ActivityFragmentHolderBinding
+
 
 class FragmentHolderActivity : DrawerBaseActivity() {
     private lateinit var binding : ActivityFragmentHolderBinding
@@ -11,5 +15,17 @@ class FragmentHolderActivity : DrawerBaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityFragmentHolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setDefaultFragment(Globals.Utils.startFragment, savedInstanceState)
+
     }
+
+    private fun setDefaultFragment(target:Fragment, state: Bundle?){
+        if (state == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.flContent, target)
+                .commit()
+        }
+    }
+
 }

@@ -1,5 +1,6 @@
 package whenweekly.frontend.app
 
+import whenweekly.frontend.EventListFragment
 import whenweekly.frontend.R
 import whenweekly.frontend.models.EventModel
 import java.text.SimpleDateFormat
@@ -17,6 +18,7 @@ class Globals {
         const val SECURE_MASTERKEYALIAS = "WhenWeekly"
         const val LABEL_PARCEL_INFO = "EventActivityInformation"
         const val LABEL_CLIP_INV = "EventActivityInviteCode"
+
     }
     object Lib{
         val Events = mutableListOf<EventModel>()
@@ -25,7 +27,7 @@ class Globals {
     object Utils{
         fun formatDate(format:String, date:Long): String = SimpleDateFormat(format,Locale.ROOT)
             .format(Date(date))
-
+        val startFragment = EventListFragment()
         fun getAllInvCodes():List<String> {
             var list:MutableList<String> = mutableListOf()
             Lib.Events.forEach{ it.invCode?.let { it1 -> list.add(it1) } }

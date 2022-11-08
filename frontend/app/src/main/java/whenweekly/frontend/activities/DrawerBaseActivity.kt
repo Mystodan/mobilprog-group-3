@@ -16,7 +16,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.navigation.NavigationView
+import whenweekly.frontend.EventListFragment
 import whenweekly.frontend.R
+import whenweekly.frontend.app.Globals
 
 
 open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -27,7 +29,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     lateinit var navView: NavigationView
     lateinit var container : FrameLayout
 
-    private var currFragment: Fragment? = null
+    var currFragment: Fragment? = Globals.Utils.startFragment
     private val fragmentManager: FragmentManager = supportFragmentManager
 
     override fun setContentView(view: View?) {
@@ -62,7 +64,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         val componentClass: Class<*>? = when (item.itemId){
             R.id.nav_join -> EventJoinActivity::class.java
             R.id.nav_create -> EventCreateActivity::class.java
-            else -> EventListActivity::class.java
+            else -> EventListFragment::class.java
         }
         //
 
@@ -85,7 +87,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
             e.printStackTrace()
         }
 
-        if (fragment != null) {
+        if (fragment != null && currFragment != fragment) {
             fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit()
             currFragment = fragment
         }
