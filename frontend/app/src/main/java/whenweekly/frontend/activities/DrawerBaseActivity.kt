@@ -15,13 +15,13 @@ import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import whenweekly.frontend.R
-import whenweekly.frontend.app.Globals
+
 
 open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private lateinit var toggle : ActionBarDrawerToggle
-    private lateinit var toolbar: Toolbar
+    lateinit var toggle : ActionBarDrawerToggle
+    lateinit var toolbar: Toolbar
 
-    private lateinit var drawerLayout: DrawerLayout
+    lateinit var drawerLayout: DrawerLayout
     lateinit var navView: NavigationView
     lateinit var container : FrameLayout
 
@@ -30,7 +30,6 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         container  = drawerLayout.findViewById(R.id.activityContainer)
         container.addView(view)
         super.setContentView(drawerLayout)
-        println(Globals.Constants.MOCKED_EXTERNAL_EVENTS.first().invCode)
         toolbar= drawerLayout.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         toggle = ActionBarDrawerToggle(this,drawerLayout,toolbar,
@@ -53,28 +52,19 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         super.onPostCreate(savedInstanceState, persistentState)
         toggle.syncState()
     }
+
     override fun onNavigationItemSelected(@NonNull item: MenuItem): Boolean {
-        val activityClass: Class<*>? = compareToCurrentActivity(when (item.itemId){
+        val activityClass: Class<*>? = when (item.itemId){
             R.id.nav_join -> EventJoinActivity::class.java
-            R.id.nav_create -> CreatePlanActivity::class.java
+            R.id.nav_create -> EventCreateActivity::class.java
             else -> EventListActivity::class.java
-        })
-        if (activityClass != null) startActivity(Intent(this,activityClass))
+        }
+        if (activityClass != javaClass) startActivity(Intent(this,activityClass))
         overridePendingTransition(abc_fade_in, abc_fade_out)
         return false
     }
 
-
-
-
-
-    private fun compareToCurrentActivity(activity:Class<*>):Class<*>?{
-        if(javaClass == activity) return null
-        return activity
-    }
-
-
-    private fun Toolbar.setNavigationIconColor(@ColorInt color: Int) = navigationIcon?.setTint(color)
+    fun Toolbar.setNavigationIconColor(@ColorInt color: Int) = navigationIcon?.setTint(color)
     fun setActivityTitle(title: String){
         if (supportActionBar == null) return
         supportActionBar!!.title = title

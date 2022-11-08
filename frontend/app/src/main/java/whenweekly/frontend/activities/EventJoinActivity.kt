@@ -18,21 +18,16 @@ class EventJoinActivity : DrawerBaseActivity() {
         binding.joinEvent.setOnClickListener{
             tryAddEvent(binding.inputCode.text.toString())
         }
-
     }
 
     private fun tryAddEvent(strInn:String){
 
-        Globals.Constants.MOCKED_EXTERNAL_EVENTS.forEach{
-            if(strInn == it.invCode && !Globals.Constants.EVENTS.contains(it)){
-                Globals.Constants.EVENTS.add(it)
-                return
-            }
+        Globals.Lib.Events.forEach{ // server sided holder of events
+            if(strInn == it.invCode && !Globals.Lib.Events.contains(it)){ // checks if local contains serversided event
+                Globals.Lib.Events.add(it) // add if not
+                return // return if added
+            }// if not then send error
             Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show()
         }
-
-
-
     }
-
 }
