@@ -1,4 +1,4 @@
-package whenweekly.frontend
+package whenweekly.frontend.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import whenweekly.frontend.activities.EventActivity
 import whenweekly.frontend.adapters.EventAdapter
@@ -22,15 +21,22 @@ class EventListFragment : Fragment() {
     private val binding get() = _binding!!
     private val eventList = Globals.Lib.Events
     private var adapter = EventAdapter(eventList) {changeActivity(eventList[it])}
+
+    /**
+     *
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?:return
     }
 
+    /**
+     *
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {  // Inflate the layout for this fragment
+    ): View {  // Inflate the layout for this fragment
         _binding = FragmentEventListBinding.inflate(inflater, container, false)
         binding.rvEvents.adapter = adapter
         binding.rvEvents.addItemDecoration( // Adds separator between items
@@ -42,7 +48,8 @@ class EventListFragment : Fragment() {
 
         Api().getEvents { events ->
             Globals.Lib.Events.addAll(events.map {
-                Globals.Utils.createEvent(                    it.name,
+                Globals.Utils.createEvent(
+                    it.name,
                     it.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
                     it.end_date.toEpochSecond(ZoneOffset.UTC) * 1000)!!
             })
@@ -50,6 +57,10 @@ class EventListFragment : Fragment() {
         }
         return binding.root
     }
+
+    /**
+     *
+     */
     private fun changeActivity(input: EventModel) {
         val intent = Intent(activity, EventActivity::class.java)
         intent.putExtra(Globals.Constants.LABEL_PARCEL_INFO, input)

@@ -72,6 +72,10 @@ class EventActivity : DrawerBaseActivity() {
             println("All dates: $allDates")
 
             val availableDates = calculateAvailableDates(allDates, unavailableDates)
+            if(unavailableDates.isNotEmpty()) {
+                Toast.makeText(this, "Dates reported successfully!", Toast.LENGTH_SHORT).show()
+                toggleCalendar(binding.calendarView.visibility)
+            }
             println("Unavailable dates: $unavailableDates")
             println("Available dates: $availableDates")
         }
@@ -80,11 +84,14 @@ class EventActivity : DrawerBaseActivity() {
     /**
      * Intent used to receive data from a parcelable and set the content inside the layout XML to the data received
      */
-    private fun getParcelableFromIntent():EventModel?{
+    private fun getParcelableFromIntent():EventModel? {
         return intent.getParcelableExtra(Globals.Constants.LABEL_PARCEL_INFO)
     }
 
-    private fun displayData(model: EventModel){
+    /**
+     *
+     */
+    private fun displayData(model: EventModel) {
         binding.eventTitle.text = model.eventName
         binding.eventStartDate.text = Globals.Utils.formatDate("yyyy.MM.dd", model.startDate)
         binding.eventEndDate.text = Globals.Utils.formatDate("yyyy.MM.dd", model.endDate)
@@ -93,7 +100,11 @@ class EventActivity : DrawerBaseActivity() {
         datesStart = timeAsInt(model.startDate)
         datesEnd = timeAsInt(model.endDate)
     }
-    private fun reconfigureToolbar(){
+
+    /**
+     *
+     */
+    private fun reconfigureToolbar() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.back_arrow)
         toolbar.setNavigationIconColor(resources.getColor(R.color.white))
         toolbar.setNavigationOnClickListener{ finish() }
@@ -155,7 +166,7 @@ class EventActivity : DrawerBaseActivity() {
      * @return                  - Returns alldates after it has removed all unavailable dates
      */
     private fun calculateAvailableDates(alldates: MutableList<LocalDate>, unavailableDates: MutableList<LocalDate>): MutableList<LocalDate> {
-        toggleCalendar(binding.calendarView.visibility)
+        if(unavailableDates.isEmpty()) Toast.makeText(this, "Please select dates first!", Toast.LENGTH_SHORT).show()
 
         for(date in binding.calendarView.selectedDates) {
             unavailableDates.add(toLocalDate(date.date.toEpochDay()*86400000))

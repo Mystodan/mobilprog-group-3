@@ -10,8 +10,8 @@ import java.util.*
 class LocalUserModel(private val context : Context) {
     private var key = context.resources.getString(Globals.Constants.USERID_KEY)
     var uuid: String? = null
-    //private val sharedPref = context.getSharedPreferences("WhenWeekly",Context.MODE_PRIVATE)
     private val securePref = setSecurePref(Globals.Constants.SECURE_FILENAME,Globals.Constants.SECURE_MASTERKEYALIAS)
+
     init {
         uuid = securePref.getString(key,null)
         if (uuid == null) {
@@ -19,7 +19,15 @@ class LocalUserModel(private val context : Context) {
             securePref.edit().putString(key, uuid).apply()
         }
     }
+
+    /**
+     *
+     */
     private fun genUUID() = UUID.randomUUID().toString()
+
+    /**
+     *
+     */
     private fun setSecurePref(fileName: String, alias: String) = EncryptedSharedPreferences.create(
         fileName, alias, context, AES256_SIV, AES256_GCM
     )

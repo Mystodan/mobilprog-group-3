@@ -1,10 +1,9 @@
 package whenweekly.frontend.app
 
-import whenweekly.frontend.EventListFragment
+import whenweekly.frontend.fragments.EventListFragment
 import whenweekly.frontend.R
 import whenweekly.frontend.models.EventModel
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -28,15 +27,15 @@ class Globals {
         fun formatDate(format:String, date:Long): String = SimpleDateFormat(format,Locale.ROOT)
             .format(Date(date))
         val startFragment = EventListFragment()
-        fun getAllInvCodes():List<String> {
-            var list:MutableList<String> = mutableListOf()
+        private fun getAllInvCodes():List<String> {
+            val list: MutableList<String> = mutableListOf()
             Lib.Events.forEach{ it.invCode?.let { it1 -> list.add(it1) } }
             return list
         }
         fun createEvent(eventName:String, eventStart:Long, eventEnd:Long): EventModel? {
-            if (Globals.Lib.userId == null) return null
+            if (Lib.userId == null) return null
             val ret = EventModel(eventName,eventStart,eventEnd)
-            if(Globals.Utils.getAllInvCodes().contains(ret.invCode))createEvent(eventName, eventStart, eventEnd)
+            if(getAllInvCodes().contains(ret.invCode))createEvent(eventName, eventStart, eventEnd)
             return ret
         }
     }
