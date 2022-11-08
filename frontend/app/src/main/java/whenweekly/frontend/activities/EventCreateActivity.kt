@@ -13,7 +13,7 @@ import whenweekly.frontend.databinding.ActivityEventCreateBinding
 
 
 
-class CreatePlanActivity : DrawerBaseActivity() {
+class EventCreateActivity : DrawerBaseActivity() {
 
     private lateinit var binding: ActivityEventCreateBinding
     private var startDate: Long = 0L
@@ -59,10 +59,12 @@ class CreatePlanActivity : DrawerBaseActivity() {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             Thread.sleep(1_00)
         }; return }
-        Globals.EventHolder.Events.add(createEvent(binding.etEventName.text.toString(), startDate, endDate))
-        Toast.makeText(this, "Event added successfully!", Toast.LENGTH_SHORT).show()
 
+        val newEvent = Globals.Utils.createEvent(binding.etEventName.text.toString(), startDate, endDate) ?: return
+        Globals.Lib.Events.add(newEvent)
+        Toast.makeText(this, "Event added successfully!", Toast.LENGTH_SHORT).show()
         resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
+
     }
 
     private fun setDateHolders(startDateHolder: TextView?,endDateHolder: TextView?){
@@ -78,11 +80,5 @@ class CreatePlanActivity : DrawerBaseActivity() {
         startDate = 0L
         endDate = 0L
     }
-    private fun createEvent(eventName:String, eventStart:Long, eventEnd:Long): EventModel {
-        val ret = EventModel(eventName,eventStart,eventEnd)
-        if(Globals.Utils.getAllInvCodes().contains(ret.invCode))createEvent(eventName, eventStart, eventEnd)
-        return ret
-    }
-
 
 }

@@ -56,7 +56,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     override fun onNavigationItemSelected(@NonNull item: MenuItem): Boolean {
         val activityClass: Class<*>? = when (item.itemId){
             R.id.nav_join -> EventJoinActivity::class.java
-            R.id.nav_create -> CreatePlanActivity::class.java
+            R.id.nav_create -> EventCreateActivity::class.java
             else -> EventListActivity::class.java
         }
         if (activityClass != javaClass) startActivity(Intent(this,activityClass))
@@ -64,7 +64,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         return false
     }
 
-    private fun Toolbar.setNavigationIconColor(@ColorInt color: Int) = navigationIcon?.setTint(color)
+    fun Toolbar.setNavigationIconColor(@ColorInt color: Int) = navigationIcon?.setTint(color)
     fun setActivityTitle(title: String){
         if (supportActionBar == null) return
         supportActionBar!!.title = title

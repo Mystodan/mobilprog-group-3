@@ -62,7 +62,8 @@ class EventActivity : DrawerBaseActivity() {
         binding.code.text = model.invCode
     }
     private fun reconfigureToolbar(){
-        toggle.setHomeAsUpIndicator(R.drawable.back_arrow)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.back_arrow)
+        toolbar.setNavigationIconColor(resources.getColor(R.color.white))
         toolbar.setNavigationOnClickListener{ finish() }
 
     }

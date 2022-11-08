@@ -2,6 +2,7 @@ package whenweekly.frontend.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import whenweekly.frontend.app.Globals
 import java.util.*
 
 /**
@@ -12,18 +13,20 @@ data class EventModel(
     var startDate: Long,
     var endDate: Long
 ) : Parcelable {
-    var invCode:String = ""
-
-    private fun genInvCode(){
-        fun getRandNum(min:Int, max:Int):Int = Random().nextInt(max+1)+min
-        invCode = ""
-        var symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-        for (i in 0..20){
-            invCode += symbols[getRandNum(0,symbols.length-1)]
-        }
-    }
+    var invCode:String? = null
+    var creatorInit:String? = null
     init {
         genInvCode()
+        creatorInit = Globals.Lib.userId
+    }
+
+    private fun genInvCode(){
+            fun getRandNum(min:Int, max:Int):Int = Random().nextInt(max+1)+min
+            invCode = ""
+            var symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+            for (i in 0..2){
+                invCode += symbols[getRandNum(0,symbols.length-1)]
+            }
     }
     /**
      * Constructor for the parcels that sets values for the EventModel parcel
@@ -77,5 +80,6 @@ data class EventModel(
             return arrayOfNulls(size)
         }
     }
+
 
 }
