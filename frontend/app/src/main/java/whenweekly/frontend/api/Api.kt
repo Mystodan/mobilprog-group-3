@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 internal val ApplicationDispatcher: CoroutineDispatcher = Dispatchers.Main
 
 class Api {
-    private val client = HttpClient(){
+    private val client = HttpClient {
         install(ContentNegotiation) {
             jackson {
                 enable(SerializationFeature.INDENT_OUTPUT)
@@ -50,7 +50,7 @@ class Api {
     fun getEvents(callback: (List<Event>) -> Unit) {
         GlobalScope.apply {
             launch(ApplicationDispatcher) {
-                val response = client.get(HttpRoutes.EVENTS);
+                val response = client.get(HttpRoutes.EVENTS)
                 println(response.bodyAsText())
                 val events: List<Event> = response.body()
                 callback(events)
