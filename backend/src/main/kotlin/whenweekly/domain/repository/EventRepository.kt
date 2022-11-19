@@ -1,10 +1,11 @@
 package whenweekly.domain.repository
 
 import whenweekly.database.entities.Event
+import whenweekly.database.entities.User
 
 
 interface EventRepository {
-    fun addEvent(event: Event): Event
+    fun addEvent(event: Event, owner: User): Event
 
     fun getEventById(id: Int): Event?
 

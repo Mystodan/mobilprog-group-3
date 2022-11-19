@@ -33,4 +33,6 @@ class UserDBRepository : UserRepository {
     override fun getUserByUUID(uuid: String): User? {
         return database.getUserByUUID(uuid)
     }
+
+    override fun updateUser(user: User) { database.updateUser(user) }
 }

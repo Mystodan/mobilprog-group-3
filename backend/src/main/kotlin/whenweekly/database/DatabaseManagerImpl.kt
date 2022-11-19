@@ -9,9 +9,11 @@ import whenweekly.database.schemas.EventTable
 import whenweekly.database.schemas.EventUserAvailableTable
 import whenweekly.database.schemas.UserTable
 import whenweekly.domain.manager.DatabaseManager
+import java.lang.Exception
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.log
 
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
@@ -31,6 +33,10 @@ class DatabaseManagerImpl : DatabaseManager {
 
     override fun getUserById(id: Int): User? {
         return users.find { it.id eq id }
+    }
+
+    override fun updateUser(user: User) {
+        users.update(user)
     }
 
     override fun addEvent(event: Event): Event {

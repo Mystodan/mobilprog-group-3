@@ -10,23 +10,24 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlin.test.*
 import io.ktor.server.testing.*
-import whenweekly.database.entities.User
 import whenweekly.plugins.*
 import whenweekly.routes.Constants.EVENTS_ROUTE
 import whenweekly.routes.Constants.USERS_ROUTE
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
+import com.mysql.cj.xdevapi.JsonString
 import io.ktor.client.plugins.*
 import io.ktor.serialization.jackson.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.server.application.*
 import io.ktor.server.util.*
-import kotlinx.serialization.Serializable
+import org.json.simple.JSONArray
 import org.junit.FixMethodOrder
 import org.junit.runners.MethodSorters
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 data class UserTest(
     val id: Int,
@@ -75,7 +76,9 @@ class ApplicationTest {
         val client = getClient()
 
         //createUser(client, "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]", "bob")
-        createUser(client, "[201,123,54,73,139,77,65,46,138,134,93,119,24,17,127,69]", "bob")
+        //createUser(client, "[201,123,54,73,139,77,65,46,138,134,93,119,24,17,127,69]", "bob")
+
+        createUser(client,"test","testUser")
 
         val users = getUsers(client)
         assertEquals(1, users.size)
@@ -92,6 +95,10 @@ class ApplicationTest {
         client.put("$EVENTS_ROUTE/${event.id}/join") {
             contentType(ContentType.Application.Json)
             setBody("{ \"id\": ${user.id} }")
+            headers{
+                val testUUID = "test"
+                append("UUID", testUUID)
+            }
         }
 
         // Get events for user
@@ -166,5 +173,9 @@ class ApplicationTest {
                 assertEquals("Database reset", bodyAsText())
             }
         }
+    }
+
+    suspend fun setUUID(userId: Int, uuid: JSONArray){
+
     }
 }

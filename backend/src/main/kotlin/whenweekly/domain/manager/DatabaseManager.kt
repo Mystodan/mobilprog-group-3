@@ -7,6 +7,7 @@ interface DatabaseManager {
     fun addUser(user: User): User
     fun getAllUsers(): List<User>
     fun getUserById(id: Int): User?
+    fun updateUser(user: User)
 
     fun addEvent(event: Event): Event
 
@@ -25,4 +26,6 @@ interface DatabaseManager {
     fun deleteEventByID(eventId: Int)
 
     fun resetDatabase()
+
+
 }
