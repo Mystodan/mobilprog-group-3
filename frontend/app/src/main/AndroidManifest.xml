@@ -18,19 +18,6 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".activities.EventListActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".activities.EventCreateActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.EventJoinActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.DrawerBaseActivity"
             android:exported="false" />
         <activity

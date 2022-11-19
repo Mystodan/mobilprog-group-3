@@ -23,8 +23,8 @@ data class EventModel(
     private fun genInvCode(){
             fun getRandNum(min:Int, max:Int):Int = Random().nextInt(max+1)+min
             invCode = ""
-            var symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-            for (i in 0..2){
+            val symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+            for (i in 0..19){
                 invCode += symbols[getRandNum(0,symbols.length-1)]
             }
     }
