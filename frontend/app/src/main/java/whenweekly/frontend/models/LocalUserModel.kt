@@ -12,18 +12,21 @@ class LocalUserModel(private val context : Context) {
     var uuid: String? = null
     private val securePref = setSecurePref(Globals.Constants.SECURE_FILENAME,Globals.Constants.SECURE_MASTER_KEY_ALIAS)
 
-    init {
+    init{
         uuid = securePref.getString(key,null)
-        if (uuid == null) {
-            uuid = genUUID()
-            securePref.edit().putString(key, uuid).apply()
-        }
     }
-
     /**
      *  generates a random UUID as string
      */
-    private fun genUUID() = UUID.randomUUID().toString()
+    fun genUUID() {
+        if (uuid == null) {
+            uuid = UUID.randomUUID().toString()
+            securePref.edit().putString(key, uuid).apply()
+        }
+    }
+    fun setGlobalUserID (){
+        if (uuid != null) Globals.Lib.userId= uuid
+    }
 
     /**
      *  sets encrypted shared preferences
