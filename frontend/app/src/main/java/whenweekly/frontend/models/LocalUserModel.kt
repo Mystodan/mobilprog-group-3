@@ -9,21 +9,26 @@ import java.util.*
 
 class LocalUserModel(private val context : Context) {
     private var key = context.resources.getString(Globals.Constants.USERID_KEY)
-    var uuid: String? = null
+    private var uuid: String = String()
     private val securePref = setSecurePref(Globals.Constants.SECURE_FILENAME,Globals.Constants.SECURE_MASTER_KEY_ALIAS)
 
     init {
-        uuid = securePref.getString(key,null)
-        if (uuid == null) {
-            uuid = genUUID()
-            securePref.edit().putString(key, uuid).apply()
+        val storedUuid = securePref.getString(key,null)
+        if (storedUuid != null) {
+            uuid = storedUuid;
+            println("UUID: " + uuid.toString())
         }
     }
-
     /**
      *  generates a random UUID as string
      */
-    private fun genUUID() = UUID.randomUUID().toString()
+    fun genUUID() {
+        uuid = UUID.randomUUID().toString()
+        securePref.edit().putString(key, uuid).apply()
+    }
+    fun setGlobalUserID (){
+        Globals.Lib.userId= uuid
+    }
 
     /**
      *  sets encrypted shared preferences

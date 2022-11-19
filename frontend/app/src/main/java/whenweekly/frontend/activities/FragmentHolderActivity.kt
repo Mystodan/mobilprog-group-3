@@ -1,6 +1,7 @@
 package whenweekly.frontend.activities
 
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import whenweekly.frontend.R
@@ -19,7 +20,10 @@ class FragmentHolderActivity : DrawerBaseActivity() {
         binding = ActivityFragmentHolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setDefaultFragment(Globals.Utils.startFragment, savedInstanceState)
-
+        if (Globals.Lib.userId.isEmpty()) {
+            startActivity(Intent(this, RegisterActivity::class.java))
+            finish()
+        }
     }
 
     /**

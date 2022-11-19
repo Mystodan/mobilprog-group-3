@@ -6,7 +6,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
+import kotlinx.coroutines.launch
 import whenweekly.frontend.activities.EventActivity
 import whenweekly.frontend.adapters.EventAdapter
 import whenweekly.frontend.api.Api
@@ -45,8 +47,9 @@ class EventListFragment : Fragment() {
 
         adapter.updateData(Globals.Lib.Events)
         if (Globals.Lib.Events.isNotEmpty()) return binding.root
+        lifecycleScope.launch{
+            val events = Api.getEvents()
 
-        Api().getEvents { events ->
             Globals.Lib.Events.addAll(events.map {
                 Globals.Utils.createEvent(
                     it.name!!,
@@ -55,6 +58,7 @@ class EventListFragment : Fragment() {
             })
             adapter.updateData(Globals.Lib.Events)
         }
+
         return binding.root
     }
 

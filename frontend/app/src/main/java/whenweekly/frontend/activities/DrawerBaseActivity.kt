@@ -32,9 +32,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     private var currFragment: Fragment? = Globals.Utils.startFragment
     private val fragmentManager: FragmentManager = supportFragmentManager
 
-    /**
-     *
-     */
+
     override fun setContentView(view: View?) {
         drawerLayout = layoutInflater.inflate(R.layout.activity_drawer_base,null) as DrawerLayout
         container  = drawerLayout.findViewById(R.id.activityContainer)
