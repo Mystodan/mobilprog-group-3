@@ -43,4 +43,8 @@ class EventDBRepository : EventRepository {
     override fun deleteEventByID(eventId: Int) {
         return database.deleteEventByID(eventId)
     }
+
+    override fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean {
+        return database.removeUserFromEvent(eventId, kickedUserID)
+    }
 }

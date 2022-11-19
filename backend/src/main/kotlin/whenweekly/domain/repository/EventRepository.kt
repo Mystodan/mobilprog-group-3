@@ -15,4 +15,6 @@ interface EventRepository {
     fun getEventsByUserId(userId: Int): List<Event>
 
     fun deleteEventByID(id: Int)
+
+    fun removeUserFromEvent(eventId: Int,kickedUserID: Int):Boolean
 }

@@ -66,9 +66,52 @@ fun Route.userJoinEvent(repository: EventRepository) {
         val success = repository.addUserToEvent(id, user.id!!)
         if (success) {
             call.respond(HttpStatusCode.OK, "user ${user.id} joined event $id")
-        } else {
-            call.respond(HttpStatusCode.NotFound, "event not found with id $id")
+interface UserKickRequest : org.ktorm.entity.Entity<UserKickRequest>{
+    var ID:Int
+}
+
+fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: UserRepository) {
+    put("{id}/kick") {
+        // Get the event ID from URL
+        val eventId = call.parameters["id"]?.toInt() ?: 0
+
+        // Check if event exists
+        val event = eventRepository.getEventById(eventId)
+        if ( event == null) {
+            call.respond(HttpStatusCode.OK, "event with id $eventId doesn't exist")
+            return@put
         }
+
+        // Get ownerID
+        val userID = Shared.getUserId(call.request, userRepository)
+        if (userID == null){
+            call.respond(
+                HttpStatusCode.NotFound,
+                "Invalid UUID"
+            )
+            return@put
+        }
+
+        if (event.owner!!.id != userID) {
+            call.respond(HttpStatusCode.Unauthorized, "You are not the owner of this event")
+            return@put
+        }
+
+        // get ID of user to remove
+        val userToKick = call.receive<UserKickRequest>()
+        if (userRepository.getUserById(userToKick.ID)==null){
+            call.respond(
+                HttpStatusCode.NotFound, "Can't find user to remove from event"
+            )
+        }
+
+        val success = eventRepository.removeUserFromEvent(eventId, userToKick.ID)
+        if (success){
+            call.respond(HttpStatusCode.OK, "user ${userToKick.ID} has been kicked from event $eventId")
+        } else {
+            call.respond(HttpStatusCode.OK, "user ${userToKick.ID} was not in event $eventId")
+        }
+
     }
 }
 

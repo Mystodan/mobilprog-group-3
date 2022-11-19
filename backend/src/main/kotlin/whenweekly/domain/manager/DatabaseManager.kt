@@ -16,6 +16,8 @@ interface DatabaseManager {
 
     fun addUserToEvent(eventId: Int, userId: Int): Boolean
 
+    fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean
+
     fun getEventsByUserId(userId: Int): List<Event>
 
     fun getUserByUUID(uuid: String): User?
