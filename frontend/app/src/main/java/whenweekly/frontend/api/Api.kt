@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-class Api {
+object Api {
     private val client = HttpClient {
         install(ContentNegotiation) {
             jackson {
@@ -34,12 +34,13 @@ class Api {
         }
     }
 
-    private suspend fun doRequest(httpMethod: HttpMethod, route: String, body: String): HttpResponse {
+    private suspend fun doRequest(httpMethod: HttpMethod, route: String, body: String? = null): HttpResponse {
         val response = client.request(route) {
             method = httpMethod
-            setBody(body)
             headers {
-                append("Content-Type", "application/json")
+                if (body != null) {
+                    setBody(body)
+                }
                 append("UUID", Globals.Lib.userId!!)
             }
         }
@@ -49,8 +50,7 @@ class Api {
     suspend fun getEvents(): List<Event> {
         val response = doRequest(
             HttpMethod.Get,
-            HttpRoutes.EVENTS,
-            ""
+            HttpRoutes.EVENTS
         )
 
         return response.body()
@@ -65,7 +65,7 @@ class Api {
         val response = doRequest(
             HttpMethod.Post,
             HttpRoutes.EVENTS,
-            Event(null, name, description, startDate, endDate, null).toString()
+            Event(null, name, description, startDate, endDate, null, null).toString()
         )
         return response.body()
     }

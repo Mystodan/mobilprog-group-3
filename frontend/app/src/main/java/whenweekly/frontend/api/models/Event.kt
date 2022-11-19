@@ -10,4 +10,5 @@ data class Event(
     val start_date: LocalDateTime?,
     val end_date: LocalDateTime?,
     val owner: User?,
+    val inviteCode: String?
 )

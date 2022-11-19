@@ -21,7 +21,7 @@ class Globals {
     }
     object Lib{
         val Events = mutableListOf<EventModel>()
-        var userId :String? = null
+        var userId: String = ""
     }
     object Utils{
         fun formatDate(format:String, date:Long): String = SimpleDateFormat(format,Locale.ROOT)
@@ -33,7 +33,6 @@ class Globals {
             return list
         }
         fun createEvent(eventName:String, eventStart:Long, eventEnd:Long): EventModel? {
-            if (Lib.userId == null) return null
             val ret = EventModel(eventName,eventStart,eventEnd)
             if(getAllInvCodes().contains(ret.invCode))createEvent(eventName, eventStart, eventEnd)
             return ret
