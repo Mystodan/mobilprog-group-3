@@ -5,37 +5,50 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.Serializable
 import whenweekly.database.entities.Event
-import whenweekly.database.entities.User
 import whenweekly.database.repository.EventDBRepository
 import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
 import whenweekly.routes.Constants.EVENTS_ROUTE
-import java.util.*
+import whenweekly.plugins.dev
+import javax.swing.text.html.parser.Entity
 
 
 fun Route.eventRouting() {
     val repository: EventRepository = EventDBRepository()
     val userRepository: UserRepository = UserDBRepository()
     route(EVENTS_ROUTE) {
+        dev {
+            getEventById(repository)
+        }
         getEvents(repository, userRepository)
-        getEventById(repository)
-        addEvent(repository)
-        userJoinEvent(repository)
-        deleteEvent(repository)
+        addEvent(repository,userRepository)
+        userJoinEvent(repository,userRepository)
+        deleteEvent(repository,userRepository)
+        removeUserFromEvent(repository,userRepository)
     }
 }
 
 fun Route.getEvents(repository: EventRepository, userRepository: UserRepository) {
     get {
-        val users = repository.getAllEvents()
         val userId = Shared.getUserId(call.request, userRepository)
         println("userId: $userId")
-        call.respond(
-            HttpStatusCode.OK,
-            users
-        )
+
+        if (userId == null){
+            call.respond(
+                HttpStatusCode.NotFound,
+                "Invalid UUID"
+            )
+        }
+        else {
+            val events = repository.getEventsByUserId(userId)
+            call.respond(
+                HttpStatusCode.OK,
+                events
+            )
+        }
     }
 }
 fun Route.getEventById(repository: EventRepository) {
@@ -48,24 +61,55 @@ fun Route.getEventById(repository: EventRepository) {
     }
 }
 
-fun Route.addEvent(repository: EventRepository) {
+fun Route.addEvent(repository: EventRepository,userRepository: UserRepository) {
     post {
-        val newEvent = call.receive<Event>()
-        val addedEvent = repository.addEvent(newEvent)
-        call.respond(
-            HttpStatusCode.Created,
-            addedEvent
-        )
+        val ownerID = Shared.getUserId(call.request, userRepository)
+        if (ownerID == null){
+            call.respond(
+                HttpStatusCode.NotFound,
+                "Invalid UUID"
+            )
+        }
+        else {
+            val newEvent = call.receive<Event>()
+            val owner = userRepository.getUserById(ownerID)
+            val addedEvent = repository.addEvent(newEvent, owner!!)
+            call.respond(
+                HttpStatusCode.Created,
+                addedEvent
+            )
+        }
     }
 }
 
-fun Route.userJoinEvent(repository: EventRepository) {
+fun Route.userJoinEvent(repository: EventRepository, userRepository: UserRepository) {
     put("{id}/join") {
-        val id = call.parameters["id"]?.toInt() ?: 0
-        val user = call.receive<User>()
-        val success = repository.addUserToEvent(id, user.id!!)
-        if (success) {
-            call.respond(HttpStatusCode.OK, "user ${user.id} joined event $id")
+        val eventId = call.parameters["id"]?.toInt() ?: 0
+
+        // Check if event exists
+        if (repository.getEventById(eventId) == null) {
+            call.respond(HttpStatusCode.OK, "event with id $eventId doesn't exist")
+            return@put
+        }
+
+        val userID = Shared.getUserId(call.request, userRepository )
+        if (userID == null){
+            call.respond(
+                HttpStatusCode.NotFound,
+                "Invalid UUID"
+            )
+            return@put
+        }
+
+        val success = repository.addUserToEvent(eventId, userID)
+        if (success){
+            call.respond(HttpStatusCode.OK, "user $userID joined event $eventId")
+        } else {
+            call.respond(HttpStatusCode.OK, "user $userID is already in event $eventId")
+        }
+    }
+}
+
 interface UserKickRequest : org.ktorm.entity.Entity<UserKickRequest>{
     var ID:Int
 }
@@ -116,11 +160,28 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
 }
 
 
-fun Route.deleteEvent(eventRepository: EventRepository){
+fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepository){
     delete("{id}") {
         val id = call.parameters["id"]?.toInt() ?: 0
-        eventRepository.deleteEventByID(id)
 
+        val event = eventRepository.getEventById(id)
+        if (event == null) {
+            call.respond(HttpStatusCode.NotFound, "Event with id $id not found")
+            return@delete
+        }
+
+        val userId = Shared.getUserId(call.request, userRepository )
+        if (userId == null){
+            call.respond(HttpStatusCode.NotFound, "Invalid UUID")
+            return@delete
+        }
+
+        if (event.owner!!.id != userId) {
+            call.respond(HttpStatusCode.Unauthorized, "You are not the owner of this event")
+            return@delete
+        }
+
+        eventRepository.deleteEventByID(id)
         call.respond(
             HttpStatusCode.OK,
             "Event $id deleted"

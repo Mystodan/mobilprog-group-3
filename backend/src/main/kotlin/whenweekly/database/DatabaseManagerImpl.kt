@@ -46,12 +46,33 @@ class DatabaseManagerImpl : DatabaseManager {
         return events.toList()
     }
 
+    /**
+     * add a selected user from the selected event
+     *
+     * @param eventId       - ID of the event in EventUserJoinedTable
+     * @param userId        - ID of the user in EventUserJoinedTable to add
+     */
     override fun addUserToEvent(eventId: Int, userId: Int): Boolean {
-        return database.insert(EventUserJoinedTable) {
-            set(it.event, eventId)
-            set(it.user, userId)
-            set(it.join_time, LocalDateTime.now())
-        } > 0
+        return try {
+            database.insert(EventUserJoinedTable) {
+                set(it.event, eventId)
+                set(it.user, userId)
+                set(it.join_time, LocalDateTime.now())
+            } > 0
+        } catch ( exception: Exception ) {
+            println(exception)
+            false
+        }
+    }
+
+    /**
+     * Remove a selected user from the selected event
+     *
+     * @param eventId       - ID of the event in EventUserJoinedTable
+     * @param kickedUserID  - ID of the user in EventUserJoinedTable to remove
+     */
+    override fun removeUserFromEvent(eventId: Int,  kickedUserID: Int): Boolean {
+         return database.delete(EventUserJoinedTable){(it.event eq eventId) and (it.user eq kickedUserID)} > 0
     }
 
     override fun getEventsByUserId(userId: Int): List<Event> {
