@@ -6,7 +6,7 @@ import org.ktorm.schema.int
 import org.ktorm.schema.varchar
 import whenweekly.database.entities.User
 
-object Users : Table<User>("users") {
+object UserTable : Table<User>("users") {
     val id = int("id").primaryKey().bindTo { it.id }
     val uuid = bytes("uuid").bindTo { it.uuid }
     val name = varchar("name").bindTo { it.name }

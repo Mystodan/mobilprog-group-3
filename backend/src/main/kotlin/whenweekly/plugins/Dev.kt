@@ -6,12 +6,15 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import whenweekly.routes.Constants.BUILD_CONFIG
 
-fun Route.auth(build: Route.() -> Unit): Route {
-    val route = createChild(AuthRouteSelector())
+fun Route.dev(build: Route.() -> Unit): Route {
+    val route = createChild(DevRouteSelector ())
+
+    val isDev = environment?.config?.property(BUILD_CONFIG)?.getString().equals("dev", true)
     val plugin = createRouteScopedPlugin("RouteAuthorization"){
         on(AuthenticationChecked){ call ->
-            if (!isValidUser(call.request)) {
+            if (isDev){
                 call.respond(HttpStatusCode.Unauthorized)
             }
         }
@@ -22,7 +25,7 @@ fun Route.auth(build: Route.() -> Unit): Route {
     return route
 }
 
-class AuthRouteSelector : RouteSelector() {
+class DevRouteSelector : RouteSelector() {
     override fun evaluate(context: RoutingResolveContext, segmentIndex: Int): RouteSelectorEvaluation {
         return RouteSelectorEvaluation.Transparent
     }
