@@ -7,9 +7,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.*
 import whenweekly.frontend.databinding.ActivityRegisterBinding
 import whenweekly.frontend.models.LocalUserModel
 
@@ -22,8 +22,7 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
         var welcomeText = listOf("Welcome to WhenWeekly." ,
             "Please Enter Your Name...")
-
-        GlobalScope.launch {
+        lifecycleScope.launch {
             showText(welcomeText[0], binding.welcomeText, null)
             showText(welcomeText[1], null, binding.inputName)
         }
@@ -61,7 +60,6 @@ class RegisterActivity : AppCompatActivity() {
             LocalUserModel(applicationContext).genUUID()
             LocalUserModel(applicationContext).setGlobalUserID()
             finish()
-
         }
     }
 }

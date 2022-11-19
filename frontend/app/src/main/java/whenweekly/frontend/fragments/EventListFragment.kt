@@ -6,7 +6,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
+import kotlinx.coroutines.launch
 import whenweekly.frontend.activities.EventActivity
 import whenweekly.frontend.adapters.EventAdapter
 import whenweekly.frontend.api.Api
@@ -45,16 +47,18 @@ class EventListFragment : Fragment() {
 
         adapter.updateData(Globals.Lib.Events)
         if (Globals.Lib.Events.isNotEmpty()) return binding.root
-
-        Api().getEvents { events ->
-            Globals.Lib.Events.addAll(events.map {
-                Globals.Utils.createEvent(
-                    it.name!!,
-                    it.start_date!!.toEpochSecond(ZoneOffset.UTC) * 1000,
-                    it.end_date!!.toEpochSecond(ZoneOffset.UTC) * 1000)!!
-            })
-            adapter.updateData(Globals.Lib.Events)
+        lifecycleScope.launch{
+            Api().getEvents { events ->
+                Globals.Lib.Events.addAll(events.map {
+                    Globals.Utils.createEvent(
+                        it.name!!,
+                        it.start_date!!.toEpochSecond(ZoneOffset.UTC) * 1000,
+                        it.end_date!!.toEpochSecond(ZoneOffset.UTC) * 1000)!!
+                })
+                adapter.updateData(Globals.Lib.Events)
+            }
         }
+
         return binding.root
     }
 
