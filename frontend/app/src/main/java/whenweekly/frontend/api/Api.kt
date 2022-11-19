@@ -12,6 +12,7 @@ import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import whenweekly.frontend.api.models.Event
+import whenweekly.frontend.app.Globals
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -56,4 +57,23 @@ class Api {
             }
         }
     }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun addEvent(name: String, description: String, startDate: LocalDateTime, endDate: LocalDateTime, callback: (Event) -> Unit) {
+        GlobalScope.apply {
+            launch(ApplicationDispatcher) {
+                val response = client.post(HttpRoutes.EVENTS) {
+                    // Set UUID header
+                    headers{
+                        append("UUID", Globals.Lib.userId!!)
+                    }
+                    setBody(Event(null, name, description, startDate, endDate, null))
+                }
+                println(response.bodyAsText())
+                val event: Event = response.body()
+                callback(event)
+            }
+        }
+    }
+
 }
