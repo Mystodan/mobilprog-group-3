@@ -49,9 +49,9 @@ class EventListFragment : Fragment() {
         Api().getEvents { events ->
             Globals.Lib.Events.addAll(events.map {
                 Globals.Utils.createEvent(
-                    it.name,
-                    it.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
-                    it.end_date.toEpochSecond(ZoneOffset.UTC) * 1000)!!
+                    it.name!!,
+                    it.start_date!!.toEpochSecond(ZoneOffset.UTC) * 1000,
+                    it.end_date!!.toEpochSecond(ZoneOffset.UTC) * 1000)!!
             })
             adapter.updateData(Globals.Lib.Events)
         }
