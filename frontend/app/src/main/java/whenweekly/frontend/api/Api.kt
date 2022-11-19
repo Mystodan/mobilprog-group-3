@@ -12,13 +12,14 @@ import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import whenweekly.frontend.api.models.Event
+import whenweekly.frontend.app.Globals
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 internal val ApplicationDispatcher: CoroutineDispatcher = Dispatchers.Main
 
 class Api {
-    private val client = HttpClient(){
+    private val client = HttpClient {
         install(ContentNegotiation) {
             jackson {
                 enable(SerializationFeature.INDENT_OUTPUT)
@@ -49,11 +50,30 @@ class Api {
     fun getEvents(callback: (List<Event>) -> Unit) {
         GlobalScope.apply {
             launch(ApplicationDispatcher) {
-                val response = client.get(HttpRoutes.EVENTS);
+                val response = client.get(HttpRoutes.EVENTS)
                 println(response.bodyAsText())
                 val events: List<Event> = response.body()
                 callback(events)
             }
         }
     }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun addEvent(name: String, description: String, startDate: LocalDateTime, endDate: LocalDateTime, callback: (Event) -> Unit) {
+        GlobalScope.apply {
+            launch(ApplicationDispatcher) {
+                val response = client.post(HttpRoutes.EVENTS) {
+                    // Set UUID header
+                    headers{
+                        append("UUID", Globals.Lib.userId!!)
+                    }
+                    setBody(Event(null, name, description, startDate, endDate, null))
+                }
+                println(response.bodyAsText())
+                val event: Event = response.body()
+                callback(event)
+            }
+        }
+    }
+
 }
