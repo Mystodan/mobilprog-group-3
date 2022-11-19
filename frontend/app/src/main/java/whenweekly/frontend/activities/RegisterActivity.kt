@@ -7,7 +7,6 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import whenweekly.frontend.api.Api
@@ -61,8 +60,8 @@ class RegisterActivity : AppCompatActivity() {
             lifecycleScope.launch{
                 val user = Api.addUser(name)
                 println(user.uuid.toString())
-                LocalUserModel(applicationContext).setUUID(user.getUUID())
-                LocalUserModel(applicationContext).setGlobalUserID(user.uuid.toString())
+                LocalUserModel(applicationContext).setUUID(user.uuidToString())
+                LocalUserModel(applicationContext).setGlobalUserID(user.uuidToString())
                 startActivity(fragmentHolderIntent)
                 finish()
             }

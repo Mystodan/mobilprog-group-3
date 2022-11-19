@@ -15,19 +15,18 @@ class LocalUserModel(private val context : Context) {
     init {
         val storedUuid = securePref.getString(key,null)
         if (storedUuid != null) {
-            uuid = "";
-            println("UUID: " + uuid)
+            uuid = storedUuid
+            Globals.Lib.userId = storedUuid
         }
     }
     /**
      *  generates a random UUID as string
      */
-    fun setUUID(uuid:String) {
+    fun setUUID(uuid: String) {
         securePref.edit().putString(key, uuid).apply()
+        Globals.Lib.userId = uuid
     }
-    fun setGlobalUserID (name:String){
-        Globals.Lib.userId= name
-    }
+
     fun getUUID():String = uuid
     /**
      *  sets encrypted shared preferences
