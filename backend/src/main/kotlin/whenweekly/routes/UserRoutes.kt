@@ -10,18 +10,19 @@ import whenweekly.database.repository.EventDBRepository
 import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
+import whenweekly.plugins.dev
 import whenweekly.routes.Constants.USERS_ROUTE
 
 fun Route.userRouting() {
     val userRepository: UserRepository = UserDBRepository()
     val eventRepository: EventRepository = EventDBRepository()
     route(USERS_ROUTE) {
-        //auth {
-            addUser(userRepository)
+        addUser(userRepository)
+        dev {
             getUsers(userRepository)
             getUserById(userRepository)
             getEventsForUser(eventRepository)
-        //}
+        }
     }
 }
 
