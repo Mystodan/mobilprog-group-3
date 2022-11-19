@@ -2,6 +2,7 @@ package whenweekly.database.repository
 
 import whenweekly.database.DatabaseManagerImpl
 import whenweekly.database.entities.Event
+import whenweekly.database.entities.User
 import whenweekly.domain.manager.DatabaseManager
 import whenweekly.domain.repository.EventRepository
 import java.util.*
@@ -19,8 +20,9 @@ private fun genInvCode(): String {
 class EventDBRepository : EventRepository {
     private val database: DatabaseManager = DatabaseManagerImpl()
 
-    override fun addEvent(event: Event): Event {
+    override fun addEvent(event: Event, owner: User): Event {
         event.inviteCode = genInvCode()
+        event.owner = owner
         return database.addEvent(event)
     }
 
@@ -38,5 +40,13 @@ class EventDBRepository : EventRepository {
 
     override fun getEventsByUserId(userId: Int): List<Event> {
         return database.getEventsByUserId(userId)
+    }
+
+    override fun deleteEventByID(eventId: Int) {
+        return database.deleteEventByID(eventId)
+    }
+
+    override fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean {
+        return database.removeUserFromEvent(eventId, kickedUserID)
     }
 }

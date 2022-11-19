@@ -9,4 +9,6 @@ interface UserRepository {
     fun getUserById(id: Int): User?
 
     fun getUserByUUID(uuid: String): User?
+
+    fun updateUser(user: User)
 }

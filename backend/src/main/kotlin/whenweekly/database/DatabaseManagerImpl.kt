@@ -9,9 +9,11 @@ import whenweekly.database.schemas.EventTable
 import whenweekly.database.schemas.EventUserAvailableTable
 import whenweekly.database.schemas.UserTable
 import whenweekly.domain.manager.DatabaseManager
+import java.lang.Exception
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.log
 
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
@@ -33,6 +35,10 @@ class DatabaseManagerImpl : DatabaseManager {
         return users.find { it.id eq id }
     }
 
+    override fun updateUser(user: User) {
+        users.update(user)
+    }
+
     override fun addEvent(event: Event): Event {
         events.add(event)
         return event
@@ -46,12 +52,33 @@ class DatabaseManagerImpl : DatabaseManager {
         return events.toList()
     }
 
+    /**
+     * add a selected user from the selected event
+     *
+     * @param eventId       - ID of the event in EventUserJoinedTable
+     * @param userId        - ID of the user in EventUserJoinedTable to add
+     */
     override fun addUserToEvent(eventId: Int, userId: Int): Boolean {
-        return database.insert(EventUserJoinedTable) {
-            set(it.event, eventId)
-            set(it.user, userId)
-            set(it.join_time, LocalDateTime.now())
-        } > 0
+        return try {
+            database.insert(EventUserJoinedTable) {
+                set(it.event, eventId)
+                set(it.user, userId)
+                set(it.join_time, LocalDateTime.now())
+            } > 0
+        } catch ( exception: Exception ) {
+            println(exception)
+            false
+        }
+    }
+
+    /**
+     * Remove a selected user from the selected event
+     *
+     * @param eventId       - ID of the event in EventUserJoinedTable
+     * @param kickedUserID  - ID of the user in EventUserJoinedTable to remove
+     */
+    override fun removeUserFromEvent(eventId: Int,  kickedUserID: Int): Boolean {
+         return database.delete(EventUserJoinedTable){(it.event eq eventId) and (it.user eq kickedUserID)} > 0
     }
 
     override fun getEventsByUserId(userId: Int): List<Event> {
@@ -77,5 +104,12 @@ class DatabaseManagerImpl : DatabaseManager {
         database.deleteAll(EventUserAvailableTable)
         database.deleteAll(EventTable)
         database.deleteAll(UserTable)
+    }
+
+    override fun deleteEventByID(eventId: Int) {
+        //EventTable has a Primary key with ON DELETE CASCADE, should delete the child tables as well
+        database.delete(EventTable) { it.id eq eventId }
+        //database.delete(EventUserJoinedTable) { it.event eq eventId }
+        //database.delete(EventUserAvailableTable) { it.event eq eventId }
     }
 }

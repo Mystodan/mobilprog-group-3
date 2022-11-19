@@ -12,6 +12,8 @@ import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
 import whenweekly.plugins.dev
 import whenweekly.routes.Constants.USERS_ROUTE
+import java.nio.ByteBuffer
+import java.util.*
 
 fun Route.userRouting() {
     val userRepository: UserRepository = UserDBRepository()
@@ -22,6 +24,7 @@ fun Route.userRouting() {
             getUsers(userRepository)
             getUserById(userRepository)
             getEventsForUser(eventRepository)
+            setUUID(userRepository)
         }
     }
 }
@@ -34,6 +37,27 @@ fun Route.getUsers(repository: UserRepository) {
             users
         )
     }
+}
+
+fun Route.setUUID(repository: UserRepository){
+    post{
+        val editedUser = call.receive<User>()
+        editedUser.uuid = UUID.fromString(call.parameters["UUID"]).asBytes()
+
+        repository.updateUser(editedUser)
+
+        call.respond(
+            HttpStatusCode.OK,
+            editedUser
+        )
+    }
+}
+
+private fun UUID.asBytes(): ByteArray{
+    val b = ByteBuffer.wrap(ByteArray(16))
+    b.putLong(this.mostSignificantBits)
+    b.putLong(this.leastSignificantBits)
+    return b.array()
 }
 
 fun Route.getUserById(repository: UserRepository) {

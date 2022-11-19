@@ -9,6 +9,6 @@ interface Event : Entity<Event> {
     val description: String
     val start_date: LocalDateTime
     val end_date: LocalDateTime
-    val owner: User
+    var owner: User?
     var inviteCode: String
 }
