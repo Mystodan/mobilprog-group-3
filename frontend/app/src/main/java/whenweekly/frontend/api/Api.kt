@@ -9,6 +9,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import whenweekly.frontend.api.models.Event
@@ -16,7 +17,6 @@ import whenweekly.frontend.app.Globals
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-internal val ApplicationDispatcher: CoroutineDispatcher = Dispatchers.Main
 
 class Api {
     private val client = HttpClient {
@@ -34,46 +34,39 @@ class Api {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun base(callback: (String) -> Unit) {
-        GlobalScope.apply {
-            launch(ApplicationDispatcher) {
-                val result: String = client.get {
-                    url(HttpRoutes.BASE_URL)
-                }.bodyAsText()
-                callback(result)
+    private suspend fun doRequest(httpMethod: HttpMethod, route: String, body: String): HttpResponse {
+        val response = client.request(route) {
+            method = httpMethod
+            setBody(body)
+            headers {
+                append("Content-Type", "application/json")
+                append("UUID", Globals.Lib.userId!!)
             }
         }
+        return response
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun getEvents(callback: (List<Event>) -> Unit) {
-        GlobalScope.apply {
-            launch(ApplicationDispatcher) {
-                val response = client.get(HttpRoutes.EVENTS)
-                println(response.bodyAsText())
-                val events: List<Event> = response.body()
-                callback(events)
-            }
-        }
+    suspend fun getEvents(): List<Event> {
+        val response = doRequest(
+            HttpMethod.Get,
+            HttpRoutes.EVENTS,
+            ""
+        )
+
+        return response.body()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun addEvent(name: String, description: String, startDate: LocalDateTime, endDate: LocalDateTime, callback: (Event) -> Unit) {
-        GlobalScope.apply {
-            launch(ApplicationDispatcher) {
-                val response = client.post(HttpRoutes.EVENTS) {
-                    // Set UUID header
-                    headers{
-                        append("UUID", Globals.Lib.userId!!)
-                    }
-                    setBody(Event(null, name, description, startDate, endDate, null))
-                }
-                println(response.bodyAsText())
-                val event: Event = response.body()
-                callback(event)
-            }
-        }
+    suspend fun addEvent(
+        name: String,
+        description: String,
+        startDate: LocalDateTime,
+        endDate: LocalDateTime
+    ): Event {
+        val response = doRequest(
+            HttpMethod.Post,
+            HttpRoutes.EVENTS,
+            Event(null, name, description, startDate, endDate, null).toString()
+        )
+        return response.body()
     }
-
 }

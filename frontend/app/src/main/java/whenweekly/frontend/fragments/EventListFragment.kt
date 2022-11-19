@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
+import kotlinx.coroutines.coroutineScope
 import whenweekly.frontend.activities.EventActivity
 import whenweekly.frontend.adapters.EventAdapter
 import whenweekly.frontend.api.Api
@@ -46,6 +47,8 @@ class EventListFragment : Fragment() {
         adapter.updateData(Globals.Lib.Events)
         if (Globals.Lib.Events.isNotEmpty()) return binding.root
 
+        // TODO: make work with coroutines
+        /*
         Api().getEvents { events ->
             Globals.Lib.Events.addAll(events.map {
                 Globals.Utils.createEvent(
@@ -55,6 +58,7 @@ class EventListFragment : Fragment() {
             })
             adapter.updateData(Globals.Lib.Events)
         }
+        */
         return binding.root
     }
 
