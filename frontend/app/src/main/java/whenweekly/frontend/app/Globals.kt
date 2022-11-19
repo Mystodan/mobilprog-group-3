@@ -14,7 +14,7 @@ class Globals {
     object Constants {
         const val USERID_KEY = (R.string.UIDKEY)
         const val SECURE_FILENAME = "UserPrefs"
-        const val SECURE_MASTERKEYALIAS = "WhenWeekly"
+        const val SECURE_MASTER_KEY_ALIAS = "WhenWeekly"
         const val LABEL_PARCEL_INFO = "EventActivityInformation"
         const val LABEL_CLIP_INV = "EventActivityInviteCode"
 

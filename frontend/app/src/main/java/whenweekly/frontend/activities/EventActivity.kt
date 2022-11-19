@@ -29,7 +29,6 @@ class EventActivity : DrawerBaseActivity() {
 
     private var datesStart: List<Int> ? = null
     private var datesEnd: List<Int> ? = null
-    private var unavailableDates = mutableListOf<LocalDate>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,11 +70,11 @@ class EventActivity : DrawerBaseActivity() {
             val allDates = allDates(toLocalDate(eventInformation.startDate), toLocalDate(eventInformation.endDate))
             println("All dates: $allDates")
 
-            val availableDates = calculateAvailableDates(allDates, unavailableDates)
+            val (availableDates, unavailableDates) = calculateAvailableDates(allDates)
             if(unavailableDates.isNotEmpty()) {
                 Toast.makeText(this, "Dates reported successfully!", Toast.LENGTH_SHORT).show()
                 toggleCalendar(binding.calendarView.visibility)
-            }
+            } else Toast.makeText(this, "Please select dates first!", Toast.LENGTH_SHORT).show()
             println("Unavailable dates: $unavailableDates")
             println("Available dates: $availableDates")
         }
@@ -161,18 +160,17 @@ class EventActivity : DrawerBaseActivity() {
     /**
      * Removes the unavailable dates from all dates that are available
      *
-     * @param alldates          - A mutable list of all LocalDates between startDate and endDate
+     * @param allDates          - A mutable list of all LocalDates between startDate and endDate
      * @param unavailableDates  - Dates that are selected by the user and marked as unavailable
      * @return                  - Returns alldates after it has removed all unavailable dates
      */
-    private fun calculateAvailableDates(alldates: MutableList<LocalDate>, unavailableDates: MutableList<LocalDate>): MutableList<LocalDate> {
-        if(unavailableDates.isEmpty()) Toast.makeText(this, "Please select dates first!", Toast.LENGTH_SHORT).show()
-
+    private fun calculateAvailableDates(allDates: MutableList<LocalDate>): Pair<MutableList<LocalDate>,MutableList<LocalDate>> {
+        var availableDates : MutableList<LocalDate> = allDates
+        var unavailableDates : MutableList<LocalDate> = mutableListOf()
         for(date in binding.calendarView.selectedDates) {
             unavailableDates.add(toLocalDate(date.date.toEpochDay()*86400000))
         }
-
-        unavailableDates.forEach{ if(alldates.contains(it)) alldates.remove(it) }
-        return alldates
+        unavailableDates.forEach{ if(availableDates.contains(it)) availableDates.remove(it) }
+        return Pair(availableDates, unavailableDates)
     }
 }

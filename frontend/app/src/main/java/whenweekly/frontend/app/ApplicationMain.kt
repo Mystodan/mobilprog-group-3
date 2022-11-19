@@ -5,10 +5,7 @@ import whenweekly.frontend.models.LocalUserModel
 
 
 class ApplicationMain : Application(){
-
-    /**
-     *
-     */
+    
     override fun onCreate() {
         super.onCreate()
         Globals.Lib.userId = LocalUserModel(applicationContext).uuid
