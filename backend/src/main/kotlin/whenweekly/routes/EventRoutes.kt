@@ -14,13 +14,6 @@ import whenweekly.domain.repository.UserRepository
 import whenweekly.routes.Constants.EVENTS_ROUTE
 import java.util.*
 
-fun getUserId(request: ApplicationRequest, userRepository: UserRepository): Int {
-    val uuid = request.headers["UUID"] ?: return -1
-    userRepository.getUserByUUID(uuid)?.let {
-        return it.id
-    }
-    return -1
-}
 
 fun Route.eventRouting() {
     val repository: EventRepository = EventDBRepository()
@@ -36,7 +29,7 @@ fun Route.eventRouting() {
 fun Route.getEvents(repository: EventRepository, userRepository: UserRepository) {
     get {
         val users = repository.getAllEvents()
-        val userId = getUserId(call.request, userRepository)
+        val userId = Shared.getUserId(call.request, userRepository)
         println("userId: $userId")
         call.respond(
             HttpStatusCode.OK,
@@ -69,7 +62,7 @@ fun Route.userJoinEvent(repository: EventRepository) {
     put("{id}/join") {
         val id = call.parameters["id"]?.toInt() ?: 0
         val user = call.receive<User>()
-        val success = repository.addUserToEvent(id, user.id)
+        val success = repository.addUserToEvent(id, user.id!!)
         if (success) {
             call.respond(HttpStatusCode.OK, "user ${user.id} joined event $id")
         } else {
