@@ -9,7 +9,7 @@ data class User(
     val uuid: ByteArray,
     val name: String
 ) {
-    private fun User.getUUID():String{
+    fun getUUID():String{
         val bb = ByteBuffer.wrap(uuid)
         return UUID(bb.long, bb.long).toString()
     }

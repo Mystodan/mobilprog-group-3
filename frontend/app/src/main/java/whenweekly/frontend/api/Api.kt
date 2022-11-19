@@ -1,5 +1,6 @@
 package whenweekly.frontend.api
 
+import com.fasterxml.jackson.core.JsonStreamContext
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
@@ -10,9 +11,8 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.*
 import whenweekly.frontend.api.models.Event
+import whenweekly.frontend.api.models.User
 import whenweekly.frontend.app.Globals
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -41,7 +41,8 @@ object Api {
                 if (body != null) {
                     setBody(body)
                 }
-                append("UUID", Globals.Lib.userId!!)
+                append("UUID", Globals.Lib.userId)
+                append("Content-Type", "application/json")
             }
         }
         return response
@@ -52,7 +53,15 @@ object Api {
             HttpMethod.Get,
             HttpRoutes.EVENTS
         )
+        return response.body()
+    }
 
+    suspend fun addUser(name:String): User {
+        val response = doRequest(
+            HttpMethod.Post,
+            HttpRoutes.USERS,
+            "{\"name\":\"$name\"}"
+        )
         return response.body()
     }
 
