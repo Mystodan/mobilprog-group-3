@@ -9,21 +9,22 @@ import java.util.*
 
 // TODO: move somewhere else
 private fun genInvCode(): String {
-    fun getRandNum(min:Int, max:Int):Int = Random().nextInt(max+1)+min
+    fun getRandNum(min: Int, max: Int): Int = Random().nextInt(max + 1) + min
     var invCode = ""
     val symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-    for (i in 0..19){
-        invCode += symbols[getRandNum(0,symbols.length-1)]
+    for (i in 0..19) {
+        invCode += symbols[getRandNum(0, symbols.length - 1)]
     }
     return invCode
 }
+
 class EventDBRepository : EventRepository {
     private val database: DatabaseManager = DatabaseManagerImpl()
 
     override fun addEvent(event: Event, owner: User): Event? {
         event.inviteCode = genInvCode()
         event.owner = owner
-        val newEvent = database.addEvent(event);
+        val newEvent = database.addEvent(event)
         if (newEvent != null) {
             // Add owner to event
             database.addUserToEvent(newEvent.id, owner.id)
@@ -39,6 +40,7 @@ class EventDBRepository : EventRepository {
     override fun getEventByInviteCode(inviteCode: String): Event? {
         return database.getEventByInviteCode(inviteCode)
     }
+
     override fun getEventById(id: Int): Event? {
         return database.getEventById(id)
     }

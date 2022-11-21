@@ -13,16 +13,16 @@ fun Route.resetRouting() {
     val database: DatabaseManager = DatabaseManagerImpl()
 
     // Only for development
-    if (environment?.config?.property(BUILD_CONFIG)?.getString().equals("dev", true)){
+    if (environment?.config?.property(BUILD_CONFIG)?.getString().equals("dev", true)) {
         route(RESET_ROUTE) {
             resetDatabase(database)
         }
     }
 }
 
-fun Route.resetDatabase(database: DatabaseManager){
+fun Route.resetDatabase(database: DatabaseManager) {
     delete {
         database.resetDatabase()
-        call.respondText("Database reset",status=HttpStatusCode.OK)
+        call.respondText("Database reset", status = HttpStatusCode.OK)
     }
 }

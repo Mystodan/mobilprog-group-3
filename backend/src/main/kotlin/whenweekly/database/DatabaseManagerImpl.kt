@@ -4,17 +4,14 @@ import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
-import whenweekly.database.schemas.EventUserJoinedTable
 import whenweekly.database.schemas.EventTable
 import whenweekly.database.schemas.EventUserAvailableTable
+import whenweekly.database.schemas.EventUserJoinedTable
 import whenweekly.database.schemas.UserTable
 import whenweekly.domain.manager.DatabaseManager
 import whenweekly.misc.asBytes
-import java.lang.Exception
-import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.log
 
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
@@ -76,6 +73,7 @@ class DatabaseManagerImpl : DatabaseManager {
             null
         }
     }
+
     override fun getEventById(id: Int): Event? {
         return try {
             events.first { it.id eq id }
@@ -107,7 +105,7 @@ class DatabaseManagerImpl : DatabaseManager {
                 set(it.user, userId)
                 set(it.join_time, LocalDateTime.now())
             } > 0
-        } catch ( exception: Exception ) {
+        } catch (exception: Exception) {
             println(exception)
             false
         }
@@ -119,12 +117,12 @@ class DatabaseManagerImpl : DatabaseManager {
      * @param eventId       - ID of the event in EventUserJoinedTable
      * @param kickedUserID  - ID of the user in EventUserJoinedTable to remove
      */
-    override fun removeUserFromEvent(eventId: Int,  kickedUserID: Int): Boolean {
+    override fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean {
         return try {
             database.delete(EventUserJoinedTable) {
                 (it.event eq eventId) and (it.user eq kickedUserID)
             } > 0
-        } catch ( exception: Exception ) {
+        } catch (exception: Exception) {
             println(exception)
             false
         }

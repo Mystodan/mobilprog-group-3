@@ -19,5 +19,5 @@ interface EventRepository {
 
     fun deleteEventByID(eventId: Int): Boolean
 
-    fun removeUserFromEvent(eventId: Int,kickedUserID: Int):Boolean
+    fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean
 }

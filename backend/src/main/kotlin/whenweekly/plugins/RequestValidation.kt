@@ -56,7 +56,7 @@ fun Application.configureRequestValidation() {
         }
         exception<BadRequestException> { call, cause ->
             println("BadRequestException: ${cause.message}")
-            cause.message?.let{
+            cause.message?.let {
                 call.respond(HttpStatusCode.BadRequest, it)
             } ?: call.respond(HttpStatusCode.BadRequest)
         }

@@ -7,7 +7,7 @@ object Shared {
     fun getUserId(request: ApplicationRequest, userRepository: UserRepository): Int? {
         val uuid = request.headers["UUID"] ?: return null
         userRepository.getUserByUUID(uuid)?.let {
-            return it.id!!
+            return it.id
         }
         return null
     }

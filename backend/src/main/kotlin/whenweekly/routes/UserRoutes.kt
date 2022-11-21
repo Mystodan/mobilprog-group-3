@@ -10,10 +10,8 @@ import whenweekly.database.repository.EventDBRepository
 import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
-import whenweekly.misc.asBytes
 import whenweekly.plugins.dev
 import whenweekly.routes.Constants.USERS_ROUTE
-import java.util.*
 
 fun Route.userRouting() {
     val userRepository: UserRepository = UserDBRepository()
@@ -24,7 +22,6 @@ fun Route.userRouting() {
             getUsers(userRepository)
             getUserById(userRepository)
             getEventsForUser(eventRepository)
-            setUUID(userRepository)
         }
     }
 }
@@ -36,36 +33,6 @@ fun Route.getUsers(repository: UserRepository) {
             HttpStatusCode.OK,
             users
         )
-    }
-}
-
-fun Route.setUUID(repository: UserRepository){
-    post {
-        val uuid = call.parameters["UUID"]
-        if (uuid == null){
-            call.respond(
-                HttpStatusCode.BadRequest,
-                "UUID not provided"
-            )
-            return@post
-        }
-        else {
-            val user = repository.getUserByUUID(uuid)
-            if (user == null){
-                call.respond(
-                    HttpStatusCode.NotFound,
-                    "User not found"
-                )
-            }
-            else {
-                user.uuid = UUID.fromString(uuid).asBytes()
-                repository.updateUser(user)
-                call.respond(
-                    HttpStatusCode.OK,
-                    user
-                )
-            }
-        }
     }
 }
 
