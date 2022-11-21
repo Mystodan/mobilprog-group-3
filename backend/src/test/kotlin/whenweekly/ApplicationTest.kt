@@ -29,6 +29,7 @@ import whenweekly.database.entities.User
 import whenweekly.misc.asUUID
 import whenweekly.routes.Constants.RESET_ROUTE
 import whenweekly.routes.EventWithUsers
+import whenweekly.routes.getEventWithUsers
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -114,6 +115,29 @@ class ApplicationTest {
             contentType(ContentType.Application.Json)
             headers{
                 append("UUID", uuid.asUUID().toString())
+            }
+        }
+    }
+
+    private suspend fun kickUser(client: HttpClient, eventID: Int, userId: Int, userUUID: ByteArray): HttpResponse {
+        return client.put("$EVENTS_ROUTE/$eventID/kick") {
+            contentType(ContentType.Application.Json)
+            setBody("""
+                {
+                    "user_id": $userId
+                }
+            """.trimIndent())
+            headers{
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+
+    private suspend fun deleteEvent(client: HttpClient, eventID: Int, userUUID: ByteArray): HttpResponse {
+        return client.delete("$EVENTS_ROUTE/$eventID") {
+            contentType(ContentType.Application.Json)
+            headers{
+                append("UUID", userUUID.asUUID().toString())
             }
         }
     }
@@ -290,6 +314,139 @@ class ApplicationTest {
         // Invalid invite code
         joinResponse = joinEvent(client, "123", joiner.uuid!!)
         assertEquals(HttpStatusCode.NotFound, joinResponse.status)
+    }
+
+    @Test
+    fun test4KickUser() = testApplication {
+        setupTest()
+        val client = getClient()
+
+        val user = UserTest(name = "event owner")
+        val response = createUser(client, user)
+        assertEquals(HttpStatusCode.Created, response.status)
+        val owner = response.body<User>()
+
+        val event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
+        val eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.Created, eventResponse.status)
+        val eventCreated = eventResponse.body<EventWithUsers>()
+
+        val user2 = UserTest(name = "event joiner")
+        val response2 = createUser(client, user2)
+        assertEquals(HttpStatusCode.Created, response2.status)
+        val joiner = response2.body<User>()
+
+        var joinerEventsResponse = getEvents(client, joiner.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
+        var joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
+        assertEquals(0, joinerEvents.size)
+
+        // Success case
+        var joinResponse = joinEvent(client, eventCreated.event.inviteCode, joiner.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinResponse.status)
+        val joinEvent = joinResponse.body<EventWithUsers>()
+        assertEquals(eventCreated.event.id, joinEvent.event.id)
+        assertEquals(2, joinEvent.users.size)
+        assertEquals(owner.id, joinEvent.users[0].id)
+        assertEquals(joiner.id, joinEvent.users[1].id)
+
+        // Make sure the user has joined the event
+        joinerEventsResponse = getEvents(client, joiner.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
+        joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
+        assertEquals(1, joinerEvents.size)
+        assertEquals(eventCreated.event.id, joinerEvents[0].event.id)
+        assertEquals(owner.id, joinerEvents[0].event.owner!!.id)
+
+
+        // Try to kick owner as the user
+        var kickResponse = kickUser(client, eventCreated.event.id, owner.id, joiner.uuid!!)
+        assertEquals(HttpStatusCode.Unauthorized, kickResponse.status)
+
+        // Kick user
+        kickResponse = kickUser(client, eventCreated.event.id, joiner.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, kickResponse.status)
+
+        // Make sure the user has been kicked
+        val events = getEvents(client, owner.uuid!!).body<List<EventWithUsers>>()
+        assertEquals(1, events[0].users.size)
+
+        // Make sure the user has been kicked
+        joinerEventsResponse = getEvents(client, joiner.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
+        joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
+        assertEquals(0, joinerEvents.size)
+
+        // Try to kick again
+        kickResponse = kickUser(client, eventCreated.event.id, joiner.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, kickResponse.status)
+
+        // Try to kick with invalid UUID
+        kickResponse = kickUser(client, eventCreated.event.id, joiner.id, ByteArray(16))
+        assertEquals(HttpStatusCode.Unauthorized, kickResponse.status)
+
+        // Try to kick with invalid event id
+        kickResponse = kickUser(client, 0, joiner.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, kickResponse.status)
+
+        // Try to kick with invalid user id
+        kickResponse = kickUser(client, eventCreated.event.id, 0, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, kickResponse.status)
+
+        // Try to kick owner
+        kickResponse = kickUser(client, eventCreated.event.id, owner.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.Conflict, kickResponse.status)
+    }
+
+    @Test
+    fun test5DeleteEvent() = testApplication {
+        setupTest()
+        val client = getClient()
+
+        val user = UserTest(name = "event owner")
+        val response = createUser(client, user)
+        assertEquals(HttpStatusCode.Created, response.status)
+        val owner = response.body<User>()
+
+        val nonOwner = UserTest(name = "non owner")
+        val nonOwnerResponse = createUser(client, nonOwner)
+        assertEquals(HttpStatusCode.Created, nonOwnerResponse.status)
+        val nonOwnerUser = nonOwnerResponse.body<User>()
+
+        val event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
+        val eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.Created, eventResponse.status)
+        val eventCreated = eventResponse.body<EventWithUsers>()
+
+        // Try to delete with invalid UUID
+        var deleteResponse = deleteEvent(client, eventCreated.event.id, ByteArray(16))
+        assertEquals(HttpStatusCode.Unauthorized, deleteResponse.status)
+
+        // Try to delete with invalid event id
+        deleteResponse = deleteEvent(client, -1, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
+
+        // Try to delete with non owner
+        deleteResponse = deleteEvent(client, eventCreated.event.id, nonOwnerUser.uuid!!)
+        assertEquals(HttpStatusCode.Unauthorized, deleteResponse.status)
+
+        // Success case
+        deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, deleteResponse.status)
+
+        // Try to delete again
+        deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
     }
 
     private fun resetDatabase() {

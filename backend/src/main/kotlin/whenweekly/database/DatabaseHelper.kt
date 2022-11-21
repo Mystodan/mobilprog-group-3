@@ -4,7 +4,6 @@ import io.ktor.server.application.*
 import org.ktorm.database.Database
 import org.ktorm.logging.ConsoleLogger
 import org.ktorm.logging.LogLevel
-import org.ktorm.logging.detectLoggerImplementation
 import whenweekly.database.Constants.DATABASE_PASSWORD
 import whenweekly.database.Constants.DATABASE_URL
 import whenweekly.database.Constants.DATABASE_USERNAME

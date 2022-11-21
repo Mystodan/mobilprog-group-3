@@ -5,7 +5,6 @@ import whenweekly.database.entities.User
 import whenweekly.domain.manager.DatabaseManager
 import whenweekly.domain.repository.UserRepository
 import whenweekly.misc.asBytes
-import java.nio.ByteBuffer
 import java.util.*
 
 class UserDBRepository : UserRepository {
@@ -28,7 +27,9 @@ class UserDBRepository : UserRepository {
         return database.getUserByUUID(uuid)
     }
 
-    override fun updateUser(user: User): User? { return database.updateUser(user) }
+    override fun updateUser(user: User): User? {
+        return database.updateUser(user)
+    }
 
     override fun getUsersByEventId(eventId: Int): List<User> {
         return database.getUsersByEventId(eventId)

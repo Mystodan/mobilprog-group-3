@@ -10,7 +10,6 @@ import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.routes.EventJoinRequest
 import whenweekly.routes.UserKickRequest
-import java.time.LocalDateTime
 
 // https://ktor.io/docs/request-validation.html
 fun Application.configureRequestValidation() {
@@ -36,7 +35,7 @@ fun Application.configureRequestValidation() {
             }
         }
         validate<UserKickRequest> { request ->
-            if (request.userId == null) {
+            if (request.user_id == null) {
                 ValidationResult.Invalid("User id not specified")
             } else {
                 ValidationResult.Valid
@@ -57,7 +56,7 @@ fun Application.configureRequestValidation() {
         }
         exception<BadRequestException> { call, cause ->
             println("BadRequestException: ${cause.message}")
-            cause.message?.let{
+            cause.message?.let {
                 call.respond(HttpStatusCode.BadRequest, it)
             } ?: call.respond(HttpStatusCode.BadRequest)
         }

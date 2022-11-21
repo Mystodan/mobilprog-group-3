@@ -127,4 +127,37 @@ object Api {
             Pair(null, e.message)
         }
     }
+
+    suspend fun kickUserFromEvent(eventId: Int, userId: Int): Boolean {
+        return try {
+            val response = doRequest(
+                HttpMethod.Put,
+                "${HttpRoutes.EVENTS}/$eventId/kick",
+                """
+                    {
+                        "user_id": $userId
+                    }
+                    """.trimIndent()
+            )
+            println(response.bodyAsText())
+            response.status == HttpStatusCode.OK
+        } catch (e: Exception) {
+            println(e)
+            false
+        }
+    }
+
+    suspend fun deleteEvent(eventId: Int): Boolean {
+        return try {
+            val response = doRequest(
+                HttpMethod.Delete,
+                "${HttpRoutes.EVENTS}/$eventId"
+            )
+            println(response.bodyAsText())
+            response.status == HttpStatusCode.OK
+        } catch (e: Exception) {
+            println(e)
+            false
+        }
+    }
 }
