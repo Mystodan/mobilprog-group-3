@@ -198,7 +198,6 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
     }
 }
 
-
 fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepository){
     delete("{id}") {
         val id = call.parameters["id"]?.toInt() ?: 0
