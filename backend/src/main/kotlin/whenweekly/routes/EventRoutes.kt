@@ -145,7 +145,7 @@ fun Route.joinEvent(repository: EventRepository, userRepository: UserRepository)
 }
 
 interface UserKickRequest : org.ktorm.entity.Entity<UserKickRequest>{
-    var userId: Int?
+    var user_id: Int?
 }
 
 fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: UserRepository) {
@@ -177,19 +177,24 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
 
         // get ID of user to remove
         val userToKick = call.receive<UserKickRequest>()
-        if (userRepository.getUserById(userToKick.userId!!)==null){
+        if (userRepository.getUserById(userToKick.user_id!!)==null){
             call.respond(
                 HttpStatusCode.NotFound, "Can't find user to remove from event"
             )
+            return@put
         }
 
-        val success = eventRepository.removeUserFromEvent(eventId, userToKick.userId!!)
+        if (userToKick.user_id!! == userID) {
+            call.respond(HttpStatusCode.Conflict, "You can't kick yourself from the event")
+            return@put
+        }
+
+        val success = eventRepository.removeUserFromEvent(eventId, userToKick.user_id!!)
         if (success){
-            call.respond(HttpStatusCode.OK, "user ${userToKick.userId} has been kicked from event $eventId")
+            call.respond(HttpStatusCode.OK, "user ${userToKick.user_id} has been kicked from event $eventId")
         } else {
-            call.respond(HttpStatusCode.Conflict, "user ${userToKick.userId} was not in event $eventId")
+            call.respond(HttpStatusCode.NotFound, "user ${userToKick.user_id} was not in event $eventId")
         }
-
     }
 }
 
