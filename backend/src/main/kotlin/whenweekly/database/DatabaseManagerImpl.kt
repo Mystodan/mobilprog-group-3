@@ -142,6 +142,18 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    override fun getUsersByEventId(eventId: Int): List<User> {
+        return try {
+            database.from(UserTable)
+                .innerJoin(EventUserJoinedTable, on = UserTable.id eq EventUserJoinedTable.user).select()
+                .where { EventUserJoinedTable.event eq eventId }
+                .map { UserTable.createEntity(it) }
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
+    }
+
     override fun getUserByUUID(uuid: String): User? {
         return try {
             val uuidBytes = UUID.fromString(uuid).asBytes()

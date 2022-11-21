@@ -29,4 +29,8 @@ class UserDBRepository : UserRepository {
     }
 
     override fun updateUser(user: User): User? { return database.updateUser(user) }
+
+    override fun getUsersByEventId(eventId: Int): List<User> {
+        return database.getUsersByEventId(eventId)
+    }
 }

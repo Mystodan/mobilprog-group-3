@@ -6,6 +6,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import whenweekly.database.entities.Event
+import whenweekly.database.entities.User
 import whenweekly.database.repository.EventDBRepository
 import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.EventRepository
@@ -22,8 +23,8 @@ fun Route.eventRouting() {
     route(EVENTS_ROUTE) {
         dev {
             getEventById(repository)
-            getEvents(repository, userRepository)
         }
+        getEvents(repository, userRepository)
         joinEvent(repository, userRepository)
         addEvent(repository, userRepository)
         removeUserFromEvent(repository, userRepository)
@@ -34,8 +35,6 @@ fun Route.eventRouting() {
 fun Route.getEvents(repository: EventRepository, userRepository: UserRepository) {
     get {
         val userId = Shared.getUserId(call.request, userRepository)
-        println("userId: $userId")
-
         if (userId == null){
             call.respond(
                 HttpStatusCode.Unauthorized,
@@ -44,9 +43,22 @@ fun Route.getEvents(repository: EventRepository, userRepository: UserRepository)
         }
         else {
             val events = repository.getEventsByUserId(userId)
+
+            // This is inefficient, but fine for now.
+            // Should get this when getting the events in the future in a single SQL query
+            val eventsWithUsers = mutableListOf<EventWithUsers>()
+            for (event in events) {
+                val users = userRepository.getUsersByEventId(event.id)
+                for (user in users) {
+                    // Don't send the uuid's to the client
+                    user.uuid = null
+                }
+                eventsWithUsers.add(EventWithUsers(event, users))
+            }
+
             call.respond(
                 HttpStatusCode.OK,
-                events
+                eventsWithUsers
             )
         }
     }
@@ -61,6 +73,10 @@ fun Route.getEventById(repository: EventRepository) {
     }
 }
 
+data class EventWithUsers(
+    val event: Event,
+    val users: List<User>
+)
 fun Route.addEvent(repository: EventRepository,userRepository: UserRepository) {
     post {
         val ownerID = Shared.getUserId(call.request, userRepository)

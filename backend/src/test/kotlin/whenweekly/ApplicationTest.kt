@@ -28,6 +28,7 @@ import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.misc.asUUID
 import whenweekly.routes.Constants.RESET_ROUTE
+import whenweekly.routes.EventWithUsers
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -185,10 +186,13 @@ class ApplicationTest {
         // Make sure owner is in the event
         var eventsResponse = getEvents(client, owner.uuid!!)
         assertEquals(HttpStatusCode.OK, eventsResponse.status)
-        var events = eventsResponse.body<List<Event>>()
+        var events = eventsResponse.body<List<EventWithUsers>>()
         assertEquals(1, events.size)
-        assertEquals(createdEvent.id, events[0].id)
-        assertEquals(owner.id, events[0].owner!!.id)
+        assertEquals(createdEvent.id, events[0].event.id)
+        assertEquals(owner.id, events[0].event.owner!!.id)
+        assertEquals(1, events[0].users.size)
+        assertEquals(owner.id, events[0].users[0].id)
+        assertEquals(null, events[0].users[0].uuid)
 
         // Empty description
         event = EventTest(name = "test event", description = "", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
@@ -198,7 +202,7 @@ class ApplicationTest {
         // Owner should have two events
         eventsResponse = getEvents(client, owner.uuid!!)
         assertEquals(HttpStatusCode.OK, eventsResponse.status)
-        events = eventsResponse.body<List<Event>>()
+        events = eventsResponse.body<List<EventWithUsers>>()
         assertEquals(2, events.size)
 
         /*
@@ -251,7 +255,7 @@ class ApplicationTest {
 
         var joinerEventsResponse = getEvents(client, joiner.uuid!!)
         assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
-        var joinerEvents = joinerEventsResponse.body<List<Event>>()
+        var joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
         assertEquals(0, joinerEvents.size)
 
         // Success case
@@ -261,10 +265,10 @@ class ApplicationTest {
         // Make sure the has joined the event
         joinerEventsResponse = getEvents(client, joiner.uuid!!)
         assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
-        joinerEvents = joinerEventsResponse.body<List<Event>>()
+        joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
         assertEquals(1, joinerEvents.size)
-        assertEquals(eventCreated.id, joinerEvents[0].id)
-        assertEquals(owner.id, joinerEvents[0].owner!!.id)
+        assertEquals(eventCreated.id, joinerEvents[0].event.id)
+        assertEquals(owner.id, joinerEvents[0].event.owner!!.id)
 
         // Join again
         joinResponse = joinEvent(client, eventCreated.inviteCode, joiner.uuid!!)
