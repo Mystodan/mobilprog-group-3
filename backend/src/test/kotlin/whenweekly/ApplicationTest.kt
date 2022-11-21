@@ -428,16 +428,8 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.Created, eventResponse.status)
         val eventCreated = eventResponse.body<EventWithUsers>()
 
-        // Success case
-        var deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
-        assertEquals(HttpStatusCode.OK, deleteResponse.status)
-
-        // Try to delete again
-        deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
-        assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
-
         // Try to delete with invalid UUID
-        deleteResponse = deleteEvent(client, eventCreated.event.id, ByteArray(16))
+        var deleteResponse = deleteEvent(client, eventCreated.event.id, ByteArray(16))
         assertEquals(HttpStatusCode.Unauthorized, deleteResponse.status)
 
         // Try to delete with invalid event id
@@ -446,6 +438,14 @@ class ApplicationTest {
 
         // Try to delete with non owner
         deleteResponse = deleteEvent(client, eventCreated.event.id, nonOwnerUser.uuid!!)
+        assertEquals(HttpStatusCode.Unauthorized, deleteResponse.status)
+
+        // Success case
+        deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, deleteResponse.status)
+
+        // Try to delete again
+        deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
         assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
     }
 
