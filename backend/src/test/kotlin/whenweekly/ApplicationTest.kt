@@ -364,8 +364,12 @@ class ApplicationTest {
         assertEquals(owner.id, joinerEvents[0].event.owner!!.id)
 
 
+        // Try to kick owner as the user
+        var kickResponse = kickUser(client, eventCreated.event.id, owner.id, joiner.uuid!!)
+        assertEquals(HttpStatusCode.Unauthorized, kickResponse.status)
+
         // Kick user
-        var kickResponse = kickUser(client, eventCreated.event.id, joiner.id, owner.uuid!!)
+        kickResponse = kickUser(client, eventCreated.event.id, joiner.id, owner.uuid!!)
         assertEquals(HttpStatusCode.OK, kickResponse.status)
 
         // Make sure the user has been kicked
