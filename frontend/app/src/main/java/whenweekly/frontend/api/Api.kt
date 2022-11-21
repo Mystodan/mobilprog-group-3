@@ -105,4 +105,23 @@ object Api {
             null
         }
     }
+
+    suspend fun joinEvent(inviteCode: String): Event? {
+        return try {
+            val response = doRequest(
+                HttpMethod.Post,
+                HttpRoutes.EVENTS_JOIN,
+                """
+                    {
+                        "inviteCode": "$inviteCode"
+                    }
+                    """.trimIndent()
+            )
+            println(response.bodyAsText())
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
+    }
 }

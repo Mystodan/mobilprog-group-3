@@ -68,6 +68,14 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    override fun getEventByInviteCode(inviteCode: String): Event? {
+        return try {
+            events.first { it.inviteCode eq inviteCode }
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
+    }
     override fun getEventById(id: Int): Event? {
         return try {
             events.first { it.id eq id }

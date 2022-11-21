@@ -10,7 +10,7 @@ interface DatabaseManager {
     fun updateUser(user: User): User?
 
     fun addEvent(event: Event): Event?
-
+    fun getEventByInviteCode(inviteCode: String): Event?
     fun getEventById(id: Int): Event?
 
     fun getAllEvents(): List<Event>

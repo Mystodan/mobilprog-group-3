@@ -8,6 +8,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
+import whenweekly.routes.EventJoinRequest
 import whenweekly.routes.UserKickRequest
 import java.time.LocalDateTime
 
@@ -37,6 +38,13 @@ fun Application.configureRequestValidation() {
         validate<UserKickRequest> { request ->
             if (request.userId == null) {
                 ValidationResult.Invalid("User id not specified")
+            } else {
+                ValidationResult.Valid
+            }
+        }
+        validate<EventJoinRequest> { request ->
+            if (request.invite_code.isBlank()) {
+                ValidationResult.Invalid("Invite code cannot be blank")
             } else {
                 ValidationResult.Valid
             }

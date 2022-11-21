@@ -7,6 +7,7 @@ import whenweekly.database.entities.User
 interface EventRepository {
     fun addEvent(event: Event, owner: User): Event?
 
+    fun getEventByInviteCode(inviteCode: String): Event?
     fun getEventById(id: Int): Event?
 
     fun getAllEvents(): List<Event>

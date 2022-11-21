@@ -22,12 +22,12 @@ fun Route.eventRouting() {
     route(EVENTS_ROUTE) {
         dev {
             getEventById(repository)
+            getEvents(repository, userRepository)
         }
-        getEvents(repository, userRepository)
+        joinEvent(repository, userRepository)
         addEvent(repository, userRepository)
-        userJoinEvent(repository, userRepository)
-        deleteEvent(repository, userRepository)
         removeUserFromEvent(repository, userRepository)
+        deleteEvent(repository, userRepository)
     }
 }
 
@@ -85,10 +85,12 @@ fun Route.addEvent(repository: EventRepository,userRepository: UserRepository) {
     }
 }
 
-fun Route.userJoinEvent(repository: EventRepository, userRepository: UserRepository) {
-    put("{id}/join") {
-        val eventId = call.parameters["id"]?.toInt() ?: 0
+interface EventJoinRequest : org.ktorm.entity.Entity<EventJoinRequest>{
+    var invite_code: String
+}
 
+fun Route.joinEvent(repository: EventRepository, userRepository: UserRepository) {
+    put("/join") {
         val userID = Shared.getUserId(call.request, userRepository )
         if (userID == null){
             call.respond(
@@ -98,17 +100,27 @@ fun Route.userJoinEvent(repository: EventRepository, userRepository: UserReposit
             return@put
         }
 
-        // Check if event exists
-        if (repository.getEventById(eventId) == null) {
-            call.respond(HttpStatusCode.NotFound, "event with id $eventId doesn't exist")
+        val joinRequest = call.receive<EventJoinRequest>()
+        val event = repository.getEventByInviteCode(joinRequest.invite_code)
+        if (event == null) {
+            call.respond(
+                HttpStatusCode.NotFound,
+                "Event not found with invite code ${joinRequest.invite_code}"
+            )
             return@put
         }
 
-        val success = repository.addUserToEvent(eventId, userID)
+        // Check if event exists
+        if (repository.getEventById(event.id) == null) {
+            call.respond(HttpStatusCode.NotFound, "event with id ${event.id} doesn't exist")
+            return@put
+        }
+
+        val success = repository.addUserToEvent(event.id, userID)
         if (success){
-            call.respond(HttpStatusCode.OK, "user $userID joined event $eventId")
+            call.respond(HttpStatusCode.OK, "user $userID joined event ${event.id}")
         } else {
-            call.respond(HttpStatusCode.Conflict, "user $userID is already in event $eventId")
+            call.respond(HttpStatusCode.Conflict, "user $userID is already in event ${event.id}")
         }
     }
 }

@@ -36,6 +36,9 @@ class EventDBRepository : EventRepository {
         return newEvent
     }
 
+    override fun getEventByInviteCode(inviteCode: String): Event? {
+        return database.getEventByInviteCode(inviteCode)
+    }
     override fun getEventById(id: Int): Event? {
         return database.getEventById(id)
     }

@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import whenweekly.frontend.app.Globals
 
 import whenweekly.frontend.databinding.FragmentEventJoinBinding
@@ -34,6 +36,9 @@ class EventJoinFragment : Fragment() {
      *
      */
     private fun tryAddEvent(strInn: String) {
+
+        lifecycleScope.launch {
+        }
 
         Globals.Lib.Events.forEach{ // server sided holder of events
             if(strInn == it.invCode && !Globals.Lib.Events.contains(it)) { // checks if local contains serverside event

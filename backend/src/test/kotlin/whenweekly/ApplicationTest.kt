@@ -16,20 +16,16 @@ import whenweekly.routes.Constants.USERS_ROUTE
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
-import com.mysql.cj.xdevapi.JsonString
 import io.ktor.client.plugins.*
 import io.ktor.serialization.jackson.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.server.application.*
 import io.ktor.server.util.*
-import org.json.simple.JSONArray
 import org.junit.FixMethodOrder
 import org.junit.runners.MethodSorters
 import org.ktorm.jackson.KtormModule
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
-import whenweekly.database.schemas.UserTable
 import whenweekly.misc.asUUID
 import whenweekly.routes.Constants.RESET_ROUTE
 import java.time.LocalDateTime
@@ -92,9 +88,14 @@ class ApplicationTest {
         }
     }
 
-    private suspend fun userJoinEvent(client: HttpClient, eventId: Int, uuid: ByteArray): HttpResponse {
-        return client.put("$EVENTS_ROUTE/$eventId/join") {
+    private suspend fun joinEvent(client: HttpClient, inviteCode: String, uuid: ByteArray): HttpResponse {
+        return client.put("$EVENTS_ROUTE/join") {
             contentType(ContentType.Application.Json)
+            setBody("""
+                {
+                    "invite_code": "$inviteCode"
+                }
+            """.trimIndent())
             headers{
                 append("UUID", uuid.asUUID().toString())
             }
@@ -254,7 +255,7 @@ class ApplicationTest {
         assertEquals(0, joinerEvents.size)
 
         // Success case
-        var joinResponse = userJoinEvent(client, eventCreated.id, joiner.uuid!!)
+        var joinResponse = joinEvent(client, eventCreated.inviteCode, joiner.uuid!!)
         assertEquals(HttpStatusCode.OK, joinResponse.status)
 
         // Make sure the has joined the event
@@ -266,19 +267,19 @@ class ApplicationTest {
         assertEquals(owner.id, joinerEvents[0].owner!!.id)
 
         // Join again
-        joinResponse = userJoinEvent(client, eventCreated.id, joiner.uuid!!)
+        joinResponse = joinEvent(client, eventCreated.inviteCode, joiner.uuid!!)
         assertEquals(HttpStatusCode.Conflict, joinResponse.status)
 
         // Creator tries to join
-        joinResponse = userJoinEvent(client, eventCreated.id, owner.uuid!!)
+        joinResponse = joinEvent(client, eventCreated.inviteCode, owner.uuid!!)
         assertEquals(HttpStatusCode.Conflict, joinResponse.status)
 
         // Invalid UUID
-        joinResponse = userJoinEvent(client, eventCreated.id, ByteArray(16))
+        joinResponse = joinEvent(client, eventCreated.inviteCode, ByteArray(16))
         assertEquals(HttpStatusCode.Unauthorized, joinResponse.status)
 
-        // Invalid event id
-        joinResponse = userJoinEvent(client, -1, joiner.uuid!!)
+        // Invalid invite code
+        joinResponse = joinEvent(client, "123", joiner.uuid!!)
         assertEquals(HttpStatusCode.NotFound, joinResponse.status)
     }
 
