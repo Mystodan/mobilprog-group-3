@@ -24,8 +24,6 @@ fun Application.configureRequestValidation() {
         validate<Event> { event ->
             if (event.name.isBlank()) {
                 ValidationResult.Invalid("Name cannot be blank")
-            } else if (event.description.isBlank()) {
-                ValidationResult.Invalid("Description cannot be blank")
             } else if (event.start_date == null) {
                 ValidationResult.Invalid("Start date not specified")
             } else if (event.end_date == null) {
