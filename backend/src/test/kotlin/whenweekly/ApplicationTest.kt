@@ -133,6 +133,15 @@ class ApplicationTest {
         }
     }
 
+    private suspend fun deleteEvent(client: HttpClient, eventID: Int, userUUID: ByteArray): HttpResponse {
+        return client.delete("$EVENTS_ROUTE/$eventID") {
+            contentType(ContentType.Application.Json)
+            headers{
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+
     @Test
     fun test0GetUsers() = testApplication {
         setupTest()
@@ -388,6 +397,52 @@ class ApplicationTest {
         // Try to kick owner
         kickResponse = kickUser(client, eventCreated.event.id, owner.id, owner.uuid!!)
         assertEquals(HttpStatusCode.Conflict, kickResponse.status)
+    }
+
+    @Test
+    fun test5DeleteEvent() = testApplication {
+        setupTest()
+        val client = getClient()
+
+        val user = UserTest(name = "event owner")
+        val response = createUser(client, user)
+        assertEquals(HttpStatusCode.Created, response.status)
+        val owner = response.body<User>()
+
+        val nonOwner = UserTest(name = "non owner")
+        val nonOwnerResponse = createUser(client, nonOwner)
+        assertEquals(HttpStatusCode.Created, nonOwnerResponse.status)
+        val nonOwnerUser = nonOwnerResponse.body<User>()
+
+        val event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
+        val eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.Created, eventResponse.status)
+        val eventCreated = eventResponse.body<EventWithUsers>()
+
+        // Success case
+        var deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, deleteResponse.status)
+
+        // Try to delete again
+        deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
+
+        // Try to delete with invalid UUID
+        deleteResponse = deleteEvent(client, eventCreated.event.id, ByteArray(16))
+        assertEquals(HttpStatusCode.Unauthorized, deleteResponse.status)
+
+        // Try to delete with invalid event id
+        deleteResponse = deleteEvent(client, -1, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
+
+        // Try to delete with non owner
+        deleteResponse = deleteEvent(client, eventCreated.event.id, nonOwnerUser.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
     }
 
     private fun resetDatabase() {

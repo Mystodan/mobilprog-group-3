@@ -203,15 +203,15 @@ fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepo
     delete("{id}") {
         val id = call.parameters["id"]?.toInt() ?: 0
 
-        val event = eventRepository.getEventById(id)
-        if (event == null) {
-            call.respond(HttpStatusCode.NotFound, "Event with id $id not found")
-            return@delete
-        }
-
         val userId = Shared.getUserId(call.request, userRepository )
         if (userId == null){
             call.respond(HttpStatusCode.Unauthorized, "Invalid UUID")
+            return@delete
+        }
+
+        val event = eventRepository.getEventById(id)
+        if (event == null) {
+            call.respond(HttpStatusCode.NotFound, "Event with id $id not found")
             return@delete
         }
 
@@ -220,11 +220,12 @@ fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepo
             return@delete
         }
 
-        eventRepository.deleteEventByID(id)
-        call.respond(
-            HttpStatusCode.OK,
-            "Event $id deleted"
-        )
+        val success = eventRepository.deleteEventByID(id)
+        if (success) {
+            call.respond(HttpStatusCode.OK, "Event with id $id has been deleted")
+        } else {
+            call.respond(HttpStatusCode.NotFound, "Event with id $id not found")
+        }
     }
 }
 
