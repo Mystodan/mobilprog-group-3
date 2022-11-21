@@ -23,7 +23,17 @@ class EventDBRepository : EventRepository {
     override fun addEvent(event: Event, owner: User): Event? {
         event.inviteCode = genInvCode()
         event.owner = owner
-        return database.addEvent(event)
+        val newEvent = database.addEvent(event);
+        if (newEvent != null) {
+            // Add owner to event
+            database.addUserToEvent(newEvent.id, owner.id)
+
+            // Get full owner info
+            database.getUserById(owner.id)?.let {
+                newEvent.owner = it
+            }
+        }
+        return newEvent
     }
 
     override fun getEventById(id: Int): Event? {
