@@ -177,18 +177,18 @@ class ApplicationTest {
         var event = EventTest(name = "test event", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
         var eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.Created, eventResponse.status)
-        val createdEvent = eventResponse.body<Event>()
-        assertEquals(event.name, createdEvent.name)
-        assertEquals(LocalDateTime.parse(event.start_date), createdEvent.start_date)
-        assertEquals(LocalDateTime.parse(event.end_date), createdEvent.end_date)
-        assertEquals(owner.id, createdEvent.owner!!.id)
+        val createdEvent = eventResponse.body<EventWithUsers>()
+        assertEquals(event.name, createdEvent.event.name)
+        assertEquals(LocalDateTime.parse(event.start_date), createdEvent.event.start_date)
+        assertEquals(LocalDateTime.parse(event.end_date), createdEvent.event.end_date)
+        assertEquals(owner.id, createdEvent.event.owner!!.id)
 
         // Make sure owner is in the event
         var eventsResponse = getEvents(client, owner.uuid!!)
         assertEquals(HttpStatusCode.OK, eventsResponse.status)
         var events = eventsResponse.body<List<EventWithUsers>>()
         assertEquals(1, events.size)
-        assertEquals(createdEvent.id, events[0].event.id)
+        assertEquals(createdEvent.event.id, events[0].event.id)
         assertEquals(owner.id, events[0].event.owner!!.id)
         assertEquals(1, events[0].users.size)
         assertEquals(owner.id, events[0].users[0].id)
@@ -246,7 +246,7 @@ class ApplicationTest {
         val event = EventTest(name = "test event", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
         val eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.Created, eventResponse.status)
-        val eventCreated = eventResponse.body<Event>()
+        val eventCreated = eventResponse.body<EventWithUsers>()
 
         val user2 = UserTest(name = "event joiner")
         val response2 = createUser(client, user2)
@@ -259,27 +259,32 @@ class ApplicationTest {
         assertEquals(0, joinerEvents.size)
 
         // Success case
-        var joinResponse = joinEvent(client, eventCreated.inviteCode, joiner.uuid!!)
+        var joinResponse = joinEvent(client, eventCreated.event.inviteCode, joiner.uuid!!)
         assertEquals(HttpStatusCode.OK, joinResponse.status)
+        val joinEvent = joinResponse.body<EventWithUsers>()
+        assertEquals(eventCreated.event.id, joinEvent.event.id)
+        assertEquals(2, joinEvent.users.size)
+        assertEquals(owner.id, joinEvent.users[0].id)
+        assertEquals(joiner.id, joinEvent.users[1].id)
 
         // Make sure the has joined the event
         joinerEventsResponse = getEvents(client, joiner.uuid!!)
         assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
         joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
         assertEquals(1, joinerEvents.size)
-        assertEquals(eventCreated.id, joinerEvents[0].event.id)
+        assertEquals(eventCreated.event.id, joinerEvents[0].event.id)
         assertEquals(owner.id, joinerEvents[0].event.owner!!.id)
 
         // Join again
-        joinResponse = joinEvent(client, eventCreated.inviteCode, joiner.uuid!!)
+        joinResponse = joinEvent(client, eventCreated.event.inviteCode, joiner.uuid!!)
         assertEquals(HttpStatusCode.Conflict, joinResponse.status)
 
         // Creator tries to join
-        joinResponse = joinEvent(client, eventCreated.inviteCode, owner.uuid!!)
+        joinResponse = joinEvent(client, eventCreated.event.inviteCode, owner.uuid!!)
         assertEquals(HttpStatusCode.Conflict, joinResponse.status)
 
         // Invalid UUID
-        joinResponse = joinEvent(client, eventCreated.inviteCode, ByteArray(16))
+        joinResponse = joinEvent(client, eventCreated.event.inviteCode, ByteArray(16))
         assertEquals(HttpStatusCode.Unauthorized, joinResponse.status)
 
         // Invalid invite code

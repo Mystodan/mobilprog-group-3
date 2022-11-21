@@ -48,12 +48,7 @@ fun Route.getEvents(repository: EventRepository, userRepository: UserRepository)
             // Should get this when getting the events in the future in a single SQL query
             val eventsWithUsers = mutableListOf<EventWithUsers>()
             for (event in events) {
-                val users = userRepository.getUsersByEventId(event.id)
-                for (user in users) {
-                    // Don't send the uuid's to the client
-                    user.uuid = null
-                }
-                eventsWithUsers.add(EventWithUsers(event, users))
+                eventsWithUsers.add(getEventWithUsers(event, userRepository))
             }
 
             call.respond(
@@ -77,6 +72,15 @@ data class EventWithUsers(
     val event: Event,
     val users: List<User>
 )
+
+fun getEventWithUsers(event: Event, userRepository: UserRepository): EventWithUsers {
+    val users = userRepository.getUsersByEventId(event.id)
+    for (user in users) {
+        // Don't send the uuid's to the client
+        user.uuid = null
+    }
+    return EventWithUsers(event, users)
+}
 fun Route.addEvent(repository: EventRepository,userRepository: UserRepository) {
     post {
         val ownerID = Shared.getUserId(call.request, userRepository)
@@ -90,13 +94,17 @@ fun Route.addEvent(repository: EventRepository,userRepository: UserRepository) {
             val newEvent = call.receive<Event>()
             val owner = userRepository.getUserById(ownerID)
             val addedEvent = repository.addEvent(newEvent, owner!!)
-            addedEvent?.let {
+            if (addedEvent == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    "event not added"
+                )
+            } else {
                 call.respond(
                     HttpStatusCode.Created,
-                    it
+                    getEventWithUsers(addedEvent, userRepository)
                 )
-                // Do we assume the client sent a bad request?
-            } ?: call.respond(HttpStatusCode.BadRequest, "event not added")
+            }
         }
     }
 }
@@ -126,18 +134,12 @@ fun Route.joinEvent(repository: EventRepository, userRepository: UserRepository)
             return@put
         }
 
-        // Check if event exists
-        if (repository.getEventById(event.id) == null) {
-            call.respond(HttpStatusCode.NotFound, "event with id ${event.id} doesn't exist")
+        val success = repository.addUserToEvent(event.id, userID)
+        if (!success){
+            call.respond(HttpStatusCode.Conflict, "user $userID is already in event ${event.id}")
             return@put
         }
-
-        val success = repository.addUserToEvent(event.id, userID)
-        if (success){
-            call.respond(HttpStatusCode.OK, "user $userID joined event ${event.id}")
-        } else {
-            call.respond(HttpStatusCode.Conflict, "user $userID is already in event ${event.id}")
-        }
+        call.respond(HttpStatusCode.OK, getEventWithUsers(event, userRepository))
     }
 }
 
