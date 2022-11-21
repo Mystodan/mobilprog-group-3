@@ -136,7 +136,8 @@ fun Route.joinEvent(repository: EventRepository, userRepository: UserRepository)
 
         val success = repository.addUserToEvent(event.id, userID)
         if (!success){
-            call.respond(HttpStatusCode.Conflict, "user $userID is already in event ${event.id}")
+            println("user $userID is already in event ${event.id}")
+            call.respond(HttpStatusCode.Conflict, "Already in event")
             return@put
         }
         call.respond(HttpStatusCode.OK, getEventWithUsers(event, userRepository))
