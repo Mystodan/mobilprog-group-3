@@ -49,20 +49,34 @@ object Api {
     }
 
     suspend fun getEvents(): List<Event> {
-        val response = doRequest(
-            HttpMethod.Get,
-            HttpRoutes.EVENTS
-        )
-        return response.body()
+        return try {
+            val response = doRequest(
+                HttpMethod.Get,
+                HttpRoutes.EVENTS
+            )
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
     }
 
-    suspend fun addUser(name:String): User {
-        val response = doRequest(
-            HttpMethod.Post,
-            HttpRoutes.USERS,
-            "{\"name\":\"$name\"}"
-        )
-        return response.body()
+    suspend fun addUser(name:String): User? {
+        return try {
+            val response = doRequest(
+                HttpMethod.Post,
+                HttpRoutes.USERS,
+                """
+                    {
+                        "name": "$name"
+                    }
+                    """.trimIndent()
+            )
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
     suspend fun addEvent(
@@ -70,12 +84,25 @@ object Api {
         description: String,
         startDate: LocalDateTime,
         endDate: LocalDateTime
-    ): Event {
-        val response = doRequest(
-            HttpMethod.Post,
-            HttpRoutes.EVENTS,
-            Event(null, name, description, startDate, endDate, null, null).toString()
-        )
-        return response.body()
+    ): Event? {
+        return try {
+            val response = doRequest(
+                HttpMethod.Post,
+                HttpRoutes.EVENTS,
+                """
+                    {
+                        "name": "$name",
+                        "description": "$description",
+                        "start_date": "$startDate",
+                        "end_date": "$endDate"
+                    }
+                    """.trimIndent()
+            )
+            println(response.bodyAsText())
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 }

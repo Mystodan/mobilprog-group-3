@@ -52,9 +52,9 @@ class EventListFragment : Fragment() {
 
             Globals.Lib.Events.addAll(events.map {
                 Globals.Utils.createEvent(
-                    it.name!!,
-                    it.start_date!!.toEpochSecond(ZoneOffset.UTC) * 1000,
-                    it.end_date!!.toEpochSecond(ZoneOffset.UTC) * 1000)!!
+                    it.name,
+                    it.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
+                    it.end_date.toEpochSecond(ZoneOffset.UTC) * 1000, it.inviteCode)
             })
             adapter.updateData(Globals.Lib.Events)
         }

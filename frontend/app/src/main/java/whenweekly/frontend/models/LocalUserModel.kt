@@ -7,6 +7,9 @@ import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionSc
 import whenweekly.frontend.app.Globals
 import java.util.*
 
+// Tell it to clear the uuid (in case of database reset)
+const val clearUUID: Boolean = false
+
 class LocalUserModel(private val context : Context) {
     private var key = context.resources.getString(Globals.Constants.USERID_KEY)
     private var uuid: String = String()
@@ -14,7 +17,7 @@ class LocalUserModel(private val context : Context) {
 
     init {
         val storedUuid = securePref.getString(key,null)
-        if (storedUuid != null) {
+        if (storedUuid != null && !clearUUID) {
             uuid = storedUuid
             Globals.Lib.userId = storedUuid
         }

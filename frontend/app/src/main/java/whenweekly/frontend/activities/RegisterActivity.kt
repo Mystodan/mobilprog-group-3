@@ -59,10 +59,12 @@ class RegisterActivity : AppCompatActivity() {
             var fragmentHolderIntent = Intent(this, FragmentHolderActivity::class.java)
             lifecycleScope.launch{
                 val user = Api.addUser(name)
-                println(user.uuid.toString())
-                LocalUserModel(applicationContext).setUUID(user.uuidToString())
-                LocalUserModel(applicationContext).setGlobalUserID(user.uuidToString())
-                startActivity(fragmentHolderIntent)
+                if (user != null){
+                    LocalUserModel(applicationContext).setUUID(user.uuidToString())
+                    startActivity(fragmentHolderIntent)
+                }
+                else
+                    Toast.makeText(this@RegisterActivity, "Error creating user!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

@@ -18,10 +18,8 @@ import kotlin.math.log
 
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
-
     private val users get() = database.sequenceOf(UserTable)
     private val events get() = database.sequenceOf(EventTable)
-    private val eventUserJoined get() = database.sequenceOf(EventUserJoinedTable)
     override fun addUser(user: User): User? {
         return try {
             users.add(user)
