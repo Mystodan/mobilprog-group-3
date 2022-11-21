@@ -5,7 +5,7 @@ import whenweekly.database.entities.User
 
 
 interface EventRepository {
-    fun addEvent(event: Event, owner: User): Event
+    fun addEvent(event: Event, owner: User): Event?
 
     fun getEventById(id: Int): Event?
 
@@ -15,7 +15,7 @@ interface EventRepository {
 
     fun getEventsByUserId(userId: Int): List<Event>
 
-    fun deleteEventByID(id: Int)
+    fun deleteEventByID(id: Int): Boolean
 
     fun removeUserFromEvent(eventId: Int,kickedUserID: Int):Boolean
 }

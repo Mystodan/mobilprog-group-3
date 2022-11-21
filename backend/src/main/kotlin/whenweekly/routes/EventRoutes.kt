@@ -5,7 +5,6 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.Serializable
 import whenweekly.database.entities.Event
 import whenweekly.database.repository.EventDBRepository
 import whenweekly.database.repository.UserDBRepository
@@ -13,7 +12,6 @@ import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
 import whenweekly.routes.Constants.EVENTS_ROUTE
 import whenweekly.plugins.dev
-import javax.swing.text.html.parser.Entity
 
 
 fun Route.eventRouting() {
@@ -24,10 +22,10 @@ fun Route.eventRouting() {
             getEventById(repository)
         }
         getEvents(repository, userRepository)
-        addEvent(repository,userRepository)
-        userJoinEvent(repository,userRepository)
-        deleteEvent(repository,userRepository)
-        removeUserFromEvent(repository,userRepository)
+        addEvent(repository, userRepository)
+        userJoinEvent(repository, userRepository)
+        deleteEvent(repository, userRepository)
+        removeUserFromEvent(repository, userRepository)
     }
 }
 
@@ -38,7 +36,7 @@ fun Route.getEvents(repository: EventRepository, userRepository: UserRepository)
 
         if (userId == null){
             call.respond(
-                HttpStatusCode.NotFound,
+                HttpStatusCode.Unauthorized,
                 "Invalid UUID"
             )
         }
@@ -66,7 +64,7 @@ fun Route.addEvent(repository: EventRepository,userRepository: UserRepository) {
         val ownerID = Shared.getUserId(call.request, userRepository)
         if (ownerID == null){
             call.respond(
-                HttpStatusCode.NotFound,
+                HttpStatusCode.Unauthorized,
                 "Invalid UUID"
             )
         }
@@ -74,10 +72,13 @@ fun Route.addEvent(repository: EventRepository,userRepository: UserRepository) {
             val newEvent = call.receive<Event>()
             val owner = userRepository.getUserById(ownerID)
             val addedEvent = repository.addEvent(newEvent, owner!!)
-            call.respond(
-                HttpStatusCode.Created,
-                addedEvent
-            )
+            addedEvent?.let {
+                call.respond(
+                    HttpStatusCode.Created,
+                    it
+                )
+                // Do we assume the client sent a bad request?
+            } ?: call.respond(HttpStatusCode.BadRequest, "event not added")
         }
     }
 }
@@ -95,7 +96,7 @@ fun Route.userJoinEvent(repository: EventRepository, userRepository: UserReposit
         val userID = Shared.getUserId(call.request, userRepository )
         if (userID == null){
             call.respond(
-                HttpStatusCode.NotFound,
+                HttpStatusCode.Unauthorized,
                 "Invalid UUID"
             )
             return@put
@@ -111,7 +112,7 @@ fun Route.userJoinEvent(repository: EventRepository, userRepository: UserReposit
 }
 
 interface UserKickRequest : org.ktorm.entity.Entity<UserKickRequest>{
-    var ID:Int
+    var userId: Int?
 }
 
 fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: UserRepository) {
@@ -130,7 +131,7 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
         val userID = Shared.getUserId(call.request, userRepository)
         if (userID == null){
             call.respond(
-                HttpStatusCode.NotFound,
+                HttpStatusCode.Unauthorized,
                 "Invalid UUID"
             )
             return@put
@@ -143,17 +144,17 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
 
         // get ID of user to remove
         val userToKick = call.receive<UserKickRequest>()
-        if (userRepository.getUserById(userToKick.ID)==null){
+        if (userRepository.getUserById(userToKick.userId!!)==null){
             call.respond(
                 HttpStatusCode.NotFound, "Can't find user to remove from event"
             )
         }
 
-        val success = eventRepository.removeUserFromEvent(eventId, userToKick.ID)
+        val success = eventRepository.removeUserFromEvent(eventId, userToKick.userId!!)
         if (success){
-            call.respond(HttpStatusCode.OK, "user ${userToKick.ID} has been kicked from event $eventId")
+            call.respond(HttpStatusCode.OK, "user ${userToKick.userId} has been kicked from event $eventId")
         } else {
-            call.respond(HttpStatusCode.OK, "user ${userToKick.ID} was not in event $eventId")
+            call.respond(HttpStatusCode.OK, "user ${userToKick.userId} was not in event $eventId")
         }
 
     }
@@ -172,7 +173,7 @@ fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepo
 
         val userId = Shared.getUserId(call.request, userRepository )
         if (userId == null){
-            call.respond(HttpStatusCode.NotFound, "Invalid UUID")
+            call.respond(HttpStatusCode.Unauthorized, "Invalid UUID")
             return@delete
         }
 

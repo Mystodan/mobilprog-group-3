@@ -2,6 +2,7 @@ package whenweekly
 
 import io.ktor.server.application.*
 import whenweekly.database.DatabaseHelper.configureDatabaseConfig
+import whenweekly.plugins.configureRequestValidation
 import whenweekly.plugins.configureRouting
 import whenweekly.plugins.configureSecurity
 import whenweekly.plugins.configureSerialization
@@ -12,4 +13,5 @@ fun Application.module() {
     configureRouting()
     configureSecurity()
     configureSerialization()
+    configureRequestValidation()
 }
