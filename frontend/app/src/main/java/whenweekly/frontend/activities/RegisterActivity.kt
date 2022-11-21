@@ -7,9 +7,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
+import whenweekly.frontend.api.Api
 import whenweekly.frontend.databinding.ActivityRegisterBinding
 import whenweekly.frontend.models.LocalUserModel
 
@@ -34,7 +34,7 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
         binding.submitName.setOnClickListener {
-            submit()
+            submit(binding.inputName.text.toString())
         }
     }
 
@@ -52,14 +52,21 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
     }
-    private fun submit(){
-        if (binding.inputName.text.isEmpty())
+    private fun submit(name:String){
+        if (name.isEmpty())
             Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
         else{
-            startActivity(Intent(this, FragmentHolderActivity::class.java))
-            LocalUserModel(applicationContext).genUUID()
-            LocalUserModel(applicationContext).setGlobalUserID()
-            finish()
+            var fragmentHolderIntent = Intent(this, FragmentHolderActivity::class.java)
+            lifecycleScope.launch{
+                val user = Api.addUser(name)
+                if (user != null){
+                    LocalUserModel(applicationContext).setUUID(user.uuidToString())
+                    startActivity(fragmentHolderIntent)
+                }
+                else
+                    Toast.makeText(this@RegisterActivity, "Error creating user!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 }

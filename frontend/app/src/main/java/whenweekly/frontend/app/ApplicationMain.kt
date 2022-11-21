@@ -10,6 +10,6 @@ class ApplicationMain : Application(){
     
     override fun onCreate() {
         super.onCreate()
-        LocalUserModel(applicationContext).setGlobalUserID()
+        println(LocalUserModel(applicationContext).getUUID())
     }
 }

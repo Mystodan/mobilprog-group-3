@@ -9,10 +9,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.MaterialDatePicker
+import kotlinx.coroutines.launch
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.R
+import whenweekly.frontend.api.Api
 import whenweekly.frontend.databinding.FragmentEventCreateBinding
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 class EventCreateActivity : Fragment() {
 
@@ -56,6 +61,7 @@ class EventCreateActivity : Fragment() {
         }
     }
 
+    fun Long.toLocalDateTime(): LocalDateTime = LocalDateTime.ofEpochSecond(this / 1000, 0, ZoneOffset.UTC)
     /**
      *
      */
@@ -72,11 +78,19 @@ class EventCreateActivity : Fragment() {
             Thread.sleep(1_00)
         }; return }
 
-        val newEvent = Globals.Utils.createEvent(binding.etEventName.text.toString(), startDate, endDate) ?: return
-        Globals.Lib.Events.add(newEvent)
-        Toast.makeText(activity, "Event added successfully!", Toast.LENGTH_SHORT).show()
+        LocalDateTime.ofEpochSecond(startDate, 0, ZoneOffset.UTC)
+        lifecycleScope.launch {
+            val eventName = binding.etEventName.text.toString()
+            val newEvent = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
+            if(newEvent != null ) {
+                val newEventModel = Globals.Utils.createEvent(eventName, startDate, endDate, newEvent.event.inviteCode)
+                Globals.Lib.Events.add(newEventModel)
+                Toast.makeText(activity, "Event created!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(activity, "Error creating event!", Toast.LENGTH_SHORT).show()
+            }
+        }
         resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
-
     }
 
     /**

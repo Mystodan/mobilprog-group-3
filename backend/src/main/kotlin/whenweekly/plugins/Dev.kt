@@ -14,7 +14,7 @@ fun Route.dev(build: Route.() -> Unit): Route {
     val isDev = environment?.config?.property(BUILD_CONFIG)?.getString().equals("dev", true)
     val plugin = createRouteScopedPlugin("RouteAuthorization"){
         on(AuthenticationChecked){ call ->
-            if (isDev){
+            if (!isDev){
                 call.respond(HttpStatusCode.Unauthorized)
             }
         }

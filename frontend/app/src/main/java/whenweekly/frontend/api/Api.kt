@@ -10,9 +10,8 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.*
-import whenweekly.frontend.api.models.Event
+import whenweekly.frontend.api.models.EventWithUsers
+import whenweekly.frontend.api.models.User
 import whenweekly.frontend.app.Globals
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -41,19 +40,42 @@ object Api {
                 if (body != null) {
                     setBody(body)
                 }
-                append("UUID", Globals.Lib.userId!!)
+                append("UUID", Globals.Lib.userId)
+                append("Content-Type", "application/json")
             }
         }
         return response
     }
 
-    suspend fun getEvents(): List<Event> {
-        val response = doRequest(
-            HttpMethod.Get,
-            HttpRoutes.EVENTS
-        )
+    suspend fun getEvents(): List<EventWithUsers> {
+        return try {
+            val response = doRequest(
+                HttpMethod.Get,
+                HttpRoutes.EVENTS
+            )
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
+    }
 
-        return response.body()
+    suspend fun addUser(name:String): User? {
+        return try {
+            val response = doRequest(
+                HttpMethod.Post,
+                HttpRoutes.USERS,
+                """
+                    {
+                        "name": "$name"
+                    }
+                    """.trimIndent()
+            )
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
     suspend fun addEvent(
@@ -61,12 +83,48 @@ object Api {
         description: String,
         startDate: LocalDateTime,
         endDate: LocalDateTime
-    ): Event {
-        val response = doRequest(
-            HttpMethod.Post,
-            HttpRoutes.EVENTS,
-            Event(null, name, description, startDate, endDate, null, null).toString()
-        )
-        return response.body()
+    ): EventWithUsers? {
+        return try {
+            val response = doRequest(
+                HttpMethod.Post,
+                HttpRoutes.EVENTS,
+                """
+                    {
+                        "name": "$name",
+                        "description": "$description",
+                        "start_date": "$startDate",
+                        "end_date": "$endDate"
+                    }
+                    """.trimIndent()
+            )
+            println(response.bodyAsText())
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
+    }
+
+    suspend fun joinEvent(inviteCode: String): Pair<EventWithUsers?, String?> {
+        return try {
+            val response = doRequest(
+                HttpMethod.Put,
+                HttpRoutes.EVENTS_JOIN,
+                """
+                    {
+                        "invite_code": "$inviteCode"
+                    }
+                    """.trimIndent()
+            )
+            println(response.bodyAsText())
+            if (response.status == HttpStatusCode.OK) {
+                Pair(response.body(), null)
+            } else {
+                Pair(null, response.bodyAsText())
+            }
+        } catch (e: Exception) {
+            println(e)
+            Pair(null, e.message)
+        }
     }
 }

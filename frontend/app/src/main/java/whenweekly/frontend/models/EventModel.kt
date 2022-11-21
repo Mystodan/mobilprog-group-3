@@ -11,23 +11,14 @@ import java.util.*
 data class EventModel(
     var eventName: String,
     var startDate: Long,
-    var endDate: Long
+    var endDate: Long,
+    var invCode: String
 ) : Parcelable {
-    var invCode:String? = null
     var creatorInit:String? = null
     init {
-        genInvCode()
         creatorInit = Globals.Lib.userId
     }
 
-    private fun genInvCode(){
-            fun getRandNum(min:Int, max:Int):Int = Random().nextInt(max+1)+min
-            invCode = ""
-            val symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-            for (i in 0..19){
-                invCode += symbols[getRandNum(0,symbols.length-1)]
-            }
-    }
     /**
      * Constructor for the parcels that sets values for the EventModel parcel
      *
@@ -36,7 +27,8 @@ data class EventModel(
     constructor(parcel: Parcel) : this(
         parcel.readString().toString(),
         parcel.readLong(),
-        parcel.readLong()
+        parcel.readLong(),
+        parcel.readString().toString(),
     )
 
     /**
@@ -49,6 +41,7 @@ data class EventModel(
         parcel.writeString(eventName)
         parcel.writeLong(startDate)
         parcel.writeLong(endDate)
+        parcel.writeString(invCode)
     }
 
     /**

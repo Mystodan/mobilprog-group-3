@@ -20,7 +20,9 @@ SET time_zone = "+00:00";
 --
 -- Database: `whenweekly`
 --
-
+DROP DATABASE if EXISTS whenweekly;
+CREATE DATABASE IF NOT EXISTS whenweekly COLLATE = utf8_danish_ci;
+USE whenweekly;
 -- --------------------------------------------------------
 
 --

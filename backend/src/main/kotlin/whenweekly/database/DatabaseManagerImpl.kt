@@ -9,6 +9,7 @@ import whenweekly.database.schemas.EventTable
 import whenweekly.database.schemas.EventUserAvailableTable
 import whenweekly.database.schemas.UserTable
 import whenweekly.domain.manager.DatabaseManager
+import whenweekly.misc.asBytes
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
@@ -17,39 +18,80 @@ import kotlin.math.log
 
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
-
     private val users get() = database.sequenceOf(UserTable)
     private val events get() = database.sequenceOf(EventTable)
-
-    private val eventUserJoined get() = database.sequenceOf(EventUserJoinedTable)
-    override fun addUser(user: User): User {
-        users.add(user)
-        return user
+    override fun addUser(user: User): User? {
+        return try {
+            users.add(user)
+            user
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
     override fun getAllUsers(): List<User> {
-        return users.toList()
+        return try {
+            users.toList()
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
     }
 
     override fun getUserById(id: Int): User? {
-        return users.find { it.id eq id }
+        return try {
+            users.first { it.id eq id }
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
-    override fun updateUser(user: User) {
-        users.update(user)
+    override fun updateUser(user: User): User? {
+        return try {
+            users.update(user)
+            user
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
-    override fun addEvent(event: Event): Event {
-        events.add(event)
-        return event
+    override fun addEvent(event: Event): Event? {
+        return try {
+            events.add(event)
+            event
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
+    override fun getEventByInviteCode(inviteCode: String): Event? {
+        return try {
+            events.first { it.inviteCode eq inviteCode }
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
+    }
     override fun getEventById(id: Int): Event? {
-        return events.find { it.id eq id }
+        return try {
+            events.first { it.id eq id }
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
     override fun getAllEvents(): List<Event> {
-        return events.toList()
+        return try {
+            events.toList()
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
     }
 
     /**
@@ -78,38 +120,68 @@ class DatabaseManagerImpl : DatabaseManager {
      * @param kickedUserID  - ID of the user in EventUserJoinedTable to remove
      */
     override fun removeUserFromEvent(eventId: Int,  kickedUserID: Int): Boolean {
-         return database.delete(EventUserJoinedTable){(it.event eq eventId) and (it.user eq kickedUserID)} > 0
+        return try {
+            database.delete(EventUserJoinedTable) {
+                (it.event eq eventId) and (it.user eq kickedUserID)
+            } > 0
+        } catch ( exception: Exception ) {
+            println(exception)
+            false
+        }
     }
 
     override fun getEventsByUserId(userId: Int): List<Event> {
-        return database.from(EventTable)
+        return try {
+            database.from(EventTable)
                 .innerJoin(EventUserJoinedTable, on = EventTable.id eq EventUserJoinedTable.event).select()
                 .where { EventUserJoinedTable.user eq userId }
                 .map { EventTable.createEntity(it) }
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
     }
 
-    private fun UUID.asBytes(): ByteArray{
-        val b = ByteBuffer.wrap(ByteArray(16))
-        b.putLong(this.mostSignificantBits)
-        b.putLong(this.leastSignificantBits)
-        return b.array()
+    override fun getUsersByEventId(eventId: Int): List<User> {
+        return try {
+            database.from(UserTable)
+                .innerJoin(EventUserJoinedTable, on = UserTable.id eq EventUserJoinedTable.user).select()
+                .where { EventUserJoinedTable.event eq eventId }
+                .map { UserTable.createEntity(it) }
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
     }
+
     override fun getUserByUUID(uuid: String): User? {
-        val uuidBytes = UUID.fromString(uuid).asBytes()
-        return users.find { it.uuid eq uuidBytes }
+        return try {
+            val uuidBytes = UUID.fromString(uuid).asBytes()
+            users.find { it.uuid eq uuidBytes }
+        } catch (e: Exception) {
+            println(e)
+            null
+        }
     }
 
     override fun resetDatabase() {
-        database.deleteAll(EventUserJoinedTable)
-        database.deleteAll(EventUserAvailableTable)
-        database.deleteAll(EventTable)
-        database.deleteAll(UserTable)
+        try {
+            database.deleteAll(EventUserJoinedTable)
+            database.deleteAll(EventUserAvailableTable)
+            database.deleteAll(EventTable)
+            database.deleteAll(UserTable)
+        } catch (e: Exception) {
+            println(e)
+        }
     }
 
-    override fun deleteEventByID(eventId: Int) {
-        //EventTable has a Primary key with ON DELETE CASCADE, should delete the child tables as well
-        database.delete(EventTable) { it.id eq eventId }
-        //database.delete(EventUserJoinedTable) { it.event eq eventId }
-        //database.delete(EventUserAvailableTable) { it.event eq eventId }
+    override fun deleteEventByID(eventId: Int): Boolean {
+        return try {
+            database.delete(EventTable) { it.id eq eventId }
+            true
+        } catch (e: Exception) {
+            println(e)
+            false
+        }
     }
 }

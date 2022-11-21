@@ -20,12 +20,25 @@ private fun genInvCode(): String {
 class EventDBRepository : EventRepository {
     private val database: DatabaseManager = DatabaseManagerImpl()
 
-    override fun addEvent(event: Event, owner: User): Event {
+    override fun addEvent(event: Event, owner: User): Event? {
         event.inviteCode = genInvCode()
         event.owner = owner
-        return database.addEvent(event)
+        val newEvent = database.addEvent(event);
+        if (newEvent != null) {
+            // Add owner to event
+            database.addUserToEvent(newEvent.id, owner.id)
+
+            // Get full owner info
+            database.getUserById(owner.id)?.let {
+                newEvent.owner = it
+            }
+        }
+        return newEvent
     }
 
+    override fun getEventByInviteCode(inviteCode: String): Event? {
+        return database.getEventByInviteCode(inviteCode)
+    }
     override fun getEventById(id: Int): Event? {
         return database.getEventById(id)
     }
@@ -42,7 +55,7 @@ class EventDBRepository : EventRepository {
         return database.getEventsByUserId(userId)
     }
 
-    override fun deleteEventByID(eventId: Int) {
+    override fun deleteEventByID(eventId: Int): Boolean {
         return database.deleteEventByID(eventId)
     }
 

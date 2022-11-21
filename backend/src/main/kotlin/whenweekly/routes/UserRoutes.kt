@@ -10,9 +10,9 @@ import whenweekly.database.repository.EventDBRepository
 import whenweekly.database.repository.UserDBRepository
 import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
+import whenweekly.misc.asBytes
 import whenweekly.plugins.dev
 import whenweekly.routes.Constants.USERS_ROUTE
-import java.nio.ByteBuffer
 import java.util.*
 
 fun Route.userRouting() {
@@ -40,33 +40,43 @@ fun Route.getUsers(repository: UserRepository) {
 }
 
 fun Route.setUUID(repository: UserRepository){
-    post{
-        val editedUser = call.receive<User>()
-        editedUser.uuid = UUID.fromString(call.parameters["UUID"]).asBytes()
-
-        repository.updateUser(editedUser)
-
-        call.respond(
-            HttpStatusCode.OK,
-            editedUser
-        )
+    post {
+        val uuid = call.parameters["UUID"]
+        if (uuid == null){
+            call.respond(
+                HttpStatusCode.BadRequest,
+                "UUID not provided"
+            )
+            return@post
+        }
+        else {
+            val user = repository.getUserByUUID(uuid)
+            if (user == null){
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    "User not found"
+                )
+            }
+            else {
+                user.uuid = UUID.fromString(uuid).asBytes()
+                repository.updateUser(user)
+                call.respond(
+                    HttpStatusCode.OK,
+                    user
+                )
+            }
+        }
     }
-}
-
-private fun UUID.asBytes(): ByteArray{
-    val b = ByteBuffer.wrap(ByteArray(16))
-    b.putLong(this.mostSignificantBits)
-    b.putLong(this.leastSignificantBits)
-    return b.array()
 }
 
 fun Route.getUserById(repository: UserRepository) {
     get("{id}") {
-        val id = call.parameters["id"]?.toInt() ?: 0
+        val id = call.parameters["id"]!!.toInt()
         val user = repository.getUserById(id)
         user?.let {
-            call.respond(HttpStatusCode.Found, it)
+            call.respond(HttpStatusCode.OK, it)
         } ?: call.respond(HttpStatusCode.NotFound, "user not found with id $id")
+        return@get
     }
 }
 
@@ -74,16 +84,15 @@ fun Route.addUser(repository: UserRepository) {
     post {
         val newUser = call.receive<User>()
         val addedUser = repository.addUser(newUser)
-        call.respond(
-            HttpStatusCode.Created,
-            addedUser
-        )
+        addedUser?.let {
+            call.respond(HttpStatusCode.Created, addedUser)
+        } ?: call.respond(HttpStatusCode.InternalServerError, "user not added")
     }
 }
 
 fun Route.getEventsForUser(eventRepository: EventRepository) {
     get("{id}/events") {
-        val id = call.parameters["id"]?.toInt() ?: 0
+        val id = call.parameters["id"]!!.toInt()
         val events = eventRepository.getEventsByUserId(id)
         call.respond(
             HttpStatusCode.OK,

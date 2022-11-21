@@ -29,12 +29,12 @@ class Globals {
         val startFragment = EventListFragment()
         private fun getAllInvCodes():List<String> {
             val list: MutableList<String> = mutableListOf()
-            Lib.Events.forEach{ it.invCode?.let { it1 -> list.add(it1) } }
+            Lib.Events.forEach{ it.invCode.let { it1 -> list.add(it1) } }
             return list
         }
-        fun createEvent(eventName:String, eventStart:Long, eventEnd:Long): EventModel? {
-            val ret = EventModel(eventName,eventStart,eventEnd)
-            if(getAllInvCodes().contains(ret.invCode))createEvent(eventName, eventStart, eventEnd)
+        fun createEvent(eventName:String, eventStart:Long, eventEnd:Long, inviteCode: String): EventModel {
+            val ret = EventModel(eventName,eventStart,eventEnd, inviteCode)
+            if(getAllInvCodes().contains(ret.invCode)) createEvent(eventName, eventStart, eventEnd, inviteCode)
             return ret
         }
     }
