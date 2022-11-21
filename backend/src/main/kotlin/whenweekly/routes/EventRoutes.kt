@@ -14,6 +14,8 @@ import whenweekly.routes.Constants.EVENTS_ROUTE
 import whenweekly.plugins.dev
 
 
+// TODO: move logic to repositories.
+
 fun Route.eventRouting() {
     val repository: EventRepository = EventDBRepository()
     val userRepository: UserRepository = UserDBRepository()
@@ -87,12 +89,6 @@ fun Route.userJoinEvent(repository: EventRepository, userRepository: UserReposit
     put("{id}/join") {
         val eventId = call.parameters["id"]?.toInt() ?: 0
 
-        // Check if event exists
-        if (repository.getEventById(eventId) == null) {
-            call.respond(HttpStatusCode.OK, "event with id $eventId doesn't exist")
-            return@put
-        }
-
         val userID = Shared.getUserId(call.request, userRepository )
         if (userID == null){
             call.respond(
@@ -102,11 +98,17 @@ fun Route.userJoinEvent(repository: EventRepository, userRepository: UserReposit
             return@put
         }
 
+        // Check if event exists
+        if (repository.getEventById(eventId) == null) {
+            call.respond(HttpStatusCode.NotFound, "event with id $eventId doesn't exist")
+            return@put
+        }
+
         val success = repository.addUserToEvent(eventId, userID)
         if (success){
             call.respond(HttpStatusCode.OK, "user $userID joined event $eventId")
         } else {
-            call.respond(HttpStatusCode.OK, "user $userID is already in event $eventId")
+            call.respond(HttpStatusCode.Conflict, "user $userID is already in event $eventId")
         }
     }
 }
@@ -123,7 +125,7 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
         // Check if event exists
         val event = eventRepository.getEventById(eventId)
         if ( event == null) {
-            call.respond(HttpStatusCode.OK, "event with id $eventId doesn't exist")
+            call.respond(HttpStatusCode.NotFound, "event with id $eventId doesn't exist")
             return@put
         }
 
@@ -154,7 +156,7 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
         if (success){
             call.respond(HttpStatusCode.OK, "user ${userToKick.userId} has been kicked from event $eventId")
         } else {
-            call.respond(HttpStatusCode.OK, "user ${userToKick.userId} was not in event $eventId")
+            call.respond(HttpStatusCode.Conflict, "user ${userToKick.userId} was not in event $eventId")
         }
 
     }

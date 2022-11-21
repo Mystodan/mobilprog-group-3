@@ -31,6 +31,7 @@ import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.database.schemas.UserTable
 import whenweekly.misc.asUUID
+import whenweekly.routes.Constants.RESET_ROUTE
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -91,11 +92,30 @@ class ApplicationTest {
         }
     }
 
+    private suspend fun userJoinEvent(client: HttpClient, eventId: Int, uuid: ByteArray): HttpResponse {
+        return client.put("$EVENTS_ROUTE/$eventId/join") {
+            contentType(ContentType.Application.Json)
+            headers{
+                append("UUID", uuid.asUUID().toString())
+            }
+        }
+    }
+
     private suspend fun getUsers(client: HttpClient): HttpResponse {
         return client.get(USERS_ROUTE){
             contentType(ContentType.Application.Json)
         }
     }
+
+    private suspend fun getEvents(client: HttpClient, uuid: ByteArray): HttpResponse {
+        return client.get(EVENTS_ROUTE){
+            contentType(ContentType.Application.Json)
+            headers{
+                append("UUID", uuid.asUUID().toString())
+            }
+        }
+    }
+
     @Test
     fun test0GetUsers() = testApplication {
         setupTest()
@@ -131,7 +151,6 @@ class ApplicationTest {
         assertEquals(user.name, responseUser.name)
         assert(createdUser.id > -1)
 
-
         // Empty name
         user = UserTest(name = "")
         response = createUser(client, user)
@@ -162,17 +181,35 @@ class ApplicationTest {
         assertEquals(LocalDateTime.parse(event.end_date), createdEvent.end_date)
         assertEquals(owner.id, createdEvent.owner!!.id)
 
+        // Make sure owner is in the event
+        var eventsResponse = getEvents(client, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, eventsResponse.status)
+        var events = eventsResponse.body<List<Event>>()
+        assertEquals(1, events.size)
+        assertEquals(createdEvent.id, events[0].id)
+        assertEquals(owner.id, events[0].owner!!.id)
+
+        // Empty description
+        event = EventTest(name = "test event", description = "", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.Created, eventResponse.status)
+
+        // Owner should have two events
+        eventsResponse = getEvents(client, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, eventsResponse.status)
+        events = eventsResponse.body<List<Event>>()
+        assertEquals(2, events.size)
+
+        /*
+         * FAIL cases
+         */
+
         // Invalid UUID
         eventResponse = createEvent(client, event, ByteArray(16))
         assertEquals(HttpStatusCode.Unauthorized, eventResponse.status)
 
         // Empty name
         event = EventTest(name = "", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
-        eventResponse = createEvent(client, event, owner.uuid!!)
-        assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
-
-        // Empty description
-        event = EventTest(name = "test event", description = "", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
         eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
 
@@ -185,111 +222,72 @@ class ApplicationTest {
         event = EventTest(name = "test event", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01:00:00")
         eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
+
+        // Start date after end date
+        event = EventTest(name = "test event", description = "test description", start_date = "2022-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
     }
     @Test
-    fun testRoutes() = testApplication {
-//
-//        application {
-//            configureRouting()
-//        }
-//        resetDatabase()
-//
-//        val client = getClient()
-//
-//        //createUser(client, "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]", "bob")
-//        //createUser(client, "[201,123,54,73,139,77,65,46,138,134,93,119,24,17,127,69]", "bob")
-//
-//        //val user = createUser(client,"test","testUser", HttpStatusCode.Created)
-//
-//        val users = getUsers(client)
-//        assertEquals(1, users.size)
-//        val user = users[0]
-//
-//        createEvent(client, "test event", "Some test event", "{ \"id\": ${user.id} }", LocalDateTime.now(), LocalDateTime.now())
-//
-//        val events = getEvents(client)
-//        assertEquals(1, events.size)
-//        val event = events[0]
-//        assertEquals("test event", event.name)
-//
-//        // Join event
-//        client.put("$EVENTS_ROUTE/${event.id}/join") {
-//            contentType(ContentType.Application.Json)
-//            setBody("{ \"id\": ${user.id} }")
-//            headers{
-//                val testUUID = "test"
-//                append("UUID", testUUID)
-//            }
-//        }
-//
-//        // Get events for user
-//        client.get("$USERS_ROUTE/${user.id}/events").apply {
-//            assertEquals(HttpStatusCode.OK, status)
-//            println(bodyAsText())
-//            val events: List<EventTest> = body()
-//            assertEquals(1, events.size)
-//        }
+    fun test3JoinEvent() = testApplication{
+        setupTest()
+        val client = getClient()
+
+        val user = UserTest(name = "event owner")
+        val response = createUser(client, user)
+        assertEquals(HttpStatusCode.Created, response.status)
+        val owner = response.body<User>()
+
+        val event = EventTest(name = "test event", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        val eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.Created, eventResponse.status)
+        val eventCreated = eventResponse.body<Event>()
+
+        val user2 = UserTest(name = "event joiner")
+        val response2 = createUser(client, user2)
+        assertEquals(HttpStatusCode.Created, response2.status)
+        val joiner = response2.body<User>()
+
+        var joinerEventsResponse = getEvents(client, joiner.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
+        var joinerEvents = joinerEventsResponse.body<List<Event>>()
+        assertEquals(0, joinerEvents.size)
+
+        // Success case
+        var joinResponse = userJoinEvent(client, eventCreated.id, joiner.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinResponse.status)
+
+        // Make sure the has joined the event
+        joinerEventsResponse = getEvents(client, joiner.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinerEventsResponse.status)
+        joinerEvents = joinerEventsResponse.body<List<Event>>()
+        assertEquals(1, joinerEvents.size)
+        assertEquals(eventCreated.id, joinerEvents[0].id)
+        assertEquals(owner.id, joinerEvents[0].owner!!.id)
+
+        // Join again
+        joinResponse = userJoinEvent(client, eventCreated.id, joiner.uuid!!)
+        assertEquals(HttpStatusCode.Conflict, joinResponse.status)
+
+        // Creator tries to join
+        joinResponse = userJoinEvent(client, eventCreated.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.Conflict, joinResponse.status)
+
+        // Invalid UUID
+        joinResponse = userJoinEvent(client, eventCreated.id, ByteArray(16))
+        assertEquals(HttpStatusCode.Unauthorized, joinResponse.status)
+
+        // Invalid event id
+        joinResponse = userJoinEvent(client, -1, joiner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, joinResponse.status)
     }
 
-    suspend fun createUser(client: HttpClient, uuid: String, name: String, expectedStatusCode: HttpStatusCode): User? {
-        val userStr = """
-            {
-                "uuid": $uuid,
-                "name": "$name"
-            }
-        """.trimIndent()
-
-        val response = client.post(USERS_ROUTE) {
-            contentType(ContentType.Application.Json)
-            //val userStr = createUserString()
-            setBody(userStr)
-
-        }.apply{
-            assertEquals(expectedStatusCode, status)
-        }
-        return response.body()
-    }
-
-
-    suspend fun createEvent(client: HttpClient, name: String, description: String, owner: String, startDate: LocalDateTime, endDate: LocalDateTime) {
-        val formatter= DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-        val eventStr = """
-            {
-                "name": "$name",
-                "description": "$description",
-                "owner": $owner,
-                "start_date": "${startDate.format(formatter)}",
-                "end_date": "${endDate.format(formatter)}"
-            }
-        """.trimIndent()
-
-        client.post(EVENTS_ROUTE) {
-            contentType(ContentType.Application.Json)
-            println(eventStr)
-            setBody(eventStr)
-        }.apply{
-            assertEquals(HttpStatusCode.Created, status)
-        }
-    }
-
-    suspend fun getEvents(client: HttpClient): List<EventTest> {
-        client.get(EVENTS_ROUTE).apply {
-            assertEquals(HttpStatusCode.OK, status)
-            println(bodyAsText())
-            val events: List<EventTest> = body()
-            return events
-        }
-    }
-    fun resetDatabase() {
+    private fun resetDatabase() {
         testApplication {
-            client.delete("/reset").apply {
+            client.delete(RESET_ROUTE).apply {
                 assertEquals(HttpStatusCode.OK, status)
                 assertEquals("Database reset", bodyAsText())
             }
         }
-    }
-
-    suspend fun setUUID(userId: Int, uuid: JSONArray){
-
     }
 }
