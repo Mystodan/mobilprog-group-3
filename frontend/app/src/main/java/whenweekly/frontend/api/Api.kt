@@ -1,6 +1,5 @@
 package whenweekly.frontend.api
 
-import com.fasterxml.jackson.core.JsonStreamContext
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
@@ -11,7 +10,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import whenweekly.frontend.api.models.Event
+import whenweekly.frontend.api.models.EventWithUsers
 import whenweekly.frontend.api.models.User
 import whenweekly.frontend.app.Globals
 import java.time.LocalDateTime
@@ -48,7 +47,7 @@ object Api {
         return response
     }
 
-    suspend fun getEvents(): List<Event> {
+    suspend fun getEvents(): List<EventWithUsers> {
         return try {
             val response = doRequest(
                 HttpMethod.Get,
@@ -84,7 +83,7 @@ object Api {
         description: String,
         startDate: LocalDateTime,
         endDate: LocalDateTime
-    ): Event? {
+    ): EventWithUsers? {
         return try {
             val response = doRequest(
                 HttpMethod.Post,
@@ -106,22 +105,26 @@ object Api {
         }
     }
 
-    suspend fun joinEvent(inviteCode: String): Event? {
+    suspend fun joinEvent(inviteCode: String): Pair<EventWithUsers?, String?> {
         return try {
             val response = doRequest(
-                HttpMethod.Post,
+                HttpMethod.Put,
                 HttpRoutes.EVENTS_JOIN,
                 """
                     {
-                        "inviteCode": "$inviteCode"
+                        "invite_code": "$inviteCode"
                     }
                     """.trimIndent()
             )
             println(response.bodyAsText())
-            response.body()
+            if (response.status == HttpStatusCode.OK) {
+                Pair(response.body(), null)
+            } else {
+                Pair(null, response.bodyAsText())
+            }
         } catch (e: Exception) {
             println(e)
-            null
+            Pair(null, e.message)
         }
     }
 }

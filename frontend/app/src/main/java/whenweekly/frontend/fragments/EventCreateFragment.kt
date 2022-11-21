@@ -83,7 +83,7 @@ class EventCreateActivity : Fragment() {
             val eventName = binding.etEventName.text.toString()
             val newEvent = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
             if(newEvent != null ) {
-                val newEventModel = Globals.Utils.createEvent(eventName, startDate, endDate, newEvent.inviteCode)
+                val newEventModel = Globals.Utils.createEvent(eventName, startDate, endDate, newEvent.event.inviteCode)
                 Globals.Lib.Events.add(newEventModel)
                 Toast.makeText(activity, "Event created!", Toast.LENGTH_SHORT).show()
             } else {
