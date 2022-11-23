@@ -12,7 +12,8 @@ import java.util.*
  */
 data class UserModel(
     var userName: String,
-    var checked: Boolean
+    var checked: Boolean,
+    var id: Int
 ) : Parcelable {
     /**
      * Constructor for the parcels that sets values for the UserModel parcel
@@ -22,7 +23,8 @@ data class UserModel(
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(parcel: Parcel) : this(
         parcel.readString().toString(),
-        parcel.readBoolean()
+        parcel.readBoolean(),
+        parcel.readInt()
     )
 
     /**
@@ -35,6 +37,7 @@ data class UserModel(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(userName)
         parcel.writeBoolean(checked)
+        parcel.writeInt(id)
     }
 
     /**

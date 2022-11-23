@@ -47,7 +47,6 @@ class EventListFragment : Fragment() {
         )
 
         adapter.updateData(Globals.Lib.Events)
-        if (Globals.Lib.Events.isNotEmpty()) return binding.root
         lifecycleScope.launch{
             val events = Api.getEvents()
             var syncEventList = mutableListOf<EventModel>()

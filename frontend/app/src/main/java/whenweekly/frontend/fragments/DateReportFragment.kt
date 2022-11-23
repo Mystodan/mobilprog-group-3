@@ -27,7 +27,7 @@ class DateReportFragment : Fragment() {
     private val binding get() = _binding!!
     private var datesStart: List<Int> ? = null
     private var datesEnd: List<Int> ? = null
-
+    private var unavailableDatesParent: MutableList<LocalDate> = mutableListOf()
 
     /**
      *
@@ -55,18 +55,20 @@ class DateReportFragment : Fragment() {
         binding.btnReportDate.setOnClickListener {
             val allDates = allDates(toLocalDate(eventInformation.startDate!!), toLocalDate(eventInformation.startDate!!))
             println("All dates: $allDates")
-
             val (availableDates, unavailableDates) = calculateAvailableDates(allDates)
-            if(unavailableDates.isNotEmpty()) {
-                Toast.makeText(context, "Dates reported successfully!", Toast.LENGTH_SHORT).show()
-            } else Toast.makeText(context, "Please select dates first!", Toast.LENGTH_SHORT).show()
-            println("Unavailable dates: $unavailableDates")
-            println("Available dates: $availableDates")
+            var toastMSG =
+                if(unavailableDates.isEmpty()) "Please select dates first!"
+                else if (doesAvailableContainUnavailable(unavailableDatesParent, unavailableDates)) "${GetUnavailableDatesAsDays()} of the selected dates are unavailable"
+                else { unavailableDates.forEach{if(!unavailableDatesParent.contains(it))unavailableDatesParent.add(it)}; "Dates reported successfully!"}
+            Toast.makeText(context, toastMSG , Toast.LENGTH_SHORT).show()
         }
 
         return binding.root
     }
-
+    private fun doesAvailableContainUnavailable(unavailableDates: MutableList<LocalDate>,availableDates: MutableList<LocalDate>):Boolean{
+        availableDates.forEach{return (unavailableDates.contains(it))}
+        return false
+    }
     private fun getEventModelFromParcel():EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
     } else
@@ -83,7 +85,11 @@ class DateReportFragment : Fragment() {
         Globals.Utils.formatDate("MM", date).toInt(),
         Globals.Utils.formatDate("dd", date).toInt()
     )
-
+    private fun GetUnavailableDatesAsDays():MutableList<Int> {
+        val retList = mutableListOf<Int>()
+        unavailableDatesParent.forEach{retList.add(it.dayOfMonth) }
+        return retList
+    }
 
     /**
      * Turns a Long into a java LocalDate and returns it
