@@ -3,6 +3,7 @@ package whenweekly.frontend.activities
 import androidx.appcompat.R.anim.*
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
@@ -23,14 +24,15 @@ import whenweekly.frontend.fragments.EventJoinFragment
 
 open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var toggle : ActionBarDrawerToggle
-    lateinit var toolbar: Toolbar
-
-    private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var container : FrameLayout
 
     private var currFragment: Fragment? = Globals.Utils.startFragment
     private val fragmentManager: FragmentManager = supportFragmentManager
+
+    lateinit var toolbar: Toolbar
+    lateinit var drawerLayout: DrawerLayout
+
 
 
     override fun setContentView(view: View?) {
@@ -44,7 +46,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         drawerLayout.addDrawerListener(toggle)
 
 
-        toolbar.setNavigationIconColor(resources.getColor(R.color.white))
+        toolbar.setNavigationIconColor(resources.getColor(R.color.white, theme))
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -72,8 +74,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         }
 
         loadFragment(componentClass)
-
-        overridePendingTransition(abc_fade_in, abc_fade_out)
+        drawerLayout.closeDrawers()
 
         return false
     }

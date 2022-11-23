@@ -2,22 +2,20 @@ package whenweekly.frontend.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.serialization.Serializable
 import whenweekly.frontend.app.Globals
-import java.util.*
 
 /**
  * The data model for a single event using parcelables to "send" information to a receiver that can use that data to put into their layout XML
  */
+@Serializable
 data class EventModel(
     var eventName: String,
     var startDate: Long,
     var endDate: Long,
-    var invCode: String
+    var invCode: String,
+    var ownerId:Int? = Globals.Lib.LocalID
 ) : Parcelable {
-    var creatorInit:String? = null
-    init {
-        creatorInit = Globals.Lib.userId
-    }
 
     /**
      * Constructor for the parcels that sets values for the EventModel parcel
@@ -29,6 +27,7 @@ data class EventModel(
         parcel.readLong(),
         parcel.readLong(),
         parcel.readString().toString(),
+        parcel.readInt(),
     )
 
     /**
@@ -42,6 +41,7 @@ data class EventModel(
         parcel.writeLong(startDate)
         parcel.writeLong(endDate)
         parcel.writeString(invCode)
+        parcel.writeInt(ownerId!!)
     }
 
     /**

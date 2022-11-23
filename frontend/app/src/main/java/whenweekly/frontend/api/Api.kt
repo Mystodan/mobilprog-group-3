@@ -40,7 +40,7 @@ object Api {
                 if (body != null) {
                     setBody(body)
                 }
-                append("UUID", Globals.Lib.userId)
+                append("UUID", Globals.Lib.LocalUUID)
                 append("Content-Type", "application/json")
             }
         }

@@ -11,7 +11,7 @@ import whenweekly.frontend.databinding.ActivityFragmentHolderBinding
 
 class FragmentHolderActivity : DrawerBaseActivity() {
     private lateinit var binding : ActivityFragmentHolderBinding
-
+    protected var eventOpen = false
     /**
      *
      */
@@ -20,7 +20,7 @@ class FragmentHolderActivity : DrawerBaseActivity() {
         binding = ActivityFragmentHolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setDefaultFragment(Globals.Utils.startFragment, savedInstanceState)
-        if (Globals.Lib.userId.isEmpty()) {
+        if (Globals.Lib.LocalUUID.isEmpty()) {
             startActivity(Intent(this, RegisterActivity::class.java))
             finish()
         }

@@ -11,5 +11,6 @@ class ApplicationMain : Application(){
     override fun onCreate() {
         super.onCreate()
         println(LocalUserModel(applicationContext).getUUID())
+        println(LocalUserModel(applicationContext).getID())
     }
 }

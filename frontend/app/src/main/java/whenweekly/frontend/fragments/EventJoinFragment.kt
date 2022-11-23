@@ -12,6 +12,7 @@ import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
 
 import whenweekly.frontend.databinding.FragmentEventJoinBinding
+import whenweekly.frontend.models.EventModel
 import java.time.ZoneOffset
 
 class EventJoinFragment : Fragment() {
@@ -41,10 +42,14 @@ class EventJoinFragment : Fragment() {
         lifecycleScope.launch {
             val (event, error) = Api.joinEvent(inviteCode)
             if (event != null) {
-                Globals.Lib.Events.add(Globals.Utils.createEvent(
+                Globals.Lib.Events.add(EventModel(
                     event.event.name,
                     event.event.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
-                    event.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000, event.event.inviteCode))
+                    event.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000,
+                    event.event.inviteCode,
+                    event.event.owner.id)
+                )
+                println("${event.event.owner.id} == ${Globals.Lib.LocalID}")
                 Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
             } else if (error != null) {
                 Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
