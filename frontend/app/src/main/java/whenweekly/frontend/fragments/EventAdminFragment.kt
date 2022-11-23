@@ -10,13 +10,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.launch
 import whenweekly.frontend.adapters.UserAdapter
 import whenweekly.frontend.api.Api
-import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.FragmentEventDeleteUsersBinding
 import whenweekly.frontend.models.UserModel
-import java.time.ZoneOffset
 
 
-class EventKickUsersFragment : Fragment() {
+class EventAdminFragment : Fragment() {
     private var userList = mutableListOf<UserModel>()       // List of users
 
     private var _binding : FragmentEventDeleteUsersBinding? = null

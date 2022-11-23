@@ -1,5 +1,6 @@
 package whenweekly.frontend.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import whenweekly.frontend.app.Globals
 
 import whenweekly.frontend.databinding.FragmentEventDatesBinding
+import whenweekly.frontend.models.EventModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -19,20 +21,13 @@ import java.time.temporal.ChronoUnit
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-private const val ARG_PARAM3 = "param3"
-private const val ARG_PARAM4 = "param4"
 
-class EventDatesFragment : Fragment() {
+class DateReportFragment : Fragment() {
     private var _binding : FragmentEventDatesBinding? = null
     private val binding get() = _binding!!
     private var datesStart: List<Int> ? = null
     private var datesEnd: List<Int> ? = null
-    private var fragmentEventName: String? = null
-    private var fragmentStartDate: Long? = null
-    private var fragmentEndDate: Long? = null
-    private var fragmentInvCode: String? = null
+
 
     /**
      *
@@ -41,15 +36,11 @@ class EventDatesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {  // Inflate the layout for this fragment
-        arguments?.let {
-            fragmentEventName = it.getString(ARG_PARAM1)
-            fragmentStartDate = it.getLong(ARG_PARAM2)
-            fragmentEndDate = it.getLong(ARG_PARAM3)
-            fragmentInvCode = it.getString(ARG_PARAM4)
-        }
+       var eventInformation = getEventModelFromParcel()
 
-        datesStart = timeAsInt(fragmentStartDate!!)
-        datesEnd = timeAsInt(fragmentEndDate!!)
+
+        datesStart = timeAsInt(eventInformation?.startDate!!)
+        datesEnd = timeAsInt(eventInformation?.endDate!!)
 
         _binding = FragmentEventDatesBinding.inflate(inflater, container, false)
 
@@ -60,18 +51,14 @@ class EventDatesFragment : Fragment() {
             .setCalendarDisplayMode(CalendarMode.MONTHS)
             .commit()
 
-        binding.btnSelectDate.setOnClickListener {
-            toggleCalendar(binding.calendarView.visibility)
-        }
 
         binding.btnReportDate.setOnClickListener {
-            val allDates = allDates(toLocalDate(fragmentStartDate!!), toLocalDate(fragmentEndDate!!))
+            val allDates = allDates(toLocalDate(eventInformation.startDate!!), toLocalDate(eventInformation.startDate!!))
             println("All dates: $allDates")
 
             val (availableDates, unavailableDates) = calculateAvailableDates(allDates)
             if(unavailableDates.isNotEmpty()) {
                 Toast.makeText(context, "Dates reported successfully!", Toast.LENGTH_SHORT).show()
-                toggleCalendar(binding.calendarView.visibility)
             } else Toast.makeText(context, "Please select dates first!", Toast.LENGTH_SHORT).show()
             println("Unavailable dates: $unavailableDates")
             println("Available dates: $availableDates")
@@ -79,6 +66,11 @@ class EventDatesFragment : Fragment() {
 
         return binding.root
     }
+
+    private fun getEventModelFromParcel():EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
+    } else
+        arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
 
     /**
      * Takes a Long and returns a list of the year, moth and day of that Long
@@ -92,19 +84,6 @@ class EventDatesFragment : Fragment() {
         Globals.Utils.formatDate("dd", date).toInt()
     )
 
-    /**
-     * Changes the visibility of the calendar on and off
-     *
-     * @param visibility    - The visibility of the calendar
-     * @return              - Returns nothing, cancels the function
-     */
-    private fun toggleCalendar(visibility: Int) {
-        if(visibility == View.INVISIBLE) {
-            binding.calendarView.visibility = View.VISIBLE
-            return
-        }
-        binding.calendarView.visibility = View.INVISIBLE
-    }
 
     /**
      * Turns a Long into a java LocalDate and returns it
@@ -146,16 +125,4 @@ class EventDatesFragment : Fragment() {
         return Pair(availableDates, unavailableDates)
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: Long, param3: Long, param4: String) =
-            EventDatesFragment().apply {
-                arguments = Bundle().apply {
-                    putString("eventName", param1)
-                    putLong("eventStart", param2)
-                    putLong("eventEnd", param3)
-                    putString("invCode", param4)
-                }
-            }
-    }
 }

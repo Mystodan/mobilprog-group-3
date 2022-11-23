@@ -64,31 +64,31 @@ class EventActivity : DrawerBaseActivity() {
     /**
      * Intent used to receive data from a parcelable and set the content inside the layout XML to the data received
      */
-    private fun getParcelableFromIntent():EventModel? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    private fun getParcelableFromIntent():EventModel? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
         } else {
             intent.getParcelableExtra(Globals.Constants.LABEL_PARCEL_INFO)
         }
-    }
+
 
     @SuppressLint("ResourceAsColor")
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun manageOwnerState(model:EventModel){
         binding.dateManage.setOnClickListener {
             buttonPanel = ButtonPanel.DatesSelect
-            changePanelView(buttonPanel)
+            changePanelView(buttonPanel, model)
         }
         binding.dateView.setOnClickListener {
             buttonPanel = ButtonPanel.DatesAll
-            changePanelView(buttonPanel)
+            changePanelView(buttonPanel, model)
         }
 
         if(model.ownerId != Globals.Lib.LocalID) return
         isOwner = true
             binding.Admin.setOnClickListener {
                 buttonPanel = ButtonPanel.Admin
-                changePanelView(buttonPanel)
+                changePanelView(buttonPanel, model)
             }
     }
 
@@ -111,15 +111,16 @@ class EventActivity : DrawerBaseActivity() {
         toolbar.setNavigationOnClickListener{ finish() }
     }
 
-    private fun changePanelView(menuItem: ButtonPanel){
+    private fun changePanelView(menuItem: ButtonPanel, parcel: EventModel){
         val componentClass: Class<*> = when(menuItem){
-            ButtonPanel.Admin -> EventKickUsersFragment::class.java
-            ButtonPanel.DatesAll -> EventShowAvailableDatesFragment::class.java
-            else -> EventDatesFragment::class.java
+            ButtonPanel.Admin -> EventAdminFragment::class.java
+            ButtonPanel.DatesAll -> DateViewAllFragment::class.java
+            else -> DateReportFragment::class.java
         }
-        loadFragment(componentClass)
+
+        loadFragment(componentClass, parcel)
     }
-    private fun loadFragment(fragmentClass:Class<*>?) {
+    private fun loadFragment(fragmentClass:Class<*>?, parcel: EventModel) {
         var fragment: Fragment? = null
         try {
             fragment = fragmentClass?.newInstance() as Fragment
@@ -128,6 +129,9 @@ class EventActivity : DrawerBaseActivity() {
         }
 
         if (fragment != null && currFragment != fragment) {
+            val eventBundle = Bundle()
+            eventBundle.putParcelable(Globals.Constants.LABEL_PARCEL_INFO,parcel)
+            fragment.arguments = eventBundle
             fragmentManager.beginTransaction().replace(R.id.fragmentHolder, fragment).commit()
             currFragment = fragment
         }
