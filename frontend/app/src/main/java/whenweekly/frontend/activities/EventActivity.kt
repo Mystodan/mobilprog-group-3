@@ -13,9 +13,7 @@ import androidx.fragment.app.FragmentManager
 import whenweekly.frontend.R
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.ActivityEventBinding
-import whenweekly.frontend.fragments.EventCreateActivity
-import whenweekly.frontend.fragments.EventJoinFragment
-import whenweekly.frontend.fragments.EventListFragment
+import whenweekly.frontend.fragments.*
 import whenweekly.frontend.models.EventModel
 
 class EventActivity : DrawerBaseActivity() {
@@ -115,9 +113,9 @@ class EventActivity : DrawerBaseActivity() {
 
     private fun changePanelView(menuItem: ButtonPanel){
         val componentClass: Class<*> = when(menuItem){
-            ButtonPanel.Admin -> EventJoinFragment::class.java
-            ButtonPanel.DatesAll -> EventCreateActivity::class.java
-            else -> EventListFragment::class.java
+            ButtonPanel.Admin -> EventKickUsersFragment::class.java
+            ButtonPanel.DatesAll -> EventShowAvailableDatesFragment::class.java
+            else -> EventDatesFragment::class.java
         }
         loadFragment(componentClass)
     }
