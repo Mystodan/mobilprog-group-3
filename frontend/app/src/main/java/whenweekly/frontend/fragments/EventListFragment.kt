@@ -48,20 +48,25 @@ class EventListFragment : Fragment() {
 
         adapter.updateData(Globals.Lib.Events)
         lifecycleScope.launch{
-            val events = Api.getEvents()
-            var syncEventList = mutableListOf<EventModel>()
-            syncEventList.addAll(events.map {
-                EventModel(
-                    it.event.name,
-                    it.event.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
-                    it.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000,
-                    it.event.inviteCode,
-                    it.event.id,
-                    it.event.owner.id,
-                )
-            })
-            Globals.Lib.Events = syncEventList
-            adapter.updateData(Globals.Lib.Events)
+            val eventsResponse = Api.getEvents()
+            if (eventsResponse.data != null){
+                val syncEventList = mutableListOf<EventModel>()
+                syncEventList.addAll(eventsResponse.data.map {
+                    EventModel(
+                        it.event.name,
+                        it.event.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
+                        it.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000,
+                        it.event.inviteCode,
+                        it.event.id,
+                        it.event.owner.id,
+                    )
+                })
+                Globals.Lib.Events = syncEventList
+                adapter.updateData(Globals.Lib.Events)
+            }
+            else{
+                // TODO: Handle error
+            }
         }
 
         return binding.root

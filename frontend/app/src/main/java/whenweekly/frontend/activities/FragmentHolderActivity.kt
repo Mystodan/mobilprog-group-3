@@ -7,11 +7,14 @@ import android.provider.Settings.Global
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import io.ktor.http.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import whenweekly.frontend.R
+import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.ActivityFragmentHolderBinding
+import whenweekly.frontend.models.LocalUserModel
 
 
 class FragmentHolderActivity : DrawerBaseActivity() {
@@ -28,6 +31,22 @@ class FragmentHolderActivity : DrawerBaseActivity() {
         if (Globals.Lib.localUUID.isEmpty()) {
             startActivity(Intent(this, RegisterActivity::class.java))
             finish()
+        } else {
+            lifecycleScope.launch {
+                val userResponse = Api.getUser()
+                if (userResponse.data != null) {
+                    Globals.Lib.CurrentUser = userResponse.data
+                    Globals.Lib.localUUID = userResponse.data.uuidToString()
+                }
+                else if (userResponse.status == HttpStatusCode.NotFound){
+                    println("User not found, database probably reset. Registering new user")
+                    startActivity(Intent(this@FragmentHolderActivity, RegisterActivity::class.java))
+                    finish()
+                }
+                else {
+                    println("Error getting user: " + userResponse.message + " " + userResponse.status)
+                }
+            }
         }
 
     }

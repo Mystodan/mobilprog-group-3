@@ -33,6 +33,19 @@ object Api {
             }
         }
     }
+    data class ApiResponse<T>(val data: T, val status: HttpStatusCode, val message: String)
+
+    private fun <T> exceptionResponse(e: Exception): ApiResponse<T?> {
+        return ApiResponse(null, HttpStatusCode.UnprocessableEntity, e.message ?: "Unknown error")
+    }
+
+    private suspend inline fun <reified T> response(response: HttpResponse, expectedStatusCode: HttpStatusCode): ApiResponse<T?> {
+        return if (response.status == expectedStatusCode) {
+            ApiResponse(response.body(), response.status, "")
+        } else {
+            ApiResponse(null, response.status, response.bodyAsText())
+        }
+    }
 
     private val objectMapper = ObjectMapper().apply {
         registerModule(JavaTimeModule().apply {
@@ -51,27 +64,40 @@ object Api {
                     setBody(body)
                 }
                 append("Content-Type", "application/json")
-                if (Globals.Lib.localUUID.isEmpty())
+                if (Globals.Lib.localUUID.isNotEmpty())
                     append("UUID", Globals.Lib.localUUID)
             }
         }
         return response
     }
 
-    suspend fun getEvents(): List<EventWithUsers> {
+    suspend fun getEvents(): ApiResponse<List<EventWithUsers>?> {
         return try {
             val response = doRequest(
                 HttpMethod.Get,
                 HttpRoutes.EVENTS
             )
-            response.body()
+            response(response, HttpStatusCode.OK)
         } catch (e: Exception) {
             println(e)
-            emptyList()
+            exceptionResponse(e)
         }
     }
 
-    suspend fun addUser(name:String): User? {
+    suspend fun getUser(): ApiResponse<User?> {
+        return try {
+            val response = doRequest(
+                HttpMethod.Get,
+                "${HttpRoutes.USERS}/me"
+            )
+            response(response, HttpStatusCode.OK)
+        } catch (e: Exception) {
+            println(e)
+            exceptionResponse(e)
+        }
+    }
+
+    suspend fun addUser(name:String): ApiResponse<User?> {
         return try {
             val response = doRequest(
                 HttpMethod.Post,
@@ -82,15 +108,11 @@ object Api {
                     }
                     """.trimIndent()
             )
-            if (response.status == HttpStatusCode.Created) {
-                response.body()
-            } else{
-                println(response.bodyAsText())
-                null
-            }
+
+            response(response, HttpStatusCode.Created)
         } catch (e: Exception) {
             println(e)
-            null
+            exceptionResponse(e)
         }
     }
 
@@ -99,7 +121,7 @@ object Api {
         description: String,
         startDate: LocalDateTime,
         endDate: LocalDateTime
-    ): EventWithUsers? {
+    ): ApiResponse<EventWithUsers?> {
         return try {
             val response = doRequest(
                 HttpMethod.Post,
@@ -113,15 +135,15 @@ object Api {
                     }
                     """.trimIndent()
             )
-            println(response.bodyAsText())
-            response.body()
+
+            response(response, HttpStatusCode.Created)
         } catch (e: Exception) {
             println(e)
-            null
+            exceptionResponse(e)
         }
     }
 
-    suspend fun joinEvent(inviteCode: String): Pair<EventWithUsers?, String?> {
+    suspend fun joinEvent(inviteCode: String): ApiResponse<EventWithUsers?> {
         return try {
             val response = doRequest(
                 HttpMethod.Put,
@@ -132,19 +154,14 @@ object Api {
                     }
                     """.trimIndent()
             )
-            println(response.bodyAsText())
-            if (response.status == HttpStatusCode.OK) {
-                Pair(response.body(), null)
-            } else {
-                Pair(null, response.bodyAsText())
-            }
+            response(response, HttpStatusCode.Created)
         } catch (e: Exception) {
             println(e)
-            Pair(null, e.message)
+            exceptionResponse(e)
         }
     }
 
-    suspend fun kickUserFromEvent(eventId: Int, userId: Int): Boolean {
+    suspend fun kickUserFromEvent(eventId: Int, userId: Int): ApiResponse<Boolean> {
         return try {
             val response = doRequest(
                 HttpMethod.Put,
@@ -155,11 +172,10 @@ object Api {
                     }
                     """.trimIndent()
             )
-            println(response.bodyAsText())
-            response.status == HttpStatusCode.OK
+            ApiResponse(response.status == HttpStatusCode.OK, response.status, "")
         } catch (e: Exception) {
             println(e)
-            false
+            ApiResponse(false, HttpStatusCode.UnprocessableEntity, e.message ?: "Unknown error")
         }
     }
 
@@ -177,20 +193,20 @@ object Api {
         }
     }
 
-    suspend fun getAvailableDates(eventId: Int): List<LocalDateTime> {
+    suspend fun getAvailableDates(eventId: Int): ApiResponse<List<LocalDateTime>?> {
         return try {
             val response = doRequest(
                 HttpMethod.Get,
                 "${HttpRoutes.EVENTS}/$eventId/available-dates"
             )
-            response.body()
+            response(response, HttpStatusCode.OK)
         } catch (e: Exception) {
             println(e)
-            emptyList()
+            exceptionResponse(e)
         }
     }
 
-    suspend fun updateAvailableDates(eventId: Int, dates: List<LocalDateTime>): Boolean {
+    suspend fun updateAvailableDates(eventId: Int, dates: List<LocalDateTime>): ApiResponse<Boolean> {
         return try {
             val response = doRequest(
                 HttpMethod.Patch,
@@ -201,10 +217,10 @@ object Api {
                 }
             """.trimIndent()
             )
-            response.status == HttpStatusCode.OK
+            ApiResponse(response.status == HttpStatusCode.OK, response.status, "")
         } catch (e: Exception) {
             println(e)
-            false
+            ApiResponse(false, HttpStatusCode.UnprocessableEntity, e.message ?: "Unknown error")
         }
     }
 }

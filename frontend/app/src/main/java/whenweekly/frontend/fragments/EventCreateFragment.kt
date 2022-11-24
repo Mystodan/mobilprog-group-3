@@ -82,9 +82,10 @@ class EventCreateActivity : Fragment() {
         LocalDateTime.ofEpochSecond(startDate, 0, ZoneOffset.UTC)
         lifecycleScope.launch {
             val eventName = binding.etEventName.text.toString()
-            val newEvent = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
+            val newEventResponse = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
             var localEvent : EventModel?=null
-            if(newEvent != null ) {
+            if(newEventResponse.data != null ) {
+                val newEvent = newEventResponse.data
                 localEvent = EventModel(eventName, startDate, endDate, newEvent.event.inviteCode,newEvent.event.id)
                 Globals.Lib.Events.add(localEvent)
                 println(Globals.Lib.CurrentUser?.id)

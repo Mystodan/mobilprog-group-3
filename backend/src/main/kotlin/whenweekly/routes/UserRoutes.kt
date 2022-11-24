@@ -18,6 +18,7 @@ fun Route.userRouting() {
     val eventRepository: EventRepository = EventDBRepository()
     route(USERS_ROUTE) {
         addUser(userRepository)
+        getUser(userRepository)
         dev {
             getUsers(userRepository)
             getUserById(userRepository)
@@ -32,6 +33,32 @@ fun Route.getUsers(repository: UserRepository) {
         call.respond(
             HttpStatusCode.OK,
             users
+        )
+    }
+}
+
+fun Route.getUser(repository: UserRepository) {
+    get("/me") {
+        val userId = Shared.getUserId(call.request, repository)
+        if (userId == null) {
+            call.respond(
+                HttpStatusCode.NotFound,
+                "UUID not found"
+            )
+            return@get
+        }
+
+        val user = repository.getUserById(userId)
+        if (user == null) {
+            call.respond(
+                HttpStatusCode.NotFound,
+                "User not found"
+            )
+            return@get
+        }
+        call.respond(
+            HttpStatusCode.OK,
+            user
         )
     }
 }

@@ -73,20 +73,25 @@ class AdminManageUserFragment : Fragment() {
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
 
     private suspend fun deleteUser(eventInformation: EventModel):List<EventWithUsers>{
-        var events = Api.getEvents()
-        binding.btnDelete.setOnClickListener {
-            lifecycleScope.launch {
-                for(event in events){
-                    if(event.event.inviteCode != eventInformation!!.invCode) continue
-                    for (user in userList){
-                        if(!user.checked) continue
-                        Api.kickUserFromEvent(event.event.id, user.id)
-                        userList.remove(user)
-                        adapter.updateData(userList)
+        val eventsResponse = Api.getEvents()
+        if (eventsResponse.data != null) {
+            binding.btnDelete.setOnClickListener {
+                lifecycleScope.launch {
+                    for(event in eventsResponse.data){
+                        if(event.event.inviteCode != eventInformation!!.invCode) continue
+                        for (user in userList){
+                            if(!user.checked) continue
+                            Api.kickUserFromEvent(event.event.id, user.id)
+                            userList.remove(user)
+                            adapter.updateData(userList)
+                        }
                     }
                 }
             }
+            return eventsResponse.data
         }
-        return events
+        else{
+            return emptyList()
+        }
     }
 }
