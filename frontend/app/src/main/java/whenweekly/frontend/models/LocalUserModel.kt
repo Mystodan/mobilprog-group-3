@@ -37,5 +37,6 @@ class LocalUserModel(private val context : Context) {
     fun setUser(user: User) {
         securePref.edit().putString(uuidKey, user.uuidToString()).apply()
         Globals.Lib.CurrentUser = user
+        Globals.Lib.localUUID = user.uuidToString()
     }
 }
