@@ -14,9 +14,9 @@ People that need help with organizing social events in a clean and orderly(?) fa
 
 ## Usage
 #### Prerequisites:
-0.1: You have Android Studio installed with a working emulator.
-0.2: You have IntelliJ IDEA installed.
-0.3. You have XAMPP installed.
+#0.1: You have Android Studio installed with a working emulator.
+#0.2: You have IntelliJ IDEA installed.
+#0.3. You have XAMPP installed.
 
 1. Make a new folder and clone the project with the command "https://git.gvk.idi.ntnu.no/Daniehhu/mobile-programming-group-3.git"
 2. Open XAMPP and start Apache and MySQL
