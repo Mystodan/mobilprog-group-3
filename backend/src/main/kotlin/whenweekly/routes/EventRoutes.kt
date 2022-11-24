@@ -13,7 +13,7 @@ import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
 import whenweekly.plugins.dev
 import whenweekly.routes.Constants.EVENTS_ROUTE
-import java.time.LocalDate
+import java.time.LocalDateTime
 import whenweekly.routes.UserKickRequest as UserKickRequest1
 
 data class EventWithUsers(
@@ -27,6 +27,10 @@ interface EventJoinRequest : org.ktorm.entity.Entity<EventJoinRequest> {
 
 interface UserKickRequest : org.ktorm.entity.Entity<UserKickRequest1> {
     var user_id: Int?
+}
+
+interface AvailableDatesRequest : org.ktorm.entity.Entity<AvailableDatesRequest> {
+    var available_dates: List<LocalDateTime>?
 }
 
 // TODO: move logic to repositories.
@@ -44,6 +48,7 @@ fun Route.eventRouting() {
         removeUserFromEvent(repository, userRepository)
         deleteEvent(repository, userRepository)
         getAvailableDatesByEventId(repository, userRepository)
+        updateAvailableDatesByEventId(repository, userRepository)
     }
 }
 
@@ -229,20 +234,73 @@ fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepo
 }
 
 fun Route.getAvailableDatesByEventId(repository: EventRepository, userRepository: UserRepository) {
-    get("{eventId}/availableDates"){
+    get("{eventId}/available-dates"){
         val eventId = call.parameters["eventId"]?.toInt() ?: 0
 
-        val availableDates = repository.getAvailableDatesByEventId(eventId)
-        val eventsWithUsers = mutableListOf<EventWithUsers>()
-
-        val event = repository.getEventById(eventId)
-        for (availableDates in availableDates) {
-            eventsWithUsers.add(getEventWithUsers(event!!, userRepository))
+        val userId = Shared.getUserId(call.request, userRepository)
+        if (userId == null) {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid UUID")
+            return@get
         }
+
+        userRepository.getUsersByEventId(eventId).all{
+            it.id != userId
+        }.let {
+            if (it) {
+                call.respond(HttpStatusCode.Unauthorized, "You are not in this event")
+                return@get
+            }
+        }
+
+        val availableDates = repository.getAvailableDatesByEventId(eventId)
 
         call.respond(
             HttpStatusCode.OK,
-            eventsWithUsers
+            availableDates
         )
+    }
+}
+
+fun Route.updateAvailableDatesByEventId(repository: EventRepository, userRepository: UserRepository) {
+    patch("{eventId}/available-dates"){
+        val eventId = call.parameters["eventId"]?.toInt() ?: 0
+
+        val userId = Shared.getUserId(call.request, userRepository)
+        if (userId == null) {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid UUID")
+            return@patch
+        }
+
+        val event = repository.getEventById(eventId)
+        if (event == null) {
+            call.respond(HttpStatusCode.NotFound, "Event with id $eventId not found")
+            return@patch
+        }
+
+        if (event.owner!!.id != userId) {
+            call.respond(HttpStatusCode.Unauthorized, "You are not the owner of this event")
+            return@patch
+        }
+
+        val availableDates = call.receive<AvailableDatesRequest>()
+
+        // Check that dates are in range of event
+        val eventStart = event.start_date
+        val eventEnd = event.end_date
+        availableDates.available_dates!!.all {
+            it.isAfter(eventStart) && it.isBefore(eventEnd)
+        }.let {
+            if (!it) {
+                call.respond(HttpStatusCode.BadRequest, "Dates must be in range of event")
+                return@patch
+            }
+        }
+
+        val success = repository.updateAvailableDates(eventId, userId, availableDates.available_dates!!)
+        if (success) {
+            call.respond(HttpStatusCode.OK, "Available dates for event with id $eventId has been updated")
+        } else {
+            call.respond(HttpStatusCode.NotFound, "Event with id $eventId not found")
+        }
     }
 }

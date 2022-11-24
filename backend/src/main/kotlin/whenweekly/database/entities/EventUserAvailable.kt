@@ -6,5 +6,5 @@ import java.time.LocalDateTime
 interface EventUserAvailable : Entity<EventUserAvailable> {
     val event: Event
     val user: User
-    val time: LocalDateTime
+    val available_dates: String
 }

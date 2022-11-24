@@ -2,10 +2,10 @@ package whenweekly.database.repository
 
 import whenweekly.database.DatabaseManagerImpl
 import whenweekly.database.entities.Event
-import whenweekly.database.entities.EventUserAvailable
 import whenweekly.database.entities.User
 import whenweekly.domain.manager.DatabaseManager
 import whenweekly.domain.repository.EventRepository
+import java.time.LocalDateTime
 import java.util.*
 
 // TODO: move somewhere else
@@ -28,7 +28,7 @@ class EventDBRepository : EventRepository {
         val newEvent = database.addEvent(event)
         if (newEvent != null) {
             // Add owner to event
-            database.addUserToEvent(newEvent.id, owner.id)
+            addUserToEvent(newEvent.id, owner.id)
 
             // Get full owner info
             database.getUserById(owner.id)?.let {
@@ -51,6 +51,10 @@ class EventDBRepository : EventRepository {
     }
 
     override fun addUserToEvent(eventId: Int, userId: Int): Boolean {
+        // Add (empty) available dates for user
+        if (!database.addAvailableDates(eventId, userId)) {
+            return false
+        }
         return database.addUserToEvent(eventId, userId)
     }
 
@@ -63,10 +67,17 @@ class EventDBRepository : EventRepository {
     }
 
     override fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean {
+        if (!database.removeAvailableDates(eventId, kickedUserID)) {
+            return false
+        }
         return database.removeUserFromEvent(eventId, kickedUserID)
     }
 
-    override fun getAvailableDatesByEventId(eventId: Int): List<EventUserAvailable> {
+    override fun getAvailableDatesByEventId(eventId: Int): List<LocalDateTime> {
         return database.getAvailableDatesByEventId(eventId)
+    }
+
+    override fun updateAvailableDates(eventId: Int, userId: Int, dates: List<LocalDateTime>): Boolean{
+       return database.updateAvailableDates(eventId, userId, dates)
     }
 }

@@ -3,6 +3,7 @@ package whenweekly.domain.manager
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.EventUserAvailable
 import whenweekly.database.entities.User
+import java.time.LocalDateTime
 
 interface DatabaseManager {
     fun addUser(user: User): User?
@@ -30,5 +31,8 @@ interface DatabaseManager {
 
     fun resetDatabase()
 
-    fun getAvailableDatesByEventId(eventId: Int): List<EventUserAvailable>
+    fun getAvailableDatesByEventId(eventId: Int): List<LocalDateTime>
+    fun addAvailableDates(eventId: Int, userId: Int): Boolean
+    fun updateAvailableDates(eventId: Int, userId: Int, dates: List<LocalDateTime>): Boolean
+    fun removeAvailableDates(eventId: Int, userId: Int): Boolean
 }
