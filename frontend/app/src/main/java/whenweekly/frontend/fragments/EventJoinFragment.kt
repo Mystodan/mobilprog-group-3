@@ -42,15 +42,16 @@ class EventJoinFragment : Fragment() {
         lifecycleScope.launch {
             val (event, error) = Api.joinEvent(inviteCode)
             if (event != null) {
-                Globals.Lib.Events.add(EventModel(
+                val localEvent = EventModel(
                     event.event.name,
                     event.event.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
                     event.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000,
                     event.event.inviteCode,
                     event.event.owner.id)
-                )
+                Globals.Lib.Events.add(localEvent)
                 println("${event.event.owner.id} == ${Globals.Lib.LocalID}")
                 Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
+                Globals.Utils.changeActivity(localEvent, requireActivity(), requireContext())
             } else if (error != null) {
                 Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
             } else {

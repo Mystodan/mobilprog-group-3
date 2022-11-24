@@ -1,7 +1,12 @@
 package whenweekly.frontend.app
 
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.ContextCompat.startActivity
+import androidx.fragment.app.FragmentActivity
 import whenweekly.frontend.fragments.EventListFragment
 import whenweekly.frontend.R
+import whenweekly.frontend.activities.EventActivity
 import whenweekly.frontend.models.EventModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,10 +32,18 @@ class Globals {
 
     }
     object Utils{
+        val startFragment = EventListFragment()
         fun formatDate(format:String, date:Long): String = SimpleDateFormat(format,Locale.ROOT)
             .format(Date(date))
-        val startFragment = EventListFragment()
 
+        /**
+         *
+         */
+        fun changeActivity(input: EventModel, activity : FragmentActivity, context: Context) {
+            val intent = Intent(activity, EventActivity::class.java)
+            intent.putExtra(Globals.Constants.LABEL_PARCEL_INFO, input)
+            startActivity(context,intent,null)
+        }
     }
 
 

@@ -1,5 +1,6 @@
 package whenweekly.frontend.fragments
 
+import android.media.metrics.Event
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -82,16 +83,18 @@ class EventCreateActivity : Fragment() {
         lifecycleScope.launch {
             val eventName = binding.etEventName.text.toString()
             val newEvent = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
+            var localEvent : EventModel?=null
             if(newEvent != null ) {
-                Globals.Lib.Events.add(EventModel(
-                    eventName, startDate, endDate, newEvent.event.inviteCode
-                ))
+                localEvent = EventModel(eventName, startDate, endDate, newEvent.event.inviteCode,newEvent.event.id)
+                Globals.Lib.Events.add(localEvent)
                 println(Globals.Lib.LocalID)
                 Toast.makeText(activity, "Event created!", Toast.LENGTH_SHORT).show()
+                Globals.Utils.changeActivity(localEvent, requireActivity(), requireContext())
             } else {
                 Toast.makeText(activity, "Error creating event!", Toast.LENGTH_SHORT).show()
             }
             resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
+
         }
     }
 

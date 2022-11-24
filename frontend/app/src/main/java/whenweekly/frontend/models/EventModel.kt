@@ -14,7 +14,8 @@ data class EventModel(
     var startDate: Long,
     var endDate: Long,
     var invCode: String,
-    var ownerId:Int? = Globals.Lib.LocalID
+    var eventId:Int,
+    var ownerId:Int? = Globals.Lib.LocalID,
 ) : Parcelable {
 
     /**
@@ -27,6 +28,7 @@ data class EventModel(
         parcel.readLong(),
         parcel.readLong(),
         parcel.readString().toString(),
+        parcel.readInt(),
         parcel.readInt(),
     )
 
@@ -41,6 +43,7 @@ data class EventModel(
         parcel.writeLong(startDate)
         parcel.writeLong(endDate)
         parcel.writeString(invCode)
+        parcel.writeInt(eventId)
         parcel.writeInt(ownerId!!)
     }
 

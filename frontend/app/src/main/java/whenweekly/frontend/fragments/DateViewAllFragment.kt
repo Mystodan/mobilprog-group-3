@@ -28,7 +28,7 @@ class DateViewAllFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_event_show_available_dates, container, false)
+        return inflater.inflate(R.layout.fragment_date_view_all, container, false)
     }
 
 }

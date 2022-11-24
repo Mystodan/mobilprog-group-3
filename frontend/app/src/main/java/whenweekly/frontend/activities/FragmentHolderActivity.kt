@@ -19,23 +19,31 @@ class FragmentHolderActivity : DrawerBaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityFragmentHolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setDefaultFragment(Globals.Utils.startFragment, savedInstanceState)
+        setDefaultFragment(Globals.Utils.startFragment, savedInstanceState, R.id.flContent)
         if (Globals.Lib.LocalUUID.isEmpty()) {
             startActivity(Intent(this, RegisterActivity::class.java))
             finish()
         }
+
     }
 
-    /**
-     *
-     */
-    private fun setDefaultFragment(target:Fragment, state: Bundle?){
-        if (state == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.flContent, target)
-                .commit()
-        }
-    }
+
+
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

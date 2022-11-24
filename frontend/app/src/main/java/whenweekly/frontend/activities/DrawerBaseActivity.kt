@@ -108,4 +108,15 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
         if (supportActionBar == null) return
         supportActionBar!!.title = title
     }
+    /**
+     *
+     */
+    protected fun setDefaultFragment(target:Fragment, state: Bundle?, view: Int){
+        if (state == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(view, target)
+                .commit()
+        }
+    }
 }

@@ -28,9 +28,8 @@ class EventActivity : DrawerBaseActivity() {
     private lateinit var clipboard: ClipboardManager
     private var isOwner = false
     private var buttonPanel: ButtonPanel = ButtonPanel.DatesAll
-    private var currFragment: Fragment? = Globals.Utils.startFragment
+    private var currFragment: Fragment = DateViewAllFragment()
     private val fragmentManager: FragmentManager = supportFragmentManager
-
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +49,8 @@ class EventActivity : DrawerBaseActivity() {
         if (!isOwner){
             binding.Admin.visibility = android.view.View.GONE
         }
-
+        // set default fragment
+        loadFragment(currFragment::class.java, eventInformation)
 
         // sets up clipboard manager
         clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -72,8 +72,6 @@ class EventActivity : DrawerBaseActivity() {
         }
 
 
-    @SuppressLint("ResourceAsColor")
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun manageOwnerState(model:EventModel){
         binding.dateManage.setOnClickListener {
             buttonPanel = ButtonPanel.DatesSelect
@@ -86,10 +84,10 @@ class EventActivity : DrawerBaseActivity() {
 
         if(model.ownerId != Globals.Lib.LocalID) return
         isOwner = true
-            binding.Admin.setOnClickListener {
-                buttonPanel = ButtonPanel.Admin
-                changePanelView(buttonPanel, model)
-            }
+        binding.Admin.setOnClickListener {
+            buttonPanel = ButtonPanel.Admin
+            changePanelView(buttonPanel, model)
+        }
     }
 
 
