@@ -1,5 +1,6 @@
 package whenweekly
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.server.routing.*
@@ -139,8 +140,34 @@ class ApplicationTest {
         }
     }
 
-    private suspend fun deleteEvent(client: HttpClient, eventID: Int, userUUID: ByteArray): HttpResponse {
-        return client.delete("$EVENTS_ROUTE/$eventID") {
+    private suspend fun deleteEvent(client: HttpClient, eventId: Int, userUUID: ByteArray): HttpResponse {
+        return client.delete("$EVENTS_ROUTE/$eventId") {
+            contentType(ContentType.Application.Json)
+            headers{
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+
+    private suspend fun updateAvailableDates(client: HttpClient, eventId: Int, dates: List<String>, userUUID: ByteArray): HttpResponse {
+        val body = """
+                {
+                    "available_dates": ${ObjectMapper().writeValueAsString(dates)}
+                }
+            """.trimIndent()
+
+        println(body)
+        return client.patch("$EVENTS_ROUTE/$eventId/available-dates") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            headers{
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+
+    private suspend fun getAvailableDates(client: HttpClient, eventId: Int, userUUID: ByteArray): HttpResponse {
+        return client.get("$EVENTS_ROUTE/$eventId/available-dates") {
             contentType(ContentType.Application.Json)
             headers{
                 append("UUID", userUUID.asUUID().toString())
@@ -476,6 +503,70 @@ class ApplicationTest {
         // Try to delete again
         deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
         assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
+    }
+
+    @Test
+    fun test6AvailableDates() = testApplication {
+        setupTest()
+        val client = getClient()
+
+        val user = UserTest(name = "event owner")
+        val response = createUser(client, user)
+        assertEquals(HttpStatusCode.Created, response.status)
+        val owner = response.body<User>()
+
+        val event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-05T00:00:00"
+        )
+        val eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.Created, eventResponse.status)
+        val eventCreated = eventResponse.body<EventWithUsers>()
+
+        // Make sure we can get the available dates after event creation
+        val availableDatesResponse = getAvailableDates(client, eventCreated.event.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, availableDatesResponse.status)
+
+        val dates = listOf(
+            "2021-01-02T00:00:00",
+            "2021-01-03T00:00:00",
+            "2021-01-04T00:00:00"
+        )
+
+        // Try to update with invalid UUID
+        var updateResponse = updateAvailableDates(client, eventCreated.event.id, dates, ByteArray(16))
+        assertEquals(HttpStatusCode.Unauthorized, updateResponse.status)
+
+        // Try to update with invalid event id
+        updateResponse = updateAvailableDates(client, -1, dates, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, updateResponse.status)
+
+        // Try to update with invalid date
+        updateResponse = updateAvailableDates(client, eventCreated.event.id, listOf("2021-x1-01T00:00:00"), owner.uuid!!)
+        assertEquals(HttpStatusCode.BadRequest, updateResponse.status)
+
+        // Success case
+        updateResponse = updateAvailableDates(client, eventCreated.event.id, dates, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, updateResponse.status)
+
+        // Make sure the dates have been updated
+        val availableDatesResp = getAvailableDates(client, eventCreated.event.id, owner.uuid!!)
+        val availableDates = availableDatesResp.body<List<String>>()
+        assertEquals(3, availableDates.size)
+        // NOTE: Not sure if these are guaranteed to be in order.
+        assertEquals("2021-01-02T00:00:00", availableDates[0])
+        assertEquals("2021-01-03T00:00:00", availableDates[1])
+        assertEquals("2021-01-04T00:00:00", availableDates[2])
+
+        // Try to update with date before event start date
+        updateResponse = updateAvailableDates(client, eventCreated.event.id, listOf("2020-01-01T00:00:00"), owner.uuid!!)
+        assertEquals(HttpStatusCode.BadRequest, updateResponse.status)
+
+        // Try to update with date after event end date
+        updateResponse = updateAvailableDates(client, eventCreated.event.id, listOf("2021-01-06T00:00:00"), owner.uuid!!)
+        assertEquals(HttpStatusCode.BadRequest, updateResponse.status)
     }
 
     private fun resetDatabase() {
