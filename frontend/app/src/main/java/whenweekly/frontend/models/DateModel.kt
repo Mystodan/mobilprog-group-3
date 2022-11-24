@@ -5,14 +5,15 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.RequiresApi
 import whenweekly.frontend.app.Globals
+import java.time.LocalDateTime
 import java.util.*
 
 /**
  * The data model for a single availableDate using parcelables to "send" information to a receiver that can use that data to put into their layout XML
  */
 data class DateModel(
-    var availableDate: String
-) : Parcelable {
+    var availableDate: LocalDateTime
+) /*: Parcelable {
     /**
      * Constructor for the parcels that sets values for the DateModel parcel
      *
@@ -66,4 +67,4 @@ data class DateModel(
     }
 
 
-}
+}*/

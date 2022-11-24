@@ -195,6 +195,7 @@ object Api {
                 }
             """.trimIndent()
             )
+            println(response.bodyAsText())
             response.status == HttpStatusCode.OK
         } catch (e: Exception) {
             println(e)

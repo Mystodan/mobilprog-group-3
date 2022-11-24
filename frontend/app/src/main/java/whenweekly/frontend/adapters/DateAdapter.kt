@@ -7,13 +7,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import whenweekly.frontend.R
 import whenweekly.frontend.models.DateModel
+import java.time.LocalDateTime
 
 /**
  * The adapter for an available date
  *
  * @param dataList  - Takes the availableDateList as a parameter
  */
-class DateAdapter(private var dataList: List<DateModel>): RecyclerView.Adapter<DateAdapter.DateViewHolder>() {
+class DateAdapter(private var dataList: List<LocalDateTime>): RecyclerView.Adapter<DateAdapter.DateViewHolder>() {
     /**
      * The view holder for an available date
      *
@@ -44,7 +45,7 @@ class DateAdapter(private var dataList: List<DateModel>): RecyclerView.Adapter<D
      */
     override fun onBindViewHolder(holder: DateViewHolder, position: Int) {
         val item = dataList[holder.adapterPosition]
-        holder.textView.text = item.availableDate
+        holder.textView.text = item.toString()
     }
 
     /**
@@ -59,7 +60,7 @@ class DateAdapter(private var dataList: List<DateModel>): RecyclerView.Adapter<D
      *
      * @param updatedDataList   - Takes the updated data list passed as a parameter
      */
-    fun updateData(updatedDataList: List<DateModel>) {
+    fun updateData(updatedDataList: List<LocalDateTime>) {
         dataList = updatedDataList
         notifyDataSetChanged()
     }
