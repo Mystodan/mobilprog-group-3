@@ -1,6 +1,7 @@
 package whenweekly.domain.repository
 
 import whenweekly.database.entities.Event
+import whenweekly.database.entities.EventUserAvailable
 import whenweekly.database.entities.User
 
 
@@ -20,4 +21,6 @@ interface EventRepository {
     fun deleteEventByID(eventId: Int): Boolean
 
     fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean
+
+    fun getAvailableDatesByEventId(eventId: Int): List<EventUserAvailable>
 }

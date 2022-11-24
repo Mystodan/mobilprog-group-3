@@ -3,6 +3,7 @@ package whenweekly.database
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import whenweekly.database.entities.Event
+import whenweekly.database.entities.EventUserAvailable
 import whenweekly.database.entities.User
 import whenweekly.database.schemas.EventTable
 import whenweekly.database.schemas.EventUserAvailableTable
@@ -180,6 +181,18 @@ class DatabaseManagerImpl : DatabaseManager {
         } catch (e: Exception) {
             println(e)
             false
+        }
+    }
+
+    override fun getAvailableDatesByEventId(eventId: Int): List<EventUserAvailable> {
+        return try {
+            database.from(EventUserAvailableTable)
+                .select()
+                .where { EventUserAvailableTable.event eq eventId }
+                .map { EventUserAvailableTable.createEntity(it) }
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
         }
     }
 }

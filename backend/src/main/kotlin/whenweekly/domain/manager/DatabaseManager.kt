@@ -1,6 +1,7 @@
 package whenweekly.domain.manager
 
 import whenweekly.database.entities.Event
+import whenweekly.database.entities.EventUserAvailable
 import whenweekly.database.entities.User
 
 interface DatabaseManager {
@@ -29,5 +30,5 @@ interface DatabaseManager {
 
     fun resetDatabase()
 
-
+    fun getAvailableDatesByEventId(eventId: Int): List<EventUserAvailable>
 }

@@ -2,6 +2,7 @@ package whenweekly.database.repository
 
 import whenweekly.database.DatabaseManagerImpl
 import whenweekly.database.entities.Event
+import whenweekly.database.entities.EventUserAvailable
 import whenweekly.database.entities.User
 import whenweekly.domain.manager.DatabaseManager
 import whenweekly.domain.repository.EventRepository
@@ -63,5 +64,9 @@ class EventDBRepository : EventRepository {
 
     override fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean {
         return database.removeUserFromEvent(eventId, kickedUserID)
+    }
+
+    override fun getAvailableDatesByEventId(eventId: Int): List<EventUserAvailable> {
+        return database.getAvailableDatesByEventId(eventId)
     }
 }

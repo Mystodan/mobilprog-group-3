@@ -5,30 +5,46 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import whenweekly.frontend.R
+import androidx.recyclerview.widget.DividerItemDecoration
+import whenweekly.frontend.adapters.DateAdapter
+import whenweekly.frontend.databinding.FragmentEventShowAvailableDatesBinding
+import whenweekly.frontend.models.DateModel
 
-
-/**
- * A simple [Fragment] subclass.
- * Use the [DateViewAllFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class DateViewAllFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private var availableDatesList = mutableListOf<DateModel>()       // List of available dates
+
+    private var _binding : FragmentEventShowAvailableDatesBinding? = null
+    private val binding get() = _binding!!
+    private val adapter = DateAdapter(availableDatesList)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        arguments?:return
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_event_show_available_dates, container, false)
-    }
+    ): View {
+        _binding = FragmentEventShowAvailableDatesBinding.inflate(inflater, container, false)
+        binding.rvDates.adapter = adapter
+        binding.rvDates.addItemDecoration( // Adds separator between items
+            DividerItemDecoration(binding.rvDates.context, DividerItemDecoration.VERTICAL)
+        )
 
+        //availableDatesList = Api.getAvailableDates()
+
+        availableDatesList = mutableListOf(
+            DateModel("2022-11-25"),
+            DateModel("2022-11-26"),
+            DateModel("2022-11-27"),
+            DateModel("2022-11-28"),
+            DateModel("2022-11-29")
+        )
+
+        adapter.updateData(availableDatesList)
+
+        return binding.root
+    }
 }

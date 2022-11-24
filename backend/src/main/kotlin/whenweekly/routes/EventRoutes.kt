@@ -13,6 +13,7 @@ import whenweekly.domain.repository.EventRepository
 import whenweekly.domain.repository.UserRepository
 import whenweekly.plugins.dev
 import whenweekly.routes.Constants.EVENTS_ROUTE
+import java.time.LocalDate
 import whenweekly.routes.UserKickRequest as UserKickRequest1
 
 data class EventWithUsers(
@@ -42,6 +43,7 @@ fun Route.eventRouting() {
         addEvent(repository, userRepository)
         removeUserFromEvent(repository, userRepository)
         deleteEvent(repository, userRepository)
+        getAvailableDatesByEventId(repository, userRepository)
     }
 }
 
@@ -228,3 +230,21 @@ fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepo
     }
 }
 
+fun Route.getAvailableDatesByEventId(repository: EventRepository, userRepository: UserRepository) {
+    get("{eventId}/availableDates"){
+        val eventId = call.parameters["eventId"]?.toInt() ?: 0
+
+        val availableDates = repository.getAvailableDatesByEventId(eventId)
+        val eventsWithUsers = mutableListOf<EventWithUsers>()
+
+        val event = repository.getEventById(eventId)
+        for (availableDates in availableDates) {
+            eventsWithUsers.add(getEventWithUsers(event!!, userRepository))
+        }
+
+        call.respond(
+            HttpStatusCode.OK,
+            eventsWithUsers
+        )
+    }
+}
