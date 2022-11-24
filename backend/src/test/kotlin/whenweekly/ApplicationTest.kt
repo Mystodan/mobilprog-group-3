@@ -44,6 +44,8 @@ data class EventTest(
     val end_date: String = "",
 )
 
+
+
 fun ApplicationTestBuilder.getClient(): HttpClient {
     return createClient {
         install(ContentNegotiation) {
@@ -66,6 +68,15 @@ fun ApplicationTestBuilder.getClient(): HttpClient {
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ApplicationTest {
 
+    private val objectMapper = ObjectMapper().apply {
+        registerModule(KtormModule())
+        registerModule(JavaTimeModule().apply {
+            addSerializer(
+                LocalDateTime::class.java,
+                LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+            )
+        })
+    }
     private fun setupTest() = testApplication {
         application {
             configureRouting()
@@ -160,11 +171,9 @@ class ApplicationTest {
     ): HttpResponse {
         val body = """
                 {
-                    "available_dates": ${ObjectMapper().writeValueAsString(dates)}
+                    "available_dates": ${objectMapper.writeValueAsString(dates)}
                 }
             """.trimIndent()
-
-        println(body)
         return client.patch("$EVENTS_ROUTE/$eventId/available-dates") {
             contentType(ContentType.Application.Json)
             setBody(body)
@@ -182,6 +191,37 @@ class ApplicationTest {
             }
         }
     }
+
+    private suspend fun updateAvailableDates2(
+        client: HttpClient,
+        eventId: Int,
+        dates: List<LocalDateTime>,
+        userUUID: ByteArray
+    ): HttpResponse {
+        val body = """
+                {
+                    "available_dates": ${objectMapper.writeValueAsString(dates)}
+                }
+            """.trimIndent()
+
+        return client.patch("$EVENTS_ROUTE/$eventId/available-dates") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            headers {
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+    private suspend fun getAvailableDates2(client: HttpClient, eventId: Int, userUUID: ByteArray): List<LocalDateTime> {
+        val response = client.get("$EVENTS_ROUTE/$eventId/available-dates") {
+            contentType(ContentType.Application.Json)
+            headers {
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+        return response.body()
+    }
+
 
     @Test
     fun test0GetUsers() = testApplication {
@@ -614,6 +654,11 @@ class ApplicationTest {
         updateResponse =
             updateAvailableDates(client, eventCreated.event.id, listOf("2021-01-06T00:00:00"), owner.uuid!!)
         assertEquals(HttpStatusCode.BadRequest, updateResponse.status)
+
+        val dates2 = getAvailableDates2(client, eventCreated.event.id, owner.uuid!!)
+        println(dates2)
+
+        updateAvailableDates2(client, eventCreated.event.id, dates2, owner.uuid!!)
     }
 
     private fun resetDatabase() {
