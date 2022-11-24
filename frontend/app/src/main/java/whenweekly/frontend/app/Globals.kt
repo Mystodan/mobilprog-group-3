@@ -33,6 +33,7 @@ class Globals {
     }
     object Lib{
         var Events = mutableListOf<EventModel>()
+        var localUUID: String = ""
         var CurrentUser : User?=null
 
     }

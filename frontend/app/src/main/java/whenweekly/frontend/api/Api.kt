@@ -51,8 +51,8 @@ object Api {
                     setBody(body)
                 }
                 append("Content-Type", "application/json")
-                if (Globals.Lib.CurrentUser != null)
-                    append("UUID", Globals.Lib.CurrentUser?.uuidToString()!!)
+                if (Globals.Lib.localUUID.isEmpty())
+                    append("UUID", Globals.Lib.localUUID)
             }
         }
         return response
