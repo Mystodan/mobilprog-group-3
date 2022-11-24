@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import whenweekly.frontend.R
-import whenweekly.frontend.models.DateModel
 import java.time.LocalDateTime
 
 /**

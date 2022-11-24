@@ -17,26 +17,18 @@ import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.FragmentDateReportBinding
 import whenweekly.frontend.models.EventModel
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.Stream
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
-
 
 class DateReportFragment : Fragment() {
     private var _binding : FragmentDateReportBinding? = null
     private val binding get() = _binding!!
     private var datesStart: List<Int> ? = null
     private var datesEnd: List<Int> ? = null
-    private var unavailableDatesParent: MutableList<LocalDateTime> = mutableListOf()
 
-    /**
-     *
-     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,44 +48,37 @@ class DateReportFragment : Fragment() {
             .setCalendarDisplayMode(CalendarMode.MONTHS)
             .commit()
 
-
         binding.btnReportDate.setOnClickListener {
-            var allDates = mutableListOf<LocalDateTime>()
+            val allDates = mutableListOf<LocalDateTime>()
             lifecycleScope.launchWhenStarted {
-                 Api.getAvailableDates(32).forEach { allDates.add(it) }
+                 Api.getAvailableDates(eventInformation.eventId).data?.forEach{allDates.add(it)}
                 val (unavailableDates, availableDates) = calculateAvailableDates(eventModel = eventInformation,allDates)
                 val toastMSG =
                     if(unavailableDates.isEmpty()) "Please select dates first!"
                     else {
                         lifecycleScope.launch {
-                            Api.updateAvailableDates(32, availableDates)
+                            Api.updateAvailableDates(eventInformation.eventId, availableDates)
                         } ; "Dates reported successfully!" }
                 Toast.makeText(context, toastMSG , Toast.LENGTH_SHORT).show()
-
             }
-
-
         }
 
         return binding.root
     }
 
+    /**
+     * @return      - Returns a long as a LocalDateTime
+     */
     private fun toLocalDateTime(long: Long): LocalDateTime {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(long), TimeZone.getDefault().toZoneId());
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(long), TimeZone.getDefault().toZoneId())
     }
 
-
-    private fun doesAvailableContainUnavailable(unavailableDates: List<LocalDateTime>,availableDates: List<LocalDateTime>):Boolean{
-        availableDates.forEach{return (unavailableDates.contains(it))}
-        return false
-    }
-
-
-
+    /**
+     * Gets the EventModel of the current Event from the EventActivity
+     */
     private fun getEventModelFromParcel():EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
-    } else
-        arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
+    } else arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
 
     /**
      * Takes a Long and returns a list of the year, moth and day of that Long
@@ -106,21 +91,6 @@ class DateReportFragment : Fragment() {
         Globals.Utils.formatDate("MM", date).toInt(),
         Globals.Utils.formatDate("dd", date).toInt()
     )
-    private fun getUnavailableDatesAsDays():MutableList<Int> {
-        val retList = mutableListOf<Int>()
-        unavailableDatesParent.forEach{retList.add(it.dayOfMonth) }
-        return retList
-    }
-
-    /**
-     * Turns a Long into a java LocalDate and returns it
-     *
-     * @param long  - The Long to be returned as LocalDate
-     * @return      - Turns a Long into a LocalDate and returns it
-     */
-    private fun toLocalDate(long: Long): LocalDate {
-        return Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate()
-    }
 
     /**
      * Returns a mutable list of all the dates between a startDate and an endDate

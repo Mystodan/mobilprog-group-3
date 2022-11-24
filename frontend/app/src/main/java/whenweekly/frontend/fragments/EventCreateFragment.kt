@@ -62,7 +62,11 @@ class EventCreateActivity : Fragment() {
         }
     }
 
+    /**
+     * 
+     */
     private fun Long.toLocalDateTime(): LocalDateTime = LocalDateTime.ofEpochSecond(this / 1000, 0, ZoneOffset.UTC)
+
     /**
      *
      */
@@ -83,7 +87,7 @@ class EventCreateActivity : Fragment() {
         lifecycleScope.launch {
             val eventName = binding.etEventName.text.toString()
             val newEventResponse = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
-            var localEvent : EventModel?=null
+            val localEvent: EventModel?
             if(newEventResponse.data != null ) {
                 val newEvent = newEventResponse.data
                 localEvent = EventModel(eventName, startDate, endDate, newEvent.event.inviteCode,newEvent.event.id)

@@ -5,6 +5,7 @@
     android:background="@color/oxford_blue">
 
     <TextView
+        android:id="@+id/banner"
         android:paddingTop="30dp"
         android:textAlignment="center"
         android:layout_width="match_parent"

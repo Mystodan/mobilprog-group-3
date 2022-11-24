@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import whenweekly.frontend.activities.FragmentHolderActivity
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
-
 import whenweekly.frontend.databinding.FragmentEventJoinBinding
 import whenweekly.frontend.models.EventModel
 import java.time.ZoneOffset

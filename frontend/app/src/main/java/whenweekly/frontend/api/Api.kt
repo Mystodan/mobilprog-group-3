@@ -17,7 +17,9 @@ import whenweekly.frontend.app.Globals
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
+/**
+ * API for communication between frontend and backend
+ */
 object Api {
     private val client = HttpClient {
         install(ContentNegotiation) {
@@ -33,6 +35,7 @@ object Api {
             }
         }
     }
+
     data class ApiResponse<T>(val data: T, val status: HttpStatusCode, val message: String)
 
     private fun <T> exceptionResponse(e: Exception): ApiResponse<T?> {
