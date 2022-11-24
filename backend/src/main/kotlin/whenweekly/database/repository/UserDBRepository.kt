@@ -7,7 +7,15 @@ import whenweekly.domain.repository.UserRepository
 import whenweekly.misc.asBytes
 import java.util.*
 
+/**
+ * User database repository for handling user related operations
+ *
+ */
 class UserDBRepository : UserRepository {
+    /*
+     * See database implementation for documentation
+     */
+
     private val database: DatabaseManager = DatabaseManagerImpl()
 
     override fun addUser(user: User): User? {

@@ -17,6 +17,11 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+/**
+ * Database manager impl
+ *
+ * @constructor Create empty Database manager impl
+ */
 class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
     private val users get() = database.sequenceOf(UserTable)
@@ -26,6 +31,7 @@ class DatabaseManagerImpl : DatabaseManager {
     private val objectMapper = ObjectMapper()
 
     init {
+        // Initialize jackson with java LocalDateTime serialization support
         objectMapper.registerModule(JavaTimeModule().apply {
             addSerializer(
                 LocalDateTime::class.java,
@@ -34,6 +40,12 @@ class DatabaseManagerImpl : DatabaseManager {
         })
     }
 
+    /**
+     * Add user
+     *
+     * @param user The user to add
+     * @return The added user
+     */
     override fun addUser(user: User): User? {
         return try {
             users.add(user)
@@ -44,6 +56,11 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get all users
+     *
+     * @return List of users
+     */
     override fun getAllUsers(): List<User> {
         return try {
             users.toList()
@@ -53,6 +70,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get user by id
+     *
+     * @param id The id of the user
+     * @return The user with the given id
+     */
     override fun getUserById(id: Int): User? {
         return try {
             users.first { it.id eq id }
@@ -62,6 +85,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Update user
+     *
+     * @param user The user to update
+     * @return The updated user
+     */
     override fun updateUser(user: User): User? {
         return try {
             users.update(user)
@@ -72,6 +101,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Add event
+     *
+     * @param event The event to add
+     * @return The added event
+     */
     override fun addEvent(event: Event): Event? {
         return try {
             events.add(event)
@@ -82,6 +117,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get event by invite code
+     *
+     * @param inviteCode The invite codee of the event
+     * @return The event with the invite code
+     */
     override fun getEventByInviteCode(inviteCode: String): Event? {
         return try {
             events.first { it.inviteCode eq inviteCode }
@@ -91,6 +132,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get event by id
+     *
+     * @param id The id of the event to get
+     * @return The event with the given id
+     */
     override fun getEventById(id: Int): Event? {
         return try {
             events.first { it.id eq id }
@@ -100,6 +147,11 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get all events
+     *
+     * @return List of all events
+     */
     override fun getAllEvents(): List<Event> {
         return try {
             events.toList()
@@ -110,10 +162,11 @@ class DatabaseManagerImpl : DatabaseManager {
     }
 
     /**
-     * add a selected user from the selected event
+     * Add user to event
      *
-     * @param eventId       - ID of the event in EventUserJoinedTable
-     * @param userId        - ID of the user in EventUserJoinedTable to add
+     * @param eventId The event id to add user to
+     * @param userId The user id to add to event
+     * @return The event user joined
      */
     override fun addUserToEvent(eventId: Int, userId: Int): Boolean {
         return try {
@@ -129,10 +182,11 @@ class DatabaseManagerImpl : DatabaseManager {
     }
 
     /**
-     * Remove a selected user from the selected event
+     * Remove user from event
      *
-     * @param eventId       - ID of the event in EventUserJoinedTable
-     * @param kickedUserID  - ID of the user in EventUserJoinedTable to remove
+     * @param eventId The event id
+     * @param kickedUserID The user id of the user to be removed
+     * @return True if the user was removed successfully
      */
     override fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean {
         return try {
@@ -145,6 +199,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get events by user id
+     *
+     * @param userId The user id to get events for
+     * @return List of events
+     */
     override fun getEventsByUserId(userId: Int): List<Event> {
         return try {
             database.from(EventTable)
@@ -157,6 +217,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get users by event id
+     *
+     * @param eventId The event id to get users from
+     * @return List of users
+     */
     override fun getUsersByEventId(eventId: Int): List<User> {
         return try {
             database.from(UserTable)
@@ -169,6 +235,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get user by UUID
+     *
+     * @param uuid The uuid of the user
+     * @return The user
+     */
     override fun getUserByUUID(uuid: String): User? {
         return try {
             val uuidBytes = UUID.fromString(uuid).asBytes()
@@ -179,6 +251,10 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Reset the database
+     *
+     */
     override fun resetDatabase() {
         try {
             database.deleteAll(EventUserJoinedTable)
@@ -190,6 +266,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Delete event by i d
+     *
+     * @param eventId The event id to delete
+     * @return True if successful, false otherwise
+     */
     override fun deleteEventByID(eventId: Int): Boolean {
         return try {
             database.delete(EventTable) { it.id eq eventId }
@@ -200,6 +282,12 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Get available dates by event id
+     *
+     * @param eventId The event id to get available dates for
+     * @return The list of available dates
+     */
     override fun getAvailableDatesByEventId(eventId: Int): List<LocalDateTime> {
         return try {
             database.from(EventUserAvailableTable)
@@ -216,6 +304,13 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Add available dates
+     *
+     * @param eventId The event id to add available dates for
+     * @param userId The user id to add available dates for
+     * @return True if success, false otherwise
+     */
     override fun addAvailableDates(eventId: Int, userId: Int): Boolean {
         return try {
             database.insert(EventUserAvailableTable) {
@@ -229,6 +324,14 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Update available dates
+     *
+     * @param eventId The event id to update available dates for
+     * @param userId The user id to update available dates for
+     * @param dates The dates to add to the available dates for the user
+     * @return True if successful, false otherwise
+     */
     override fun updateAvailableDates(eventId: Int, userId: Int, dates: List<LocalDateTime>): Boolean {
         return try {
             val jsonDates = objectMapper.writeValueAsString(dates)
@@ -245,6 +348,13 @@ class DatabaseManagerImpl : DatabaseManager {
         }
     }
 
+    /**
+     * Remove available dates
+     *
+     * @param eventId The event id to remove available dates for
+     * @param userId The user id to remove available dates for
+     * @return True if successful, false otherwise
+     */
     override fun removeAvailableDates(eventId: Int, userId: Int): Boolean {
         return try {
             database.delete(EventUserAvailableTable) {

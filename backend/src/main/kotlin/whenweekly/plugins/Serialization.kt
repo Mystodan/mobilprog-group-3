@@ -10,11 +10,15 @@ import org.ktorm.jackson.KtormModule
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Configure serialization
+ *
+ */
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
         jackson {
             enable(SerializationFeature.INDENT_OUTPUT)
-            // ktorm entity serialize support
+            // ktorm entity serialization support
             registerModule(KtormModule())
             // java LocalDateTime serialize support
             registerModule(JavaTimeModule().apply {

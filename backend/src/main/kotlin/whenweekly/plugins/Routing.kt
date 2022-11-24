@@ -6,6 +6,10 @@ import whenweekly.routes.eventRouting
 import whenweekly.routes.resetRouting
 import whenweekly.routes.userRouting
 
+/**
+ * Configure routing
+ *
+ */
 fun Application.configureRouting() {
     routing {
         eventRouting()

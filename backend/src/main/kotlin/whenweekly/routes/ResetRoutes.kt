@@ -10,6 +10,10 @@ import whenweekly.plugins.dev
 import whenweekly.routes.Constants.BUILD_CONFIG
 import whenweekly.routes.Constants.RESET_ROUTE
 
+/**
+ * Reset routing
+ *
+ */
 fun Route.resetRouting() {
     val database: DatabaseManager = DatabaseManagerImpl()
 
@@ -21,6 +25,11 @@ fun Route.resetRouting() {
     }
 }
 
+/**
+ * Reset the database
+ *
+ * @param database The database manager
+ */
 fun Route.resetDatabase(database: DatabaseManager) {
     delete {
         database.resetDatabase()
