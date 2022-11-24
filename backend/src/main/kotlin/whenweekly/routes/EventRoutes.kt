@@ -234,7 +234,7 @@ fun Route.deleteEvent(eventRepository: EventRepository, userRepository: UserRepo
 }
 
 fun Route.getAvailableDatesByEventId(repository: EventRepository, userRepository: UserRepository) {
-    get("{eventId}/available-dates"){
+    get("{eventId}/available-dates") {
         val eventId = call.parameters["eventId"]?.toInt() ?: 0
 
         val userId = Shared.getUserId(call.request, userRepository)
@@ -243,7 +243,7 @@ fun Route.getAvailableDatesByEventId(repository: EventRepository, userRepository
             return@get
         }
 
-        userRepository.getUsersByEventId(eventId).all{
+        userRepository.getUsersByEventId(eventId).all {
             it.id != userId
         }.let {
             if (it) {
@@ -262,7 +262,7 @@ fun Route.getAvailableDatesByEventId(repository: EventRepository, userRepository
 }
 
 fun Route.updateAvailableDatesByEventId(repository: EventRepository, userRepository: UserRepository) {
-    patch("{eventId}/available-dates"){
+    patch("{eventId}/available-dates") {
         val eventId = call.parameters["eventId"]?.toInt() ?: 0
 
         val userId = Shared.getUserId(call.request, userRepository)

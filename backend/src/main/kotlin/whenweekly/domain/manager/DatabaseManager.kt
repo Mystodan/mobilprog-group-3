@@ -1,7 +1,6 @@
 package whenweekly.domain.manager
 
 import whenweekly.database.entities.Event
-import whenweekly.database.entities.EventUserAvailable
 import whenweekly.database.entities.User
 import java.time.LocalDateTime
 

@@ -21,8 +21,10 @@ class DatabaseManagerImpl : DatabaseManager {
     private val database = DatabaseHelper.database()
     private val users get() = database.sequenceOf(UserTable)
     private val events get() = database.sequenceOf(EventTable)
+
     // Convert availableDates to json with jackson
     private val objectMapper = ObjectMapper()
+
     init {
         objectMapper.registerModule(JavaTimeModule().apply {
             addSerializer(
@@ -226,6 +228,7 @@ class DatabaseManagerImpl : DatabaseManager {
             false
         }
     }
+
     override fun updateAvailableDates(eventId: Int, userId: Int, dates: List<LocalDateTime>): Boolean {
         return try {
             val jsonDates = objectMapper.writeValueAsString(dates)

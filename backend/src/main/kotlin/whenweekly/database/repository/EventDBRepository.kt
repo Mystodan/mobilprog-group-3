@@ -77,7 +77,7 @@ class EventDBRepository : EventRepository {
         return database.getAvailableDatesByEventId(eventId)
     }
 
-    override fun updateAvailableDates(eventId: Int, userId: Int, dates: List<LocalDateTime>): Boolean{
-       return database.updateAvailableDates(eventId, userId, dates)
+    override fun updateAvailableDates(eventId: Int, userId: Int, dates: List<LocalDateTime>): Boolean {
+        return database.updateAvailableDates(eventId, userId, dates)
     }
 }
