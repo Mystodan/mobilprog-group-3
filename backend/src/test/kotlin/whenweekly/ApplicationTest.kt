@@ -91,6 +91,15 @@ class ApplicationTest {
         }
     }
 
+    private suspend fun getUser(client: HttpClient, uuid: ByteArray): HttpResponse {
+       return client.get("$USERS_ROUTE/me") {
+           contentType(ContentType.Application.Json)
+           headers {
+               append("UUID", uuid.asUUID().toString())
+           }
+       }
+    }
+
     private suspend fun createEvent(client: HttpClient, event: EventTest, uuid: ByteArray): HttpResponse {
         return client.post(EVENTS_ROUTE) {
             contentType(ContentType.Application.Json)
@@ -233,6 +242,10 @@ class ApplicationTest {
         var users = response.body<List<User>>()
         assertEquals(0, users.size)
 
+        // Invalid UUID
+        response = getUser(client, ByteArray(16))
+        assertEquals(HttpStatusCode.NotFound, response.status)
+
         val user = UserTest(name = "test")
         response = createUser(client, user)
         assertEquals(HttpStatusCode.Created, response.status)
@@ -241,6 +254,9 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.OK, response.status)
         users = response.body()
         assertEquals(1, users.size)
+
+        response = getUser(client, users[0].uuid!!)
+        assertEquals(HttpStatusCode.OK, response.status)
     }
 
     @Test
