@@ -41,8 +41,9 @@ class EventJoinFragment : Fragment() {
      */
     private fun joinEvent(inviteCode: String) {
         lifecycleScope.launch {
-            val (event, error) = Api.joinEvent(inviteCode)
-            if (event != null) {
+            val eventResponse = Api.joinEvent(inviteCode)
+            if (eventResponse.data != null) {
+                val event = eventResponse.data
                 val localEvent = EventModel(
                     event.event.name,
                     event.event.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
@@ -53,10 +54,8 @@ class EventJoinFragment : Fragment() {
                 Globals.Lib.Events.add(localEvent)
                 Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
                 Globals.Utils.startEventActivityOfEvent(localEvent, requireActivity(), (activity as FragmentHolderActivity).getResult)
-            } else if (error != null) {
-                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Unknown error occurred", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, eventResponse.message, Toast.LENGTH_SHORT).show()
             }
         }
     }

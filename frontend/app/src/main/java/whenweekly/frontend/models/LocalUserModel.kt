@@ -21,13 +21,9 @@ class LocalUserModel(private val context : Context) {
         val storedUuid = securePref.getString(uuidKey,null)
         if (storedUuid != null && !clearUUID) {
             Globals.Lib.localUUID = storedUuid
-            val (user, error) = Api.getUser()
-            if (user != null) {
-                Globals.Lib.CurrentUser = user
-            }
-            else if (error != null) {
-                // TODO: Handle error
-            }
+        }
+        else {
+            println("No UUID stored")
         }
 
     }
