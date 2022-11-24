@@ -6,7 +6,7 @@
         <item
             android:id="@+id/nav_lobby"
             android:icon="@drawable/item_one"
-            android:title="Lobbies" />
+            android:title="Events" />
         </menu>
         </item>
 

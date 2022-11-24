@@ -14,6 +14,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.launch
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.R
+import whenweekly.frontend.activities.FragmentHolderActivity
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.databinding.FragmentEventCreateBinding
 import whenweekly.frontend.models.EventModel
@@ -82,16 +83,19 @@ class EventCreateActivity : Fragment() {
         lifecycleScope.launch {
             val eventName = binding.etEventName.text.toString()
             val newEvent = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
+            var localEvent : EventModel?=null
             if(newEvent != null ) {
-                Globals.Lib.Events.add(EventModel(
-                    eventName, startDate, endDate, newEvent.event.inviteCode
-                ))
-                println(Globals.Lib.LocalID)
+                localEvent = EventModel(eventName, startDate, endDate, newEvent.event.inviteCode,newEvent.event.id)
+                Globals.Lib.Events.add(localEvent)
+                println(Globals.Lib.CurrentUser?.id)
                 Toast.makeText(activity, "Event created!", Toast.LENGTH_SHORT).show()
+                println("activity:${requireActivity()} \nContext:${requireContext()}")
+                Globals.Utils.startEventActivityOfEvent(localEvent, requireActivity(), (activity as FragmentHolderActivity).getResult)
             } else {
                 Toast.makeText(activity, "Error creating event!", Toast.LENGTH_SHORT).show()
             }
             resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
+
         }
     }
 

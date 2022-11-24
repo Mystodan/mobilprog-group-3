@@ -7,10 +7,8 @@ import whenweekly.frontend.models.LocalUserModel
 
 
 class ApplicationMain : Application(){
-    
     override fun onCreate() {
+        println(LocalUserModel(applicationContext))
         super.onCreate()
-        println(LocalUserModel(applicationContext).getUUID())
-        println(LocalUserModel(applicationContext).getID())
     }
 }

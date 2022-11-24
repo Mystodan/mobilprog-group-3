@@ -61,8 +61,7 @@ class RegisterActivity : AppCompatActivity() {
             lifecycleScope.launch{
                 val user = Api.addUser(name)
                 if (user != null){
-                    LocalUserModel(applicationContext).setUUID(user.uuidToString())
-                    LocalUserModel(applicationContext).setID(user.id)
+                    LocalUserModel(applicationContext).setUser(user)
                     startActivity(fragmentHolderIntent)
                 }
                 else
