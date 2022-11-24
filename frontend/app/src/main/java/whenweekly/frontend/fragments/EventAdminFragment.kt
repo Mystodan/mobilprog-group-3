@@ -6,33 +6,36 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.launch
+import whenweekly.frontend.R
+import whenweekly.frontend.activities.EventActivity
 import whenweekly.frontend.adapters.UserAdapter
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.api.models.EventWithUsers
 import whenweekly.frontend.app.Globals
-import whenweekly.frontend.databinding.FragmentEventDeleteUsersBinding
+import whenweekly.frontend.databinding.FragmentAdminPanelBinding
 import whenweekly.frontend.models.EventModel
 import whenweekly.frontend.models.UserModel
 
 
 class EventAdminFragment : Fragment() {
-    private var userList = mutableListOf<UserModel>()       // List of users
-
-    private var _binding : FragmentEventDeleteUsersBinding? = null
-    private val binding get() = _binding!!
-    private val adapter = UserAdapter(userList) { isChecked, position ->
-        userList[position].checked = isChecked
+    enum class ButtonPanel{
+        Users, Edit, Delete
     }
+    private var buttonPanel: ButtonPanel = ButtonPanel.Users
+    private var _binding: FragmentAdminPanelBinding? = null
+    private val binding get() = _binding!!
+    private var currFragment: Fragment = DateViewAllFragment()
 
     /**
      *
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?:return
+        arguments ?: return
     }
 
     /**
@@ -43,55 +46,59 @@ class EventAdminFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {  // Inflate the layout for this fragment
         var eventInformation = getEventModelFromParcel()
-
-        _binding = FragmentEventDeleteUsersBinding.inflate(inflater, container, false)
-        binding.rvUsers.adapter = adapter
-        binding.rvUsers.addItemDecoration( // Adds separator between items
-            DividerItemDecoration(binding.rvUsers.context, DividerItemDecoration.VERTICAL)
-        )
-
-        lifecycleScope.launchWhenStarted{
-            var list = deleteUser(eventInformation!!)
-            getEventUsersFromAPI(eventInformation!!,list )
-        }
+        _binding = FragmentAdminPanelBinding.inflate(inflater, container, false)
+        manageAdminState(eventInformation!!)
 
         return binding.root
     }
-
-    /**
-     *
-     */
-    private fun getEventUsersFromAPI(eventInformation: EventModel, eventWithUsers: List<EventWithUsers>) {
-        for(event in eventWithUsers) {
-            if(event.event.inviteCode != eventInformation!!.invCode) continue
-            for(user in event.users) {
-                if(user.id == eventInformation.ownerId) continue
-                userList.add(UserModel(user.name!!, false, user.id))
-            }
-        }
-        adapter.updateData(userList)
-    }
-
     private fun getEventModelFromParcel(): EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
     } else
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
 
-    private suspend fun deleteUser(eventInformation: EventModel): List<EventWithUsers>{
-        var events = Api.getEvents()
-        binding.btnDelete.setOnClickListener {
-            lifecycleScope.launch {
-                for(event in events){
-                    if(event.event.inviteCode != eventInformation!!.invCode) continue
-                    for (user in userList){
-                        if(!user.checked) continue
-                        Api.kickUserFromEvent(event.event.id, user.id)
-                        userList.remove(user)
-                        adapter.updateData(userList)
-                    }
-                }
-            }
+    private fun manageAdminState(model:EventModel){
+        binding.btnManageUser.setOnClickListener {
+            buttonPanel = ButtonPanel.Users
+            changePanelView(buttonPanel, model)
         }
-        return events
+        binding.btnEventEdit.setOnClickListener {
+            buttonPanel = ButtonPanel.Edit
+            changePanelView(buttonPanel, model)
+        }
+        binding.btnEventDelete.setOnClickListener {
+            buttonPanel = ButtonPanel.Delete
+            changePanelView(buttonPanel, model)
+        }
+    }
+    private fun changePanelView(menuItem: ButtonPanel, parcel: EventModel){
+        val componentClass: Class<*> = when(menuItem){
+            ButtonPanel.Users -> AdminManageUserFragment::class.java
+            ButtonPanel.Edit -> DateViewAllFragment::class.java
+            else -> AdminDeleteFragment::class.java
+        }
+
+        loadFragment(componentClass, parcel)
+    }
+    private fun loadFragment(fragmentClass:Class<*>?, parcel: EventModel) {
+        var fragment: Fragment? = null
+        try {
+            fragment = fragmentClass?.newInstance() as Fragment
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        if (fragment != null && currFragment != fragment) {
+            println(fragment)
+            val eventBundle = Bundle()
+            eventBundle.putParcelable(Globals.Constants.LABEL_PARCEL_INFO,parcel)
+            fragment.arguments = eventBundle
+            parentFragmentManager.beginTransaction().replace(R.id.adminFragmentHolder, fragment).commit()
+            currFragment = fragment
+        }
     }
 }
+
+
+
+
+

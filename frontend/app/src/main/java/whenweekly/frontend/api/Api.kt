@@ -50,8 +50,9 @@ object Api {
                 if (body != null) {
                     setBody(body)
                 }
-                append("UUID", Globals.Lib.LocalUUID)
                 append("Content-Type", "application/json")
+                if (Globals.Lib.localUUID.isEmpty())
+                    append("UUID", Globals.Lib.localUUID)
             }
         }
         return response
@@ -81,7 +82,12 @@ object Api {
                     }
                     """.trimIndent()
             )
-            response.body()
+            if (response.status == HttpStatusCode.Created) {
+                response.body()
+            } else{
+                println(response.bodyAsText())
+                null
+            }
         } catch (e: Exception) {
             println(e)
             null

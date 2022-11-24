@@ -7,14 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import whenweekly.frontend.adapters.DateAdapter
-import whenweekly.frontend.databinding.FragmentEventShowAvailableDatesBinding
+import whenweekly.frontend.api.Api
+import whenweekly.frontend.databinding.FragmentDateViewAllBinding
 import whenweekly.frontend.models.DateModel
 
 class DateViewAllFragment : Fragment() {
 
     private var availableDatesList = mutableListOf<DateModel>()       // List of available dates
 
-    private var _binding : FragmentEventShowAvailableDatesBinding? = null
+    private var _binding : FragmentDateViewAllBinding? = null
     private val binding get() = _binding!!
     private val adapter = DateAdapter(availableDatesList)
 
@@ -27,13 +28,12 @@ class DateViewAllFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentEventShowAvailableDatesBinding.inflate(inflater, container, false)
+        _binding = FragmentDateViewAllBinding.inflate(inflater, container, false)
         binding.rvDates.adapter = adapter
         binding.rvDates.addItemDecoration( // Adds separator between items
             DividerItemDecoration(binding.rvDates.context, DividerItemDecoration.VERTICAL)
         )
 
-        //availableDatesList = Api.getAvailableDates()
 
         availableDatesList = mutableListOf(
             DateModel("2022-11-25"),
