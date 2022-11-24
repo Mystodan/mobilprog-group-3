@@ -21,8 +21,9 @@ import java.time.ZoneOffset
 class EventListFragment : Fragment() {
     private var _binding : FragmentEventListBinding? = null
     private val binding get() = _binding!!
-    private val eventList = Globals.Lib.Events
-    private var adapter = EventAdapter(eventList) {changeActivity(eventList[it])}
+    private var adapter = EventAdapter(Globals.Lib.Events) {
+        changeActivity(Globals.Lib.Events[it])
+    }
 
     /**
      *
@@ -46,16 +47,19 @@ class EventListFragment : Fragment() {
         )
 
         adapter.updateData(Globals.Lib.Events)
-        if (Globals.Lib.Events.isNotEmpty()) return binding.root
         lifecycleScope.launch{
             val events = Api.getEvents()
-
-            Globals.Lib.Events.addAll(events.map {
-                Globals.Utils.createEvent(
+            var syncEventList = mutableListOf<EventModel>()
+            syncEventList.addAll(events.map {
+                EventModel(
                     it.event.name,
                     it.event.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
-                    it.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000, it.event.inviteCode)
+                    it.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000,
+                    it.event.inviteCode,
+                    it.event.owner.id
+                )
             })
+            Globals.Lib.Events = syncEventList
             adapter.updateData(Globals.Lib.Events)
         }
 

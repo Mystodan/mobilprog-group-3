@@ -1,42 +1,42 @@
 package whenweekly
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.server.routing.*
-import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.util.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import kotlin.test.*
-import io.ktor.server.testing.*
-import whenweekly.plugins.*
-import whenweekly.routes.Constants.EVENTS_ROUTE
-import whenweekly.routes.Constants.USERS_ROUTE
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
+import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.plugins.*
-import io.ktor.serialization.jackson.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.routing.*
+import io.ktor.server.testing.*
 import io.ktor.server.util.*
+import io.ktor.util.*
 import org.junit.FixMethodOrder
 import org.junit.runners.MethodSorters
 import org.ktorm.jackson.KtormModule
-import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.misc.asUUID
+import whenweekly.plugins.*
+import whenweekly.routes.Constants.EVENTS_ROUTE
 import whenweekly.routes.Constants.RESET_ROUTE
+import whenweekly.routes.Constants.USERS_ROUTE
 import whenweekly.routes.EventWithUsers
-import whenweekly.routes.getEventWithUsers
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.test.*
 
 data class UserTest(
     val name: String = ""
 )
+
 data class EventTest(
     val name: String = "",
     val description: String = "",
@@ -44,28 +44,39 @@ data class EventTest(
     val end_date: String = "",
 )
 
-fun ApplicationTestBuilder.getClient(): HttpClient {
-    return createClient{
-            install(ContentNegotiation) {
-                jackson {
-                    enable(SerializationFeature.INDENT_OUTPUT)
-                    // java LocalDateTime serialize support
 
-                    registerModule(KtormModule())
-                    registerModule(JavaTimeModule().apply {
-                        addSerializer(
-                            LocalDateTime::class.java,
-                            LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
-                        )
-                    })
-                }
+
+fun ApplicationTestBuilder.getClient(): HttpClient {
+    return createClient {
+        install(ContentNegotiation) {
+            jackson {
+                enable(SerializationFeature.INDENT_OUTPUT)
+                // java LocalDateTime serialize support
+
+                registerModule(KtormModule())
+                registerModule(JavaTimeModule().apply {
+                    addSerializer(
+                        LocalDateTime::class.java,
+                        LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                    )
+                })
             }
         }
+    }
 }
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ApplicationTest {
 
+    private val objectMapper = ObjectMapper().apply {
+        registerModule(KtormModule())
+        registerModule(JavaTimeModule().apply {
+            addSerializer(
+                LocalDateTime::class.java,
+                LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+            )
+        })
+    }
     private fun setupTest() = testApplication {
         application {
             configureRouting()
@@ -84,7 +95,7 @@ class ApplicationTest {
         return client.post(EVENTS_ROUTE) {
             contentType(ContentType.Application.Json)
             setBody(event)
-            headers{
+            headers {
                 append("UUID", uuid.asUUID().toString())
             }
         }
@@ -93,54 +104,124 @@ class ApplicationTest {
     private suspend fun joinEvent(client: HttpClient, inviteCode: String, uuid: ByteArray): HttpResponse {
         return client.put("$EVENTS_ROUTE/join") {
             contentType(ContentType.Application.Json)
-            setBody("""
+            setBody(
+                """
                 {
                     "invite_code": "$inviteCode"
                 }
-            """.trimIndent())
-            headers{
+            """.trimIndent()
+            )
+            headers {
                 append("UUID", uuid.asUUID().toString())
             }
         }
     }
 
     private suspend fun getUsers(client: HttpClient): HttpResponse {
-        return client.get(USERS_ROUTE){
+        return client.get(USERS_ROUTE) {
             contentType(ContentType.Application.Json)
         }
     }
 
     private suspend fun getEvents(client: HttpClient, uuid: ByteArray): HttpResponse {
-        return client.get(EVENTS_ROUTE){
+        return client.get(EVENTS_ROUTE) {
             contentType(ContentType.Application.Json)
-            headers{
+            headers {
                 append("UUID", uuid.asUUID().toString())
             }
         }
     }
 
-    private suspend fun kickUser(client: HttpClient, eventID: Int, userId: Int, userUUID: ByteArray): HttpResponse {
-        return client.put("$EVENTS_ROUTE/$eventID/kick") {
+    private suspend fun getEvent(client: HttpClient, eventId: Int): HttpResponse {
+        return client.get("$EVENTS_ROUTE/$eventId") {
             contentType(ContentType.Application.Json)
-            setBody("""
+        }
+    }
+
+    private suspend fun kickUser(client: HttpClient, eventId: Int, userId: Int, userUUID: ByteArray): HttpResponse {
+        return client.put("$EVENTS_ROUTE/$eventId/kick") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                """
                 {
                     "user_id": $userId
                 }
-            """.trimIndent())
-            headers{
+            """.trimIndent()
+            )
+            headers {
                 append("UUID", userUUID.asUUID().toString())
             }
         }
     }
 
-    private suspend fun deleteEvent(client: HttpClient, eventID: Int, userUUID: ByteArray): HttpResponse {
-        return client.delete("$EVENTS_ROUTE/$eventID") {
+    private suspend fun deleteEvent(client: HttpClient, eventId: Int, userUUID: ByteArray): HttpResponse {
+        return client.delete("$EVENTS_ROUTE/$eventId") {
             contentType(ContentType.Application.Json)
-            headers{
+            headers {
                 append("UUID", userUUID.asUUID().toString())
             }
         }
     }
+
+    private suspend fun updateAvailableDates(
+        client: HttpClient,
+        eventId: Int,
+        dates: List<String>,
+        userUUID: ByteArray
+    ): HttpResponse {
+        val body = """
+                {
+                    "available_dates": ${objectMapper.writeValueAsString(dates)}
+                }
+            """.trimIndent()
+        return client.patch("$EVENTS_ROUTE/$eventId/available-dates") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            headers {
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+
+    private suspend fun getAvailableDates(client: HttpClient, eventId: Int, userUUID: ByteArray): HttpResponse {
+        return client.get("$EVENTS_ROUTE/$eventId/available-dates") {
+            contentType(ContentType.Application.Json)
+            headers {
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+
+    private suspend fun updateAvailableDates2(
+        client: HttpClient,
+        eventId: Int,
+        dates: List<LocalDateTime>,
+        userUUID: ByteArray
+    ): HttpResponse {
+        val body = """
+                {
+                    "available_dates": ${objectMapper.writeValueAsString(dates)}
+                }
+            """.trimIndent()
+
+        return client.patch("$EVENTS_ROUTE/$eventId/available-dates") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            headers {
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+    }
+    private suspend fun getAvailableDates2(client: HttpClient, eventId: Int, userUUID: ByteArray): List<LocalDateTime> {
+        val response = client.get("$EVENTS_ROUTE/$eventId/available-dates") {
+            contentType(ContentType.Application.Json)
+            headers {
+                append("UUID", userUUID.asUUID().toString())
+            }
+        }
+        return response.body()
+    }
+
 
     @Test
     fun test0GetUsers() = testApplication {
@@ -198,7 +279,12 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.Created, response.status)
         val owner = response.body<User>()
 
-        var event = EventTest(name = "test event", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        var event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
         var eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.Created, eventResponse.status)
         val createdEvent = eventResponse.body<EventWithUsers>()
@@ -219,7 +305,12 @@ class ApplicationTest {
         assertEquals(null, events[0].users[0].uuid)
 
         // Empty description
-        event = EventTest(name = "test event", description = "", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        event = EventTest(
+            name = "test event",
+            description = "",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
         eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.Created, eventResponse.status)
 
@@ -238,27 +329,48 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.Unauthorized, eventResponse.status)
 
         // Empty name
-        event = EventTest(name = "", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        event = EventTest(
+            name = "",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
         eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
 
         // Badly formatted start date
-        event = EventTest(name = "test event", description = "test description", start_date = "2021-xx01T00:00:00", end_date = "2021-01-01T00:00:00")
+        event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-xx01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
         eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
 
         // Badly formatted end date
-        event = EventTest(name = "test event", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01:00:00")
+        event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01:00:00"
+        )
         eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
 
         // Start date after end date
-        event = EventTest(name = "test event", description = "test description", start_date = "2022-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2022-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
         eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.BadRequest, eventResponse.status)
     }
+
     @Test
-    fun test3JoinEvent() = testApplication{
+    fun test3JoinEvent() = testApplication {
         setupTest()
         val client = getClient()
 
@@ -267,7 +379,12 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.Created, response.status)
         val owner = response.body<User>()
 
-        val event = EventTest(name = "test event", description = "test description", start_date = "2021-01-01T00:00:00", end_date = "2021-01-01T00:00:00")
+        val event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-01T00:00:00"
+        )
         val eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.Created, eventResponse.status)
         val eventCreated = eventResponse.body<EventWithUsers>()
@@ -346,6 +463,7 @@ class ApplicationTest {
         var joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
         assertEquals(0, joinerEvents.size)
 
+
         // Success case
         var joinResponse = joinEvent(client, eventCreated.event.inviteCode, joiner.uuid!!)
         assertEquals(HttpStatusCode.OK, joinResponse.status)
@@ -354,6 +472,16 @@ class ApplicationTest {
         assertEquals(2, joinEvent.users.size)
         assertEquals(owner.id, joinEvent.users[0].id)
         assertEquals(joiner.id, joinEvent.users[1].id)
+
+
+        val user3 = UserTest(name = "event joiner 2")
+        val response3 = createUser(client, user3)
+        assertEquals(HttpStatusCode.Created, response3.status)
+        val joiner3 = response3.body<User>()
+
+        // user 3 join
+        joinResponse = joinEvent(client, eventCreated.event.inviteCode, joiner3.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinResponse.status)
 
         // Make sure the user has joined the event
         joinerEventsResponse = getEvents(client, joiner.uuid!!)
@@ -366,7 +494,11 @@ class ApplicationTest {
 
         // Try to kick owner as the user
         var kickResponse = kickUser(client, eventCreated.event.id, owner.id, joiner.uuid!!)
-        assertEquals(HttpStatusCode.Unauthorized, kickResponse.status)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
+
+        // Try to kick another user when not owner
+        kickResponse = kickUser(client, eventCreated.event.id, joiner3.id, joiner.uuid!!)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
 
         // Kick user
         kickResponse = kickUser(client, eventCreated.event.id, joiner.id, owner.uuid!!)
@@ -374,7 +506,15 @@ class ApplicationTest {
 
         // Make sure the user has been kicked
         val events = getEvents(client, owner.uuid!!).body<List<EventWithUsers>>()
-        assertEquals(1, events[0].users.size)
+        assertEquals(2, events[0].users.size)
+
+        // Owner kick owner
+        kickResponse = kickUser(client, eventCreated.event.id, owner.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
+
+        // User leave event
+        kickResponse = kickUser(client, eventCreated.event.id, joiner3.id, joiner3.uuid!!)
+        assertEquals(HttpStatusCode.OK, kickResponse.status)
 
         // Make sure the user has been kicked
         joinerEventsResponse = getEvents(client, joiner.uuid!!)
@@ -400,7 +540,7 @@ class ApplicationTest {
 
         // Try to kick owner
         kickResponse = kickUser(client, eventCreated.event.id, owner.id, owner.uuid!!)
-        assertEquals(HttpStatusCode.Conflict, kickResponse.status)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
     }
 
     @Test
@@ -447,6 +587,78 @@ class ApplicationTest {
         // Try to delete again
         deleteResponse = deleteEvent(client, eventCreated.event.id, owner.uuid!!)
         assertEquals(HttpStatusCode.NotFound, deleteResponse.status)
+    }
+
+    @Test
+    fun test6AvailableDates() = testApplication {
+        setupTest()
+        val client = getClient()
+
+        val user = UserTest(name = "event owner")
+        val response = createUser(client, user)
+        assertEquals(HttpStatusCode.Created, response.status)
+        val owner = response.body<User>()
+
+        val event = EventTest(
+            name = "test event",
+            description = "test description",
+            start_date = "2021-01-01T00:00:00",
+            end_date = "2021-01-05T00:00:00"
+        )
+        val eventResponse = createEvent(client, event, owner.uuid!!)
+        assertEquals(HttpStatusCode.Created, eventResponse.status)
+        val eventCreated = eventResponse.body<EventWithUsers>()
+
+        // Make sure we can get the available dates after event creation
+        val availableDatesResponse = getAvailableDates(client, eventCreated.event.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, availableDatesResponse.status)
+
+        val dates = listOf(
+            "2021-01-02T00:00:00",
+            "2021-01-03T00:00:00",
+            "2021-01-04T00:00:00"
+        )
+
+        // Try to update with invalid UUID
+        var updateResponse = updateAvailableDates(client, eventCreated.event.id, dates, ByteArray(16))
+        assertEquals(HttpStatusCode.Unauthorized, updateResponse.status)
+
+        // Try to update with invalid event id
+        updateResponse = updateAvailableDates(client, -1, dates, owner.uuid!!)
+        assertEquals(HttpStatusCode.NotFound, updateResponse.status)
+
+        // Try to update with invalid date
+        updateResponse =
+            updateAvailableDates(client, eventCreated.event.id, listOf("2021-x1-01T00:00:00"), owner.uuid!!)
+        assertEquals(HttpStatusCode.BadRequest, updateResponse.status)
+
+        // Success case
+        updateResponse = updateAvailableDates(client, eventCreated.event.id, dates, owner.uuid!!)
+        assertEquals(HttpStatusCode.OK, updateResponse.status)
+
+        // Make sure the dates have been updated
+        val availableDatesResp = getAvailableDates(client, eventCreated.event.id, owner.uuid!!)
+        val availableDates = availableDatesResp.body<List<String>>()
+        assertEquals(3, availableDates.size)
+        // NOTE: Not sure if these are guaranteed to be in order.
+        assertEquals("2021-01-02T00:00:00", availableDates[0])
+        assertEquals("2021-01-03T00:00:00", availableDates[1])
+        assertEquals("2021-01-04T00:00:00", availableDates[2])
+
+        // Try to update with date before event start date
+        updateResponse =
+            updateAvailableDates(client, eventCreated.event.id, listOf("2020-01-01T00:00:00"), owner.uuid!!)
+        assertEquals(HttpStatusCode.BadRequest, updateResponse.status)
+
+        // Try to update with date after event end date
+        updateResponse =
+            updateAvailableDates(client, eventCreated.event.id, listOf("2021-01-06T00:00:00"), owner.uuid!!)
+        assertEquals(HttpStatusCode.BadRequest, updateResponse.status)
+
+        val dates2 = getAvailableDates2(client, eventCreated.event.id, owner.uuid!!)
+        println(dates2)
+
+        updateAvailableDates2(client, eventCreated.event.id, dates2, owner.uuid!!)
     }
 
     private fun resetDatabase() {

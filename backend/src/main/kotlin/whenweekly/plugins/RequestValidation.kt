@@ -8,6 +8,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
+import whenweekly.routes.AvailableDatesRequest
 import whenweekly.routes.EventJoinRequest
 import whenweekly.routes.UserKickRequest
 
@@ -44,6 +45,15 @@ fun Application.configureRequestValidation() {
         validate<EventJoinRequest> { request ->
             if (request.invite_code.isBlank()) {
                 ValidationResult.Invalid("Invite code cannot be blank")
+            } else {
+                ValidationResult.Valid
+            }
+        }
+        validate<AvailableDatesRequest> {
+            if (it.available_dates == null) {
+                ValidationResult.Invalid("Dates not specified")
+            } else if (it.available_dates!!.isEmpty()) {
+                ValidationResult.Invalid("Dates cannot be empty")
             } else {
                 ValidationResult.Valid
             }

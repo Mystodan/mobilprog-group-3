@@ -10,6 +10,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import whenweekly.frontend.api.Api
+import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.ActivityRegisterBinding
 import whenweekly.frontend.models.LocalUserModel
 
@@ -22,7 +23,7 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
         var welcomeText = listOf("Welcome to WhenWeekly." ,
             "Please Enter Your Name...")
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
             showText(welcomeText[0], binding.welcomeText, null)
             showText(welcomeText[1], null, binding.inputName)
         }
@@ -61,6 +62,7 @@ class RegisterActivity : AppCompatActivity() {
                 val user = Api.addUser(name)
                 if (user != null){
                     LocalUserModel(applicationContext).setUUID(user.uuidToString())
+                    LocalUserModel(applicationContext).setID(user.id)
                     startActivity(fragmentHolderIntent)
                 }
                 else

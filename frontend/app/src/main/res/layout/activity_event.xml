@@ -5,6 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.EventActivity">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -130,42 +135,36 @@
     </androidx.cardview.widget.CardView>
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/buttonPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical"
-        android:weightSum="10"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cv_card"
-        app:layout_constraintVertical_bias="0.0">
-
-
+        android:orientation="horizontal">
         <Button
-            android:id="@+id/btnSelectDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center|top"
-            android:layout_weight="0.5"
-            android:text="select dates" />
-
-        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
-            android:id="@+id/calendarView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            app:mcv_showOtherDates="none"
-            app:mcv_selectionColor="@color/font_brown" />
-
+            android:text="View Dates"
+            android:id="@+id/dateView"/>
         <Button
-            android:id="@+id/btnReportDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Report Date" />
+            android:text="Manage Dates"
+            android:id="@+id/dateManage"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/font_brown_light"
+            android:backgroundTint="@color/white"
+            android:text="Admin"
+            android:id="@+id/Admin"/>
     </LinearLayout>
 
+        <FrameLayout
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/fragmentHolder">
+
+        </FrameLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

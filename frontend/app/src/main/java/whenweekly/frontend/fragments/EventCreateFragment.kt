@@ -16,6 +16,7 @@ import whenweekly.frontend.app.Globals
 import whenweekly.frontend.R
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.databinding.FragmentEventCreateBinding
+import whenweekly.frontend.models.EventModel
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -46,7 +47,6 @@ class EventCreateActivity : Fragment() {
      *
      */
     private fun showDataRangePicker() {
-
         var setupDatePicker = MaterialDatePicker
             .Builder.dateRangePicker()
             .setTitleText("Select Date")
@@ -61,7 +61,7 @@ class EventCreateActivity : Fragment() {
         }
     }
 
-    fun Long.toLocalDateTime(): LocalDateTime = LocalDateTime.ofEpochSecond(this / 1000, 0, ZoneOffset.UTC)
+    private fun Long.toLocalDateTime(): LocalDateTime = LocalDateTime.ofEpochSecond(this / 1000, 0, ZoneOffset.UTC)
     /**
      *
      */
@@ -83,14 +83,16 @@ class EventCreateActivity : Fragment() {
             val eventName = binding.etEventName.text.toString()
             val newEvent = Api.addEvent(eventName, "filler description", startDate.toLocalDateTime(), endDate.toLocalDateTime())
             if(newEvent != null ) {
-                val newEventModel = Globals.Utils.createEvent(eventName, startDate, endDate, newEvent.event.inviteCode)
-                Globals.Lib.Events.add(newEventModel)
+                Globals.Lib.Events.add(EventModel(
+                    eventName, startDate, endDate, newEvent.event.inviteCode
+                ))
+                println(Globals.Lib.LocalID)
                 Toast.makeText(activity, "Event created!", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(activity, "Error creating event!", Toast.LENGTH_SHORT).show()
             }
+            resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
         }
-        resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
     }
 
     /**

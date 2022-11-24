@@ -2,6 +2,7 @@ package whenweekly.domain.repository
 
 import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
+import java.time.LocalDateTime
 
 
 interface EventRepository {
@@ -20,4 +21,8 @@ interface EventRepository {
     fun deleteEventByID(eventId: Int): Boolean
 
     fun removeUserFromEvent(eventId: Int, kickedUserID: Int): Boolean
+
+    fun getAvailableDatesByEventId(eventId: Int): List<LocalDateTime>
+
+    fun updateAvailableDates(eventId: Int, userId: Int, dates: List<LocalDateTime>): Boolean
 }
