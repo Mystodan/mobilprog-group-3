@@ -1,5 +1,6 @@
 package whenweekly.frontend.api
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
@@ -31,6 +32,15 @@ object Api {
                 })
             }
         }
+    }
+
+    private val objectMapper = ObjectMapper().apply {
+        registerModule(JavaTimeModule().apply {
+            addSerializer(
+                LocalDateTime::class.java,
+                LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+            )
+        })
     }
 
     private suspend fun doRequest(httpMethod: HttpMethod, route: String, body: String? = null): HttpResponse {
@@ -154,6 +164,37 @@ object Api {
                 "${HttpRoutes.EVENTS}/$eventId"
             )
             println(response.bodyAsText())
+            response.status == HttpStatusCode.OK
+        } catch (e: Exception) {
+            println(e)
+            false
+        }
+    }
+
+    suspend fun getAvailableDates(eventId: Int): List<LocalDateTime> {
+        return try {
+            val response = doRequest(
+                HttpMethod.Get,
+                "${HttpRoutes.EVENTS}/$eventId/available-dates"
+            )
+            response.body()
+        } catch (e: Exception) {
+            println(e)
+            emptyList()
+        }
+    }
+
+    suspend fun updateAvailableDates(eventId: Int, dates: List<LocalDateTime>): Boolean {
+        return try {
+            val response = doRequest(
+                HttpMethod.Patch,
+                "${HttpRoutes.EVENTS}/$eventId/available-dates",
+                """
+                {
+                    "available_dates": ${objectMapper.writeValueAsString(dates)}
+                }
+            """.trimIndent()
+            )
             response.status == HttpStatusCode.OK
         } catch (e: Exception) {
             println(e)
