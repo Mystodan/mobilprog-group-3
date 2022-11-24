@@ -35,11 +35,11 @@ class DateReportFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {  // Inflate the layout for this fragment
-       var eventInformation = getEventModelFromParcel()
+       val eventInformation = getEventModelFromParcel()
 
 
         datesStart = timeAsInt(eventInformation?.startDate!!)
-        datesEnd = timeAsInt(eventInformation?.endDate!!)
+        datesEnd = timeAsInt(eventInformation.endDate)
 
         _binding = FragmentDateReportBinding.inflate(inflater, container, false)
 
@@ -52,22 +52,33 @@ class DateReportFragment : Fragment() {
 
 
         binding.btnReportDate.setOnClickListener {
-            val allDates = allDates(toLocalDate(eventInformation.startDate!!), toLocalDate(eventInformation.startDate!!))
+            val allDates = allDates(toLocalDate(eventInformation.startDate), toLocalDate(eventInformation.endDate))
             println("All dates: $allDates")
-            val (availableDates, unavailableDates) = calculateAvailableDates(allDates)
-            var toastMSG =
+
+            println(localDateToString(allDates))
+
+            val (unavailableDates) = calculateAvailableDates(allDates)
+            val toastMSG =
                 if(unavailableDates.isEmpty()) "Please select dates first!"
-                else if (doesAvailableContainUnavailable(unavailableDatesParent, unavailableDates)) "${GetUnavailableDatesAsDays()} of the selected dates are unavailable"
+                else if (doesAvailableContainUnavailable(unavailableDatesParent, unavailableDates)) "${getUnavailableDatesAsDays()} of the selected dates are unavailable"
                 else { unavailableDates.forEach{if(!unavailableDatesParent.contains(it))unavailableDatesParent.add(it)}; "Dates reported successfully!"}
             Toast.makeText(context, toastMSG , Toast.LENGTH_SHORT).show()
         }
 
         return binding.root
     }
+
     private fun doesAvailableContainUnavailable(unavailableDates: MutableList<LocalDate>,availableDates: MutableList<LocalDate>):Boolean{
         availableDates.forEach{return (unavailableDates.contains(it))}
         return false
     }
+
+    private fun localDateToString(datesList: MutableList<LocalDate>) : MutableList<String> {
+        val stringDates = mutableListOf<String>()
+        calculateAvailableDates(datesList).first.forEach{ stringDates.add("\"$it\"") }
+        return stringDates
+    }
+
     private fun getEventModelFromParcel():EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
     } else
@@ -84,7 +95,7 @@ class DateReportFragment : Fragment() {
         Globals.Utils.formatDate("MM", date).toInt(),
         Globals.Utils.formatDate("dd", date).toInt()
     )
-    private fun GetUnavailableDatesAsDays():MutableList<Int> {
+    private fun getUnavailableDatesAsDays():MutableList<Int> {
         val retList = mutableListOf<Int>()
         unavailableDatesParent.forEach{retList.add(it.dayOfMonth) }
         return retList
@@ -117,12 +128,11 @@ class DateReportFragment : Fragment() {
      * Removes the unavailable dates from all dates that are available
      *
      * @param allDates          - A mutable list of all LocalDates between startDate and endDate
-     * @param unavailableDates  - Dates that are selected by the user and marked as unavailable
      * @return                  - Returns alldates after it has removed all unavailable dates
      */
     private fun calculateAvailableDates(allDates: MutableList<LocalDate>): Pair<MutableList<LocalDate>,MutableList<LocalDate>> {
-        var availableDates : MutableList<LocalDate> = allDates
-        var unavailableDates : MutableList<LocalDate> = mutableListOf()
+        val availableDates : MutableList<LocalDate> = allDates
+        val unavailableDates : MutableList<LocalDate> = mutableListOf()
         for(date in binding.calendarView.selectedDates) {
             unavailableDates.add(toLocalDate(date.date.toEpochDay()*86400000))
         }

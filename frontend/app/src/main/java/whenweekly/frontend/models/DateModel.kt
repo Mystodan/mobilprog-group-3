@@ -4,26 +4,23 @@ import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.RequiresApi
+import whenweekly.frontend.app.Globals
 import java.util.*
 
 /**
- * The data model for a single user using parcelables to "send" information to a receiver that can use that data to put into their layout XML
+ * The data model for a single availableDate using parcelables to "send" information to a receiver that can use that data to put into their layout XML
  */
-data class UserModel(
-    var userName: String,
-    var checked: Boolean,
-    var id: Int
+data class DateModel(
+    var availableDate: String
 ) : Parcelable {
     /**
-     * Constructor for the parcels that sets values for the UserModel parcel
+     * Constructor for the parcels that sets values for the DateModel parcel
      *
      * @param parcel    - Takes a parcel as a parameter
      */
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(parcel: Parcel) : this(
-        parcel.readString().toString(),
-        parcel.readBoolean(),
-        parcel.readInt()
+        parcel.readString().toString()
     )
 
     /**
@@ -34,9 +31,7 @@ data class UserModel(
      */
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(userName)
-        parcel.writeBoolean(checked)
-        parcel.writeInt(id)
+        parcel.writeString(availableDate)
     }
 
     /**
@@ -47,17 +42,17 @@ data class UserModel(
     }
 
     /**
-     * Function that returns a UserModel
+     * Function that returns a DateModel
      */
-    companion object CREATOR : Parcelable.Creator<UserModel> {
+    companion object CREATOR : Parcelable.Creator<DateModel> {
         /**
          * Function that creates from a parcel
          *
          * @param parcel    - Takes a parcel as a parameter
          */
         @RequiresApi(Build.VERSION_CODES.Q)
-        override fun createFromParcel(parcel: Parcel): UserModel {
-            return UserModel(parcel)
+        override fun createFromParcel(parcel: Parcel): DateModel {
+            return DateModel(parcel)
         }
 
         /**
@@ -65,7 +60,7 @@ data class UserModel(
          *
          * @param size  - The size of the array passed as an int
          */
-        override fun newArray(size: Int): Array<UserModel?> {
+        override fun newArray(size: Int): Array<DateModel?> {
             return arrayOfNulls(size)
         }
     }
