@@ -14,8 +14,7 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import kotlinx.coroutines.launch
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
-
-import whenweekly.frontend.databinding.FragmentEventDatesBinding
+import whenweekly.frontend.databinding.FragmentDateReportBinding
 import whenweekly.frontend.models.EventModel
 import java.time.Instant
 import java.time.LocalDate
@@ -29,7 +28,7 @@ import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 
 class DateReportFragment : Fragment() {
-    private var _binding : FragmentEventDatesBinding? = null
+    private var _binding : FragmentDateReportBinding? = null
     private val binding get() = _binding!!
     private var datesStart: List<Int> ? = null
     private var datesEnd: List<Int> ? = null
@@ -48,7 +47,7 @@ class DateReportFragment : Fragment() {
         datesStart = timeAsInt(eventInformation?.startDate!!)
         datesEnd = timeAsInt(eventInformation.endDate)
 
-        _binding = FragmentEventDatesBinding.inflate(inflater, container, false)
+        _binding = FragmentDateReportBinding.inflate(inflater, container, false)
 
         binding.calendarView.selectionMode = MaterialCalendarView.SELECTION_MODE_MULTIPLE
         binding.calendarView.state().edit()

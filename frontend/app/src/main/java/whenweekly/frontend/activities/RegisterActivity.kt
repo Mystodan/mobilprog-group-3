@@ -57,12 +57,11 @@ class RegisterActivity : AppCompatActivity() {
         if (name.isEmpty())
             Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
         else{
-            var fragmentHolderIntent = Intent(this, FragmentHolderActivity::class.java)
+            val fragmentHolderIntent = Intent(this, FragmentHolderActivity::class.java)
             lifecycleScope.launch{
-                val user = Api.addUser(name)
-                if (user != null){
-                    LocalUserModel(applicationContext).setUUID(user.uuidToString())
-                    LocalUserModel(applicationContext).setID(user.id)
+                val userResponse = Api.addUser(name)
+                if (userResponse.data != null){
+                    LocalUserModel(applicationContext).setUser(userResponse.data)
                     startActivity(fragmentHolderIntent)
                 }
                 else

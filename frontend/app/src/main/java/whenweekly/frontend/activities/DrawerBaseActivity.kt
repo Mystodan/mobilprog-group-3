@@ -82,7 +82,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     /**
      *
      */
-    private fun loadFragment(fragmentClass:Class<*>?) {
+    protected fun loadFragment(fragmentClass:Class<*>?) {
         var fragment: Fragment? = null
         try {
             fragment = fragmentClass?.newInstance() as Fragment
@@ -107,5 +107,16 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     fun setActivityTitle(title: String) {
         if (supportActionBar == null) return
         supportActionBar!!.title = title
+    }
+    /**
+     *
+     */
+    protected fun setDefaultFragment(target:Fragment, state: Bundle?, view: Int){
+        if (state == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(view, target)
+                .commit()
+        }
     }
 }

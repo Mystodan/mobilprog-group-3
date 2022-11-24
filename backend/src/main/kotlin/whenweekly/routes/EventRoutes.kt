@@ -277,11 +277,6 @@ fun Route.updateAvailableDatesByEventId(repository: EventRepository, userReposit
             return@patch
         }
 
-        if (event.owner!!.id != userId) {
-            call.respond(HttpStatusCode.Unauthorized, "You are not the owner of this event")
-            return@patch
-        }
-
         val availableDates = call.receive<AvailableDatesRequest>()
 
         // Check that dates are in range of event
