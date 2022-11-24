@@ -161,7 +161,7 @@ object Api {
         }
     }
 
-    suspend fun kickUserFromEvent(eventId: Int, userId: Int): Boolean {
+    suspend fun kickUserFromEvent(eventId: Int, userId: Int): ApiResponse<Boolean> {
         return try {
             val response = doRequest(
                 HttpMethod.Put,
@@ -172,11 +172,10 @@ object Api {
                     }
                     """.trimIndent()
             )
-            println(response.bodyAsText())
-            response.status == HttpStatusCode.OK
+            ApiResponse(response.status == HttpStatusCode.OK, response.status, "")
         } catch (e: Exception) {
             println(e)
-            false
+            ApiResponse(false, HttpStatusCode.UnprocessableEntity, e.message ?: "Unknown error")
         }
     }
 
@@ -207,7 +206,7 @@ object Api {
         }
     }
 
-    suspend fun updateAvailableDates(eventId: Int, dates: List<LocalDateTime>): Boolean {
+    suspend fun updateAvailableDates(eventId: Int, dates: List<LocalDateTime>): ApiResponse<Boolean> {
         return try {
             val response = doRequest(
                 HttpMethod.Patch,
@@ -218,10 +217,10 @@ object Api {
                 }
             """.trimIndent()
             )
-            response.status == HttpStatusCode.OK
+            ApiResponse(response.status == HttpStatusCode.OK, response.status, "")
         } catch (e: Exception) {
             println(e)
-            false
+            ApiResponse(false, HttpStatusCode.UnprocessableEntity, e.message ?: "Unknown error")
         }
     }
 }
