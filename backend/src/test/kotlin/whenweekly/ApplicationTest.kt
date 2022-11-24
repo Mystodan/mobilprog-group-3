@@ -119,8 +119,14 @@ class ApplicationTest {
         }
     }
 
-    private suspend fun kickUser(client: HttpClient, eventID: Int, userId: Int, userUUID: ByteArray): HttpResponse {
-        return client.put("$EVENTS_ROUTE/$eventID/kick") {
+    private suspend fun getEvent(client: HttpClient, eventId: Int): HttpResponse {
+        return client.get("$EVENTS_ROUTE/$eventId"){
+            contentType(ContentType.Application.Json)
+        }
+    }
+
+    private suspend fun kickUser(client: HttpClient, eventId: Int, userId: Int, userUUID: ByteArray): HttpResponse {
+        return client.put("$EVENTS_ROUTE/$eventId/kick") {
             contentType(ContentType.Application.Json)
             setBody("""
                 {
@@ -346,6 +352,7 @@ class ApplicationTest {
         var joinerEvents = joinerEventsResponse.body<List<EventWithUsers>>()
         assertEquals(0, joinerEvents.size)
 
+
         // Success case
         var joinResponse = joinEvent(client, eventCreated.event.inviteCode, joiner.uuid!!)
         assertEquals(HttpStatusCode.OK, joinResponse.status)
@@ -354,6 +361,16 @@ class ApplicationTest {
         assertEquals(2, joinEvent.users.size)
         assertEquals(owner.id, joinEvent.users[0].id)
         assertEquals(joiner.id, joinEvent.users[1].id)
+
+
+        val user3 = UserTest(name = "event joiner 2")
+        val response3 = createUser(client, user3)
+        assertEquals(HttpStatusCode.Created, response3.status)
+        val joiner3 = response3.body<User>()
+
+        // user 3 join
+        joinResponse = joinEvent(client, eventCreated.event.inviteCode, joiner3.uuid!!)
+        assertEquals(HttpStatusCode.OK, joinResponse.status)
 
         // Make sure the user has joined the event
         joinerEventsResponse = getEvents(client, joiner.uuid!!)
@@ -366,7 +383,11 @@ class ApplicationTest {
 
         // Try to kick owner as the user
         var kickResponse = kickUser(client, eventCreated.event.id, owner.id, joiner.uuid!!)
-        assertEquals(HttpStatusCode.Unauthorized, kickResponse.status)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
+
+        // Try to kick another user when not owner
+        kickResponse = kickUser(client, eventCreated.event.id, joiner3.id, joiner.uuid!!)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
 
         // Kick user
         kickResponse = kickUser(client, eventCreated.event.id, joiner.id, owner.uuid!!)
@@ -374,7 +395,15 @@ class ApplicationTest {
 
         // Make sure the user has been kicked
         val events = getEvents(client, owner.uuid!!).body<List<EventWithUsers>>()
-        assertEquals(1, events[0].users.size)
+        assertEquals(2, events[0].users.size)
+
+        // Owner kick owner
+        kickResponse = kickUser(client, eventCreated.event.id, owner.id, owner.uuid!!)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
+
+        // User leave event
+        kickResponse = kickUser(client, eventCreated.event.id, joiner3.id, joiner3.uuid!!)
+        assertEquals(HttpStatusCode.OK, kickResponse.status)
 
         // Make sure the user has been kicked
         joinerEventsResponse = getEvents(client, joiner.uuid!!)
@@ -400,7 +429,7 @@ class ApplicationTest {
 
         // Try to kick owner
         kickResponse = kickUser(client, eventCreated.event.id, owner.id, owner.uuid!!)
-        assertEquals(HttpStatusCode.Conflict, kickResponse.status)
+        assertEquals(HttpStatusCode.Forbidden, kickResponse.status)
     }
 
     @Test
