@@ -1,15 +1,14 @@
 package whenweekly.frontend.fragments
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import kotlinx.coroutines.launch
-import whenweekly.frontend.activities.EventActivity
+import whenweekly.frontend.activities.FragmentHolderActivity
 import whenweekly.frontend.adapters.EventAdapter
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
@@ -22,7 +21,8 @@ class EventListFragment : Fragment() {
     private var _binding : FragmentEventListBinding? = null
     private val binding get() = _binding!!
     private var adapter = EventAdapter(Globals.Lib.Events) {
-        Globals.Utils.changeActivity(Globals.Lib.Events[it], requireActivity(),requireContext() )
+        Globals.Utils.startEventActivityOfEvent(Globals.Lib.Events[it], requireActivity(),(activity as FragmentHolderActivity).getResult)
+
     }
 
     /**
@@ -66,6 +66,7 @@ class EventListFragment : Fragment() {
 
         return binding.root
     }
+
 
 
 }

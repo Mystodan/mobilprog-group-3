@@ -5,6 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.EventActivity">
+    <ScrollView
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -143,6 +147,13 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="leave"
+            android:textColor="@color/font_brown_light"
+            android:backgroundTint="@color/white"
+            android:id="@+id/leave"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="View Dates"
             android:id="@+id/dateView"/>
         <Button
@@ -167,4 +178,5 @@
 
         </FrameLayout>
     </LinearLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

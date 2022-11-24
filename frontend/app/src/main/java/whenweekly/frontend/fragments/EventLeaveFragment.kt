@@ -12,8 +12,9 @@ import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.FragmentPromptBinding
 import whenweekly.frontend.models.EventModel
+import whenweekly.frontend.models.LocalUserModel
 
-class AdminDeleteFragment:Fragment() {
+class EventLeaveFragment:Fragment() {
     private var _binding : FragmentPromptBinding? = null
     private val binding get() = _binding!!
 
@@ -36,10 +37,11 @@ class AdminDeleteFragment:Fragment() {
         var eventInformation = getEventModelFromParcel()!!
         _binding = FragmentPromptBinding.inflate(inflater, container, false)
         setUpPrompt(eventInformation)
+
         binding.btnSubmitPromt.setOnClickListener {
-            if(binding.inputPrompt.text.toString() == eventInformation.eventName){
+            if(binding.inputPrompt.text.toString() == Globals.Lib.CurrentUser?.name){
                 lifecycleScope.launch {
-                    Api.deleteEvent(eventInformation.eventId)
+                    Api.kickUserFromEvent(eventInformation.eventId, Globals.Lib.CurrentUser?.id!!)
                     Globals.Lib.Events.remove(eventInformation)
                     activity?.finish()
                 }
@@ -48,10 +50,10 @@ class AdminDeleteFragment:Fragment() {
         return binding.root
     }
     private fun setUpPrompt(eventInformation:EventModel){
-        var event = eventInformation.eventName
-        binding.prompt.text = "Are you sure you want to delete \"${event}\"?"
-        binding.inputPrompt.hint = "Type \"${event}\" in order to confirm"
-        binding.btnSubmitPromt.text = "Delete ${event}"
+        var output = Globals.Lib.CurrentUser?.name
+        binding.prompt.text = "Are you(${output}) sure you want to leave ${eventInformation.eventName}?"
+        binding.inputPrompt.hint = "Type \"${output}\" in order to confirm"
+        binding.btnSubmitPromt.text = "Leave Event"
     }
 
     private fun getEventModelFromParcel(): EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

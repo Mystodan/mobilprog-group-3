@@ -51,32 +51,42 @@ class AdminManageUserFragment : Fragment() {
         )
 
         lifecycleScope.launchWhenStarted{
-            deleteUser(eventInformation!!)
+            getEventUsersFromAPI(eventInformation!!,deleteUser(eventInformation!!))
         }
 
         return binding.root
     }
-
-
+    private fun getEventUsersFromAPI(eventInformation: EventModel, eventWithUsers: List<EventWithUsers>) {
+        for(event in eventWithUsers) {
+            if(event.event.inviteCode != eventInformation!!.invCode) continue
+            for(user in event.users) {
+                if(user.id == eventInformation.ownerId) continue
+                userList.add(UserModel(user.name!!, false, user.id))
+            }
+        }
+        adapter.updateData(userList)
+    }
 
     private fun getEventModelFromParcel(): EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
     } else
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
 
-    private suspend fun deleteUser(eventInformation: EventModel){
+    private suspend fun deleteUser(eventInformation: EventModel):List<EventWithUsers>{
+        var events = Api.getEvents()
         binding.btnDelete.setOnClickListener {
             lifecycleScope.launch {
-                for(event in Globals.Lib.Events){
-                    if(event.invCode != eventInformation!!.invCode) continue
+                for(event in events){
+                    if(event.event.inviteCode != eventInformation!!.invCode) continue
                     for (user in userList){
                         if(!user.checked) continue
-                        Api.kickUserFromEvent(event.eventId, user.id)
+                        Api.kickUserFromEvent(event.event.id, user.id)
                         userList.remove(user)
                         adapter.updateData(userList)
                     }
                 }
             }
         }
+        return events
     }
 }

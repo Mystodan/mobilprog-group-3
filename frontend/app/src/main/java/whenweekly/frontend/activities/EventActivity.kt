@@ -1,9 +1,6 @@
 package whenweekly.frontend.activities
 
-import android.annotation.SuppressLint
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import android.content.*
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -18,7 +15,7 @@ import whenweekly.frontend.models.EventModel
 
 class EventActivity : DrawerBaseActivity() {
     enum class ButtonPanel{
-        Admin, DatesSelect, DatesAll
+        Admin, DatesSelect, DatesAll, Leave
     }
 
     /**
@@ -32,6 +29,7 @@ class EventActivity : DrawerBaseActivity() {
     private val fragmentManager: FragmentManager = supportFragmentManager
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
+        isOwner = false
         super.onCreate(savedInstanceState)
         //Sets the binding to the XML layout and sets it as the root
         binding = ActivityEventBinding.inflate(layoutInflater)
@@ -46,9 +44,6 @@ class EventActivity : DrawerBaseActivity() {
         displayData(eventInformation)
         // reconfigures toolbar
         reconfigureToolbar()
-        if (!isOwner){
-            binding.Admin.visibility = android.view.View.GONE
-        }
         // set default fragment
         loadFragment(currFragment::class.java, eventInformation)
 
@@ -73,6 +68,13 @@ class EventActivity : DrawerBaseActivity() {
 
 
     private fun manageOwnerState(model:EventModel){
+        applyUserAccess(model)
+        if(model.ownerId != Globals.Lib.CurrentUser?.id){ hideAdmin(model);return}
+        applyOwnerAccess(model)
+    }
+
+
+    private fun applyUserAccess(model: EventModel){
         binding.dateManage.setOnClickListener {
             buttonPanel = ButtonPanel.DatesSelect
             changePanelView(buttonPanel, model)
@@ -81,15 +83,25 @@ class EventActivity : DrawerBaseActivity() {
             buttonPanel = ButtonPanel.DatesAll
             changePanelView(buttonPanel, model)
         }
-
-        if(model.ownerId != Globals.Lib.LocalID) return
+    }
+    private fun applyOwnerAccess(model:EventModel){
         isOwner = true
+        binding.leave.visibility = android.view.View.GONE
         binding.Admin.setOnClickListener {
             buttonPanel = ButtonPanel.Admin
             changePanelView(buttonPanel, model)
+
         }
     }
-
+    private fun hideAdmin(model:EventModel){
+        if(!isOwner){
+            binding.Admin.visibility = android.view.View.GONE
+            binding.leave.setOnClickListener {
+                buttonPanel = ButtonPanel.Leave
+                changePanelView(buttonPanel,model)
+            }
+        }
+    }
 
     /**
      *
@@ -106,13 +118,14 @@ class EventActivity : DrawerBaseActivity() {
     private fun reconfigureToolbar() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.back_arrow)
         toolbar.setNavigationIconColor(resources.getColor(R.color.white, theme))
-        toolbar.setNavigationOnClickListener{ finish() }
+        toolbar.setNavigationOnClickListener{ finish()}
     }
 
     private fun changePanelView(menuItem: ButtonPanel, parcel: EventModel){
         val componentClass: Class<*> = when(menuItem){
             ButtonPanel.Admin -> EventAdminFragment::class.java
             ButtonPanel.DatesAll -> DateViewAllFragment::class.java
+            ButtonPanel.Leave-> EventLeaveFragment::class.java
             else -> DateReportFragment::class.java
         }
 

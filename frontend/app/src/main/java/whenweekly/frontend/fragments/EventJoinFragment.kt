@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import whenweekly.frontend.activities.FragmentHolderActivity
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
 
@@ -47,11 +48,11 @@ class EventJoinFragment : Fragment() {
                     event.event.start_date.toEpochSecond(ZoneOffset.UTC) * 1000,
                     event.event.end_date.toEpochSecond(ZoneOffset.UTC) * 1000,
                     event.event.inviteCode,
+                    event.event.id,
                     event.event.owner.id)
                 Globals.Lib.Events.add(localEvent)
-                println("${event.event.owner.id} == ${Globals.Lib.LocalID}")
                 Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
-                Globals.Utils.changeActivity(localEvent, requireActivity(), requireContext())
+                Globals.Utils.startEventActivityOfEvent(localEvent, requireActivity(), (activity as FragmentHolderActivity).getResult)
             } else if (error != null) {
                 Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
             } else {

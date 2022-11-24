@@ -82,7 +82,7 @@ open class DrawerBaseActivity : AppCompatActivity(), NavigationView.OnNavigation
     /**
      *
      */
-    private fun loadFragment(fragmentClass:Class<*>?) {
+    protected fun loadFragment(fragmentClass:Class<*>?) {
         var fragment: Fragment? = null
         try {
             fragment = fragmentClass?.newInstance() as Fragment

@@ -15,7 +15,7 @@ data class EventModel(
     var endDate: Long,
     var invCode: String,
     var eventId:Int,
-    var ownerId:Int? = Globals.Lib.LocalID,
+    var ownerId:Int? = Globals.Lib.CurrentUser?.id,
 ) : Parcelable {
 
     /**

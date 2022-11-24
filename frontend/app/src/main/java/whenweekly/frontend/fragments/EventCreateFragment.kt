@@ -1,6 +1,5 @@
 package whenweekly.frontend.fragments
 
-import android.media.metrics.Event
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +14,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.launch
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.R
+import whenweekly.frontend.activities.FragmentHolderActivity
 import whenweekly.frontend.api.Api
 import whenweekly.frontend.databinding.FragmentEventCreateBinding
 import whenweekly.frontend.models.EventModel
@@ -87,9 +87,10 @@ class EventCreateActivity : Fragment() {
             if(newEvent != null ) {
                 localEvent = EventModel(eventName, startDate, endDate, newEvent.event.inviteCode,newEvent.event.id)
                 Globals.Lib.Events.add(localEvent)
-                println(Globals.Lib.LocalID)
+                println(Globals.Lib.CurrentUser?.id)
                 Toast.makeText(activity, "Event created!", Toast.LENGTH_SHORT).show()
-                Globals.Utils.changeActivity(localEvent, requireActivity(), requireContext())
+                println("activity:${requireActivity()} \nContext:${requireContext()}")
+                Globals.Utils.startEventActivityOfEvent(localEvent, requireActivity(), (activity as FragmentHolderActivity).getResult)
             } else {
                 Toast.makeText(activity, "Error creating event!", Toast.LENGTH_SHORT).show()
             }

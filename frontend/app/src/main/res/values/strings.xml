@@ -4,6 +4,7 @@
     <string name="drawer_close">Drawer Close</string>
     <string name="userID">UUID</string>
     <string name="UIDKEY">177013</string>
+    <string name="NAMEKEY">123456</string>
     <string name="IDKEY">265918</string>
     <string name="defaultDateHolder">""</string>
 </resources>
