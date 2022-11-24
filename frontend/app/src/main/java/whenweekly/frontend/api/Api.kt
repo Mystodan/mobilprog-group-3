@@ -71,6 +71,23 @@ object Api {
         }
     }
 
+    suspend fun getUser(): Pair<User?, String?> {
+        return try {
+            val response = doRequest(
+                HttpMethod.Get,
+                "${HttpRoutes.USERS}/me"
+            )
+            if (response.status == HttpStatusCode.OK) {
+                Pair(response.body(), null)
+            } else {
+                Pair(null, response.bodyAsText())
+            }
+        } catch (e: Exception) {
+            println(e)
+            Pair(null, e.message)
+        }
+    }
+
     suspend fun addUser(name:String): User? {
         return try {
             val response = doRequest(

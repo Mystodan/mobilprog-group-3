@@ -15,15 +15,19 @@ const val clearUUID: Boolean = false
 
 class LocalUserModel(private val context : Context) {
     private var uuidKey = context.resources.getString(Globals.Constants.USERID_KEY)
-    private var user:User?=null
     private val securePref = setSecurePref(Globals.Constants.SECURE_FILENAME,Globals.Constants.SECURE_MASTER_KEY_ALIAS)
 
     init {
         val storedUuid = securePref.getString(uuidKey,null)
         if (storedUuid != null && !clearUUID) {
             Globals.Lib.localUUID = storedUuid
-            //user = Api.getUser(storedUuid)
-            Globals.Lib.CurrentUser = user
+            val (user, error) = Api.getUser()
+            if (user != null) {
+                Globals.Lib.CurrentUser = user
+            }
+            else if (error != null) {
+                // TODO: Handle error
+            }
         }
 
     }
