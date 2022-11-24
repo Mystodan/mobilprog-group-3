@@ -21,7 +21,6 @@ fun Route.userRouting() {
         getUser(userRepository)
         dev {
             getUsers(userRepository)
-            getUserById(userRepository)
             getEventsForUser(eventRepository)
         }
     }
@@ -60,17 +59,6 @@ fun Route.getUser(repository: UserRepository) {
             HttpStatusCode.OK,
             user
         )
-    }
-}
-
-fun Route.getUserById(repository: UserRepository) {
-    get("{id}") {
-        val id = call.parameters["id"]!!.toInt()
-        val user = repository.getUserById(id)
-        user?.let {
-            call.respond(HttpStatusCode.OK, it)
-        } ?: call.respond(HttpStatusCode.NotFound, "user not found with id $id")
-        return@get
     }
 }
 
