@@ -162,18 +162,13 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
             return@put
         }
 
-        // Get ownerID
+        // Get user id
         val userID = Shared.getUserId(call.request, userRepository)
         if (userID == null) {
             call.respond(
                 HttpStatusCode.Unauthorized,
                 "Invalid UUID"
             )
-            return@put
-        }
-
-        if (event.owner!!.id != userID) {
-            call.respond(HttpStatusCode.Unauthorized, "You are not the owner of this event")
             return@put
         }
 
@@ -186,8 +181,11 @@ fun Route.removeUserFromEvent(eventRepository: EventRepository, userRepository: 
             return@put
         }
 
-        if (userToKick.user_id!! == userID) {
-            call.respond(HttpStatusCode.Conflict, "You can't kick yourself from the event")
+        if (userToKick.user_id!! == userID && event.owner!!.id == userID) {
+            call.respond(HttpStatusCode.Forbidden, "You can't kick yourself from the event as an owner")
+            return@put
+        } else if (userToKick.user_id!! != userID && event.owner!!.id != userID) {
+            call.respond(HttpStatusCode.Forbidden, "You can't kick other users from the event")
             return@put
         }
 
