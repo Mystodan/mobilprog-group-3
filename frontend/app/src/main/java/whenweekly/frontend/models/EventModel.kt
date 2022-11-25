@@ -15,7 +15,7 @@ data class EventModel(
     var endDate: Long,
     var invCode: String,
     var eventId:Int,
-    var ownerId:Int? = Globals.Lib.CurrentUser?.id,
+    var ownerId:Int? = Globals.Lib.CurrentUser?.id
 ) : Parcelable {
 
     /**
@@ -29,7 +29,7 @@ data class EventModel(
         parcel.readLong(),
         parcel.readString().toString(),
         parcel.readInt(),
-        parcel.readInt(),
+        parcel.readInt()
     )
 
     /**
@@ -76,6 +76,4 @@ data class EventModel(
             return arrayOfNulls(size)
         }
     }
-
-
 }
