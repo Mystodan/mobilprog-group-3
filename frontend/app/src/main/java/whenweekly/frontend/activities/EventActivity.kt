@@ -47,6 +47,8 @@ class EventActivity : DrawerBaseActivity() {
         // set default fragment
         loadFragment(currFragment::class.java, eventInformation)
 
+
+
         // sets up clipboard manager
         clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         binding.copyCode.setOnClickListener { clipboard.setPrimaryClip(

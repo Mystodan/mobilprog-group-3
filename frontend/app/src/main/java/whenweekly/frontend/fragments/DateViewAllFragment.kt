@@ -40,7 +40,7 @@ class DateViewAllFragment : Fragment() {
         lifecycleScope.launch {
             Api.getAvailableDates(eventInformation?.eventId!!).data?.forEach{
                 availableDatesList.add(it)
-                adapter.updateData(availableDatesList)
+                adapter.updateData(availableDatesList.distinct())
             }
             println(availableDatesList)
         }

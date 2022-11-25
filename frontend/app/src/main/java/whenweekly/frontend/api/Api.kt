@@ -21,6 +21,9 @@ import java.time.format.DateTimeFormatter
  * API for communication between frontend and backend
  */
 object Api {
+    /**
+     * Client with jackson serialization
+     */
     private val client = HttpClient {
         install(ContentNegotiation) {
             jackson {
@@ -38,10 +41,16 @@ object Api {
 
     data class ApiResponse<T>(val data: T, val status: HttpStatusCode, val message: String)
 
+    /**
+     * @return      - Returns exception message
+     */
     private fun <T> exceptionResponse(e: Exception): ApiResponse<T?> {
         return ApiResponse(null, HttpStatusCode.UnprocessableEntity, e.message ?: "Unknown error")
     }
 
+    /**
+     * API response helper, checks if statuscode is what we want
+     */
     private suspend inline fun <reified T> response(response: HttpResponse, expectedStatusCode: HttpStatusCode): ApiResponse<T?> {
         return if (response.status == expectedStatusCode) {
             ApiResponse(response.body(), response.status, "")
@@ -50,6 +59,9 @@ object Api {
         }
     }
 
+    /**
+     * Serialization of DateTime
+     */
     private val objectMapper = ObjectMapper().apply {
         registerModule(JavaTimeModule().apply {
             addSerializer(
@@ -59,6 +71,9 @@ object Api {
         })
     }
 
+    /**
+     * Sends a request to the backend
+     */
     private suspend fun doRequest(httpMethod: HttpMethod, route: String, body: String? = null): HttpResponse {
         val response = client.request(route) {
             method = httpMethod
@@ -74,6 +89,9 @@ object Api {
         return response
     }
 
+    /**
+     * Get events from the API
+     */
     suspend fun getEvents(): ApiResponse<List<EventWithUsers>?> {
         return try {
             val response = doRequest(
@@ -87,6 +105,9 @@ object Api {
         }
     }
 
+    /**
+     * Get user from the API
+     */
     suspend fun getUser(): ApiResponse<User?> {
         return try {
             val response = doRequest(
@@ -100,6 +121,9 @@ object Api {
         }
     }
 
+    /**
+     * Add a user to the database
+     */
     suspend fun addUser(name:String): ApiResponse<User?> {
         return try {
             val response = doRequest(
@@ -119,6 +143,9 @@ object Api {
         }
     }
 
+    /**
+     * Add an event to the database
+     */
     suspend fun addEvent(
         name: String,
         description: String,
@@ -146,6 +173,9 @@ object Api {
         }
     }
 
+    /**
+     * Join an event by providing inviteCode
+     */
     suspend fun joinEvent(inviteCode: String): ApiResponse<EventWithUsers?> {
         return try {
             val response = doRequest(
@@ -164,6 +194,9 @@ object Api {
         }
     }
 
+    /**
+     * Kick a user from an event by inputting eventId and userId
+     */
     suspend fun kickUserFromEvent(eventId: Int, userId: Int): ApiResponse<Boolean> {
         return try {
             val response = doRequest(
@@ -182,6 +215,9 @@ object Api {
         }
     }
 
+    /**
+     * Delete an event from the database
+     */
     suspend fun deleteEvent(eventId: Int): Boolean {
         return try {
             val response = doRequest(
@@ -196,6 +232,9 @@ object Api {
         }
     }
 
+    /**
+     * Get the available dates for a user in a specific event
+     */
     suspend fun getAvailableDates(eventId: Int): ApiResponse<List<LocalDateTime>?> {
         return try {
             val response = doRequest(
@@ -209,6 +248,9 @@ object Api {
         }
     }
 
+    /**
+     * Update a user's available dates in a specified eventId
+     */
     suspend fun updateAvailableDates(eventId: Int, dates: List<LocalDateTime>): ApiResponse<Boolean> {
         return try {
             val response = doRequest(

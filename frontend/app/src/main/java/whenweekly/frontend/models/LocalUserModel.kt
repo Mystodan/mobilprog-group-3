@@ -25,14 +25,14 @@ class LocalUserModel(private val context : Context) {
 
     }
     /**
-     *  sets encrypted shared preferences
+     *  Sets encrypted shared preferences
      */
     private fun setSecurePref(fileName: String, alias: String) = EncryptedSharedPreferences.create(
         fileName, alias, context, AES256_SIV, AES256_GCM
     )
 
     /**
-     *
+     * Sets user and UUID
      */
     fun setUser(user: User) {
         securePref.edit().putString(uuidKey, user.uuidToString()).apply()

@@ -206,7 +206,7 @@ class DatabaseManagerImpl : DatabaseManager {
                 .select()
                 .where { EventUserAvailableTable.event eq eventId }
                 .map { objectMapper.readValue(it[EventUserAvailableTable.available_dates], List::class.java) }
-                .first()
+                .flatten()
                 .map {
                     LocalDateTime.parse(it.toString())
                 }

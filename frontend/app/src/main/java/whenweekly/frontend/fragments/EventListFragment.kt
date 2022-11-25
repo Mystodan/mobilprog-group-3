@@ -18,24 +18,18 @@ import whenweekly.frontend.models.EventModel
 import java.time.ZoneOffset
 
 class EventListFragment : Fragment() {
-    private var _binding : FragmentEventListBinding? = null
+    private var _binding: FragmentEventListBinding? = null
     private val binding get() = _binding!!
     private var adapter = EventAdapter(Globals.Lib.Events) {
         Globals.Utils.startEventActivityOfEvent(Globals.Lib.Events[it], requireActivity(),(activity as FragmentHolderActivity).getResult)
 
     }
 
-    /**
-     *
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?:return
     }
 
-    /**
-     *
-     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -63,10 +57,7 @@ class EventListFragment : Fragment() {
                 })
                 Globals.Lib.Events = syncEventList
                 adapter.updateData(Globals.Lib.Events)
-            }
-            else {
-                Toast.makeText(context,  eventsResponse.message, Toast.LENGTH_SHORT).show()
-            }
+            } else Toast.makeText(context,  eventsResponse.message, Toast.LENGTH_SHORT).show()
         }
         return binding.root
     }

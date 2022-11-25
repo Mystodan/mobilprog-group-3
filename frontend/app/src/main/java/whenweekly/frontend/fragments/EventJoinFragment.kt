@@ -16,12 +16,9 @@ import whenweekly.frontend.models.EventModel
 import java.time.ZoneOffset
 
 class EventJoinFragment : Fragment() {
-    private var _binding : FragmentEventJoinBinding? = null
+    private var _binding: FragmentEventJoinBinding? = null
     private val binding get() = _binding!!
 
-    /**
-     *
-     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -36,7 +33,7 @@ class EventJoinFragment : Fragment() {
     }
 
     /**
-     *
+     * Function that the user can use to join an event
      */
     private fun joinEvent(inviteCode: String) {
         lifecycleScope.launch {
@@ -53,9 +50,7 @@ class EventJoinFragment : Fragment() {
                 Globals.Lib.Events.add(localEvent)
                 Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
                 Globals.Utils.startEventActivityOfEvent(localEvent, requireActivity(), (activity as FragmentHolderActivity).getResult)
-            } else {
-                Toast.makeText(context, eventResponse.message, Toast.LENGTH_SHORT).show()
-            }
+            } else Toast.makeText(context, eventResponse.message, Toast.LENGTH_SHORT).show()
         }
     }
 }

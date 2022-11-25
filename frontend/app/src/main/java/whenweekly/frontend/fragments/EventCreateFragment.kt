@@ -34,7 +34,6 @@ class EventCreateActivity : Fragment() {
     ): View {  // Inflate the layout for this fragment
         _binding = FragmentEventCreateBinding.inflate(inflater, container, false)
         super.onCreate(savedInstanceState)
-        // gets all inv codes
 
         // sets the functionality for picking dates
         binding.selectDates.setOnClickListener { showDataRangePicker() }
@@ -45,7 +44,7 @@ class EventCreateActivity : Fragment() {
     }
 
     /**
-     *
+     * Sets up, builds and shows the DateRangePicker
      */
     private fun showDataRangePicker() {
         var setupDatePicker = MaterialDatePicker
@@ -63,12 +62,12 @@ class EventCreateActivity : Fragment() {
     }
 
     /**
-     * 
+     * Returns a Long into as the equivalent in LocalDateTime
      */
     private fun Long.toLocalDateTime(): LocalDateTime = LocalDateTime.ofEpochSecond(this / 1000, 0, ZoneOffset.UTC)
 
     /**
-     *
+     * Create an event and resets the name and dates
      */
     private fun createEventPlan() {
         val errString = mutableListOf<String>()
@@ -96,16 +95,13 @@ class EventCreateActivity : Fragment() {
                 Toast.makeText(activity, "Event created!", Toast.LENGTH_SHORT).show()
                 println("activity:${requireActivity()} \nContext:${requireContext()}")
                 Globals.Utils.startEventActivityOfEvent(localEvent, requireActivity(), (activity as FragmentHolderActivity).getResult)
-            } else {
-                Toast.makeText(activity, "Error creating event!", Toast.LENGTH_SHORT).show()
-            }
+            } else Toast.makeText(activity, "Error creating event!", Toast.LENGTH_SHORT).show()
             resetDateHolders(binding.startDateHolder, binding.endDateHolder,binding.etEventName)
-
         }
     }
 
     /**
-     *
+     * Displays the corresponding dates in the DateHolder TextViews
      */
     private fun setDateHolders(startDateHolder: TextView?,endDateHolder: TextView?) {
         fun formatDate(date:Long): String = Globals.Utils.formatDate("yy.MM.dd", date).replace(".","/")
@@ -114,7 +110,7 @@ class EventCreateActivity : Fragment() {
     }
 
     /**
-     *
+     * Resets the DateHolders
      */
     private fun resetDateHolders(startDateHolder: TextView?,endDateHolder: TextView?, editTextHolder:EditText?) {
         val def = getString(R.string.defaultDateHolder)
