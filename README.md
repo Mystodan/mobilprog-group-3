@@ -19,9 +19,9 @@ People that need help with organizing social events in a clean and orderly(?) fa
 3. You have XAMPP installed.
 
 #### Guide:
-4. Import the "whenweekly_db.sql" SQL file from documentation into PHPMyAdmin on localhost
-5. Make a new folder and clone the project with the command "https://git.gvk.idi.ntnu.no/Daniehhu/mobile-programming-group-3.git"
-6. Open XAMPP and start Apache and MySQL
+4. Open XAMPP and start Apache and MySQL
+5. Import the "whenweekly_db.sql" SQL file from documentation into PHPMyAdmin on localhost
+6. Make a new folder and clone the project with the command "https://git.gvk.idi.ntnu.no/Daniehhu/mobile-programming-group-3.git"
 7. Open the directory called "backend" in IntelliJ IDEA,
 add the VM Options to the ApplicationKt: "-DDB_URL=jdbc:mysql://127.0.0.1:3306/whenweekly -DDB_USER=root -DDB_PWD= -DPORT=8080 -DBUILD_CONFIG=dev", then run the application
 8. Open the directory called "frontend" in Android Studio and run the application
