@@ -12,7 +12,10 @@ import whenweekly.routes.AvailableDatesRequest
 import whenweekly.routes.EventJoinRequest
 import whenweekly.routes.UserKickRequest
 
-// https://ktor.io/docs/request-validation.html
+/**
+ * Configure request validation
+ * See https://ktor.io/docs/request-validation.html
+ */
 fun Application.configureRequestValidation() {
     install(RequestValidation) {
         validate<User> { user ->
@@ -60,6 +63,7 @@ fun Application.configureRequestValidation() {
         }
     }
     install(StatusPages) {
+        // Configure status pages for certain exceptions
         exception<RequestValidationException> { call, cause ->
             println("RequestValidationException: ${cause.message}")
             call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())

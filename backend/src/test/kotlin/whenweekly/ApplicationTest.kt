@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.test.*
 
+// Serializable classes for testing purposes
 data class UserTest(
     val name: String = ""
 )
@@ -45,15 +46,18 @@ data class EventTest(
 )
 
 
-
+/**
+ * Get test client with serialization ktorm support
+ *
+ * @return test client
+ */
 fun ApplicationTestBuilder.getClient(): HttpClient {
     return createClient {
         install(ContentNegotiation) {
             jackson {
                 enable(SerializationFeature.INDENT_OUTPUT)
-                // java LocalDateTime serialize support
-
                 registerModule(KtormModule())
+                // Add LocalDateTime serialization support
                 registerModule(JavaTimeModule().apply {
                     addSerializer(
                         LocalDateTime::class.java,
@@ -68,6 +72,7 @@ fun ApplicationTestBuilder.getClient(): HttpClient {
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ApplicationTest {
 
+    // Object mapper for serialization
     private val objectMapper = ObjectMapper().apply {
         registerModule(KtormModule())
         registerModule(JavaTimeModule().apply {
@@ -77,6 +82,11 @@ class ApplicationTest {
             )
         })
     }
+
+    /**
+     * Setup test cases by setting up routing and resetting database
+     *
+     */
     private fun setupTest() = testApplication {
         application {
             configureRouting()
@@ -269,7 +279,9 @@ class ApplicationTest {
         var response = createUser(client, user)
         assertEquals(HttpStatusCode.Created, response.status)
         val createdUser = response.body<User>()
-        val responseUser = client.get("$USERS_ROUTE/${createdUser.id}").body<User>()
+        val responseUserData = getUser(client, createdUser.uuid!!)
+        assertEquals(HttpStatusCode.OK, responseUserData.status)
+        val responseUser = responseUserData.body<User>()
         assertEquals(user.name, createdUser.name)
         assertEquals(user.name, responseUser.name)
         assert(createdUser.id > -1)
@@ -301,6 +313,8 @@ class ApplicationTest {
             start_date = "2021-01-01T00:00:00",
             end_date = "2021-01-01T00:00:00"
         )
+
+        // Create event
         var eventResponse = createEvent(client, event, owner.uuid!!)
         assertEquals(HttpStatusCode.Created, eventResponse.status)
         val createdEvent = eventResponse.body<EventWithUsers>()
@@ -677,6 +691,10 @@ class ApplicationTest {
         updateAvailableDates2(client, eventCreated.event.id, dates2, owner.uuid!!)
     }
 
+    /**
+     * Reset the database
+     *
+     */
     private fun resetDatabase() {
         testApplication {
             client.delete(RESET_ROUTE).apply {

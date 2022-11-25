@@ -13,20 +13,31 @@ import whenweekly.domain.repository.UserRepository
 import whenweekly.plugins.dev
 import whenweekly.routes.Constants.USERS_ROUTE
 
+/**
+ * User routing
+ *
+ */
 fun Route.userRouting() {
+    // Initialize the repositories
     val userRepository: UserRepository = UserDBRepository()
     val eventRepository: EventRepository = EventDBRepository()
+
     route(USERS_ROUTE) {
         addUser(userRepository)
         getUser(userRepository)
+        // Dev only routes
         dev {
             getUsers(userRepository)
-            //getUserById(userRepository)
             getEventsForUser(eventRepository)
         }
     }
 }
 
+/**
+ * Get users
+ *
+ * @param repository
+ */
 fun Route.getUsers(repository: UserRepository) {
     get {
         val users = repository.getAllUsers()
@@ -37,6 +48,11 @@ fun Route.getUsers(repository: UserRepository) {
     }
 }
 
+/**
+ * Get user
+ *
+ * @param repository The user repository
+ */
 fun Route.getUser(repository: UserRepository) {
     get("/me") {
         val userId = Shared.getUserId(call.request, repository)
@@ -63,17 +79,11 @@ fun Route.getUser(repository: UserRepository) {
     }
 }
 
-/*fun Route.getUserById(repository: UserRepository) {
-    get("{id}") {
-        val id = call.parameters["id"]!!.toInt()
-        val user = repository.getUserById(id)
-        user?.let {
-            call.respond(HttpStatusCode.OK, it)
-        } ?: call.respond(HttpStatusCode.NotFound, "user not found with id $id")
-        return@get
-    }
-}*/
-
+/**
+ * Add user
+ *
+ * @param repository The user repository
+ */
 fun Route.addUser(repository: UserRepository) {
     post {
         val newUser = call.receive<User>()
@@ -84,6 +94,11 @@ fun Route.addUser(repository: UserRepository) {
     }
 }
 
+/**
+ * Get events for user
+ *
+ * @param eventRepository The event repository
+ */
 fun Route.getEventsForUser(eventRepository: EventRepository) {
     get("{id}/events") {
         val id = call.parameters["id"]!!.toInt()

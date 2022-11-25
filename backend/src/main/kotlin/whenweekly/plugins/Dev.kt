@@ -8,6 +8,12 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import whenweekly.routes.Constants.BUILD_CONFIG
 
+/**
+ * Dev route to protect dev only routes from being accessed in production
+ *
+ * @param build The build route
+ * @return The dev route
+ */
 fun Route.dev(build: Route.() -> Unit): Route {
     val route = createChild(DevRouteSelector())
 
@@ -25,14 +31,15 @@ fun Route.dev(build: Route.() -> Unit): Route {
     return route
 }
 
+/**
+ * Dev route selector
+ *
+ * @constructor Create empty Dev route selector
+ */
 class DevRouteSelector : RouteSelector() {
     override fun evaluate(context: RoutingResolveContext, segmentIndex: Int): RouteSelectorEvaluation {
         return RouteSelectorEvaluation.Transparent
     }
 
     override fun toString(): String = "auth"
-}
-
-fun isValidUser(request: ApplicationRequest): Boolean {
-    return request.headers["Authorization"] == "Bearer 123"
 }

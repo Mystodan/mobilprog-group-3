@@ -13,12 +13,23 @@ object DatabaseHelper {
     private var username = ""
     private var password = ""
 
+    /**
+     * Configure database config
+     *
+     */
     fun Application.configureDatabaseConfig() {
+        // Url of the database server
         url = environment.config.property(DATABASE_URL).getString()
+        // Username of the database server
         username = environment.config.property(DATABASE_USERNAME).getString()
+        // Password of the database server
         password = environment.config.property(DATABASE_PASSWORD).getString()
     }
 
+    /**
+     * Database instance factory method
+     *
+     */
     fun database() = Database.connect(
         url = url,
         user = username,

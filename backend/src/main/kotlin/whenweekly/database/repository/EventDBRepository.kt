@@ -5,21 +5,19 @@ import whenweekly.database.entities.Event
 import whenweekly.database.entities.User
 import whenweekly.domain.manager.DatabaseManager
 import whenweekly.domain.repository.EventRepository
+import whenweekly.misc.genInvCode
 import java.time.LocalDateTime
 import java.util.*
 
-// TODO: move somewhere else
-private fun genInvCode(): String {
-    fun getRandNum(min: Int, max: Int): Int = Random().nextInt(max + 1) + min
-    var invCode = ""
-    val symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-    for (i in 0..19) {
-        invCode += symbols[getRandNum(0, symbols.length - 1)]
-    }
-    return invCode
-}
-
+/**
+ * Event database repository for handling event related operations
+ *
+ */
 class EventDBRepository : EventRepository {
+    /*
+     * See database implementation for documentation
+     */
+
     private val database: DatabaseManager = DatabaseManagerImpl()
 
     override fun addEvent(event: Event, owner: User): Event? {
