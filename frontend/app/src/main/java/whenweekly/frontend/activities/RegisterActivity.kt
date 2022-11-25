@@ -10,18 +10,17 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import whenweekly.frontend.api.Api
-import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.ActivityRegisterBinding
 import whenweekly.frontend.models.LocalUserModel
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding : ActivityRegisterBinding
-    var userInput = false
+    private var userInput = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        var welcomeText = listOf("Welcome to WhenWeekly." ,
+        val welcomeText = listOf("Welcome to WhenWeekly." ,
             "Please Enter Your Name...")
         lifecycleScope.launchWhenStarted {
             showText(welcomeText[0], binding.welcomeText, null)
@@ -39,8 +38,9 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-
-
+    /**
+     * Displays text on the screen of the mobile device
+     */
     private suspend fun showText(text: String, textView: TextView?, editView: EditText?){
         delay(100L)
         var textHolder = ""
@@ -53,7 +53,11 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
     }
-    private fun submit(name:String){
+
+    /**
+     * Submit the users name and add them to the database
+     */
+    private fun submit(name: String){
         if (name.isEmpty())
             Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
         else{

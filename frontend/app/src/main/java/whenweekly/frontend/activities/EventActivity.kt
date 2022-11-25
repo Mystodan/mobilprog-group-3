@@ -47,19 +47,20 @@ class EventActivity : DrawerBaseActivity() {
         // set default fragment
         loadFragment(currFragment::class.java, eventInformation)
 
+
+
         // sets up clipboard manager
         clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         binding.copyCode.setOnClickListener { clipboard.setPrimaryClip(
             ClipData.newPlainText(Globals.Constants.LABEL_CLIP_INV,eventInformation.invCode))
             Toast.makeText(this, "Copied: ${eventInformation.invCode}", Toast.LENGTH_SHORT).show()
         }
-
-
     }
+
     /**
      * Intent used to receive data from a parcelable and set the content inside the layout XML to the data received
      */
-    private fun getParcelableFromIntent():EventModel? =
+    private fun getParcelableFromIntent() : EventModel? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
         } else {
@@ -67,13 +68,18 @@ class EventActivity : DrawerBaseActivity() {
         }
 
 
-    private fun manageOwnerState(model:EventModel){
+    /**
+     * Handles owner permissions
+     */
+    private fun manageOwnerState(model: EventModel){
         applyUserAccess(model)
         if(model.ownerId != Globals.Lib.CurrentUser?.id){ hideAdmin(model);return}
         applyOwnerAccess(model)
     }
 
-
+    /**
+     * Applies access to general permissions
+     */
     private fun applyUserAccess(model: EventModel){
         binding.dateManage.setOnClickListener {
             buttonPanel = ButtonPanel.DatesSelect
@@ -84,7 +90,11 @@ class EventActivity : DrawerBaseActivity() {
             changePanelView(buttonPanel, model)
         }
     }
-    private fun applyOwnerAccess(model:EventModel){
+
+    /**
+     * Applies to owner permissions
+     */
+    private fun applyOwnerAccess(model: EventModel){
         isOwner = true
         binding.leave.visibility = android.view.View.GONE
         binding.Admin.setOnClickListener {
@@ -93,7 +103,11 @@ class EventActivity : DrawerBaseActivity() {
 
         }
     }
-    private fun hideAdmin(model:EventModel){
+
+    /**
+     * Hides admin permissions
+     */
+    private fun hideAdmin(model: EventModel){
         if(!isOwner){
             binding.Admin.visibility = android.view.View.GONE
             binding.leave.setOnClickListener {
@@ -104,7 +118,7 @@ class EventActivity : DrawerBaseActivity() {
     }
 
     /**
-     *
+     * Displays the data of the EventModel
      */
     private fun displayData(model: EventModel) {
         binding.eventTitle.text = model.eventName
@@ -112,8 +126,9 @@ class EventActivity : DrawerBaseActivity() {
         binding.eventEndDate.text = Globals.Utils.formatDate("yyyy.MM.dd", model.endDate)
         binding.code.text = model.invCode
     }
+
     /**
-     *
+     * Reconfigures toolbar to finish current activity
      */
     private fun reconfigureToolbar() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.back_arrow)
@@ -121,6 +136,9 @@ class EventActivity : DrawerBaseActivity() {
         toolbar.setNavigationOnClickListener{ finish()}
     }
 
+    /**
+     * Changes the panel view
+     */
     private fun changePanelView(menuItem: ButtonPanel, parcel: EventModel){
         val componentClass: Class<*> = when(menuItem){
             ButtonPanel.Admin -> EventAdminFragment::class.java
@@ -131,6 +149,10 @@ class EventActivity : DrawerBaseActivity() {
 
         loadFragment(componentClass, parcel)
     }
+
+    /**
+     * Loads a fragment
+     */
     private fun loadFragment(fragmentClass:Class<*>?, parcel: EventModel) {
         var fragment: Fragment? = null
         try {
@@ -141,7 +163,7 @@ class EventActivity : DrawerBaseActivity() {
 
         if (fragment != null && currFragment != fragment) {
             val eventBundle = Bundle()
-            eventBundle.putParcelable(Globals.Constants.LABEL_PARCEL_INFO,parcel)
+            eventBundle.putParcelable(Globals.Constants.LABEL_PARCEL_INFO, parcel)
             fragment.arguments = eventBundle
             fragmentManager.beginTransaction().replace(R.id.fragmentHolder, fragment).commit()
             currFragment = fragment

@@ -4,11 +4,8 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme.*
 import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme.*
-import whenweekly.frontend.api.Api
 import whenweekly.frontend.api.models.User
 import whenweekly.frontend.app.Globals
-import java.nio.ByteBuffer
-import java.util.*
 
 // Tell it to clear the uuid (in case of database reset)
 const val clearUUID: Boolean = false
@@ -28,14 +25,18 @@ class LocalUserModel(private val context : Context) {
 
     }
     /**
-     *  sets encrypted shared preferences
+     *  Sets encrypted shared preferences
      */
     private fun setSecurePref(fileName: String, alias: String) = EncryptedSharedPreferences.create(
         fileName, alias, context, AES256_SIV, AES256_GCM
     )
 
+    /**
+     * Sets user and UUID
+     */
     fun setUser(user: User) {
         securePref.edit().putString(uuidKey, user.uuidToString()).apply()
         Globals.Lib.CurrentUser = user
+        Globals.Lib.localUUID = user.uuidToString()
     }
 }

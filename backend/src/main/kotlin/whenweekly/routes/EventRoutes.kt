@@ -283,7 +283,7 @@ fun Route.updateAvailableDatesByEventId(repository: EventRepository, userReposit
         val eventStart = event.start_date
         val eventEnd = event.end_date
         availableDates.available_dates!!.all {
-            it.isAfter(eventStart) && it.isBefore(eventEnd)
+            (it.isAfter(eventStart) || it.isEqual(eventStart)) && (it.isBefore(eventEnd) || it.isEqual(eventEnd))
         }.let {
             if (!it) {
                 call.respond(HttpStatusCode.BadRequest, "Dates must be in range of event")

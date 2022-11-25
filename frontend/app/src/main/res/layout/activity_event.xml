@@ -5,14 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.EventActivity">
-    <ScrollView
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" >
 
 
     <androidx.cardview.widget.CardView
@@ -171,12 +168,11 @@
     </LinearLayout>
 
         <FrameLayout
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/fragmentHolder">
+            android:id="@+id/fragmentHolder"
+            android:layout_marginBottom="70dp" >
 
         </FrameLayout>
     </LinearLayout>
-    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

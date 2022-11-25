@@ -20,6 +20,9 @@
                     android:id="@+id/nav_create"
                     android:icon="@drawable/item_three"
                     android:title="Create" />
+                <item
+                    android:id="@+id/darkmode"
+                    android:title="Toggle Darkmode" />
             </menu>
         </item>
     </group>

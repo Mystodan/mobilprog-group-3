@@ -7,30 +7,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
+import kotlinx.coroutines.launch
+import whenweekly.frontend.api.Api
 import whenweekly.frontend.app.Globals
 import whenweekly.frontend.databinding.FragmentDateReportBinding
 import whenweekly.frontend.models.EventModel
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.Stream
-
 
 class DateReportFragment : Fragment() {
     private var _binding : FragmentDateReportBinding? = null
     private val binding get() = _binding!!
     private var datesStart: List<Int> ? = null
     private var datesEnd: List<Int> ? = null
-    private var unavailableDatesParent: MutableList<LocalDate> = mutableListOf()
 
-    /**
-     *
-     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,39 +48,37 @@ class DateReportFragment : Fragment() {
             .setCalendarDisplayMode(CalendarMode.MONTHS)
             .commit()
 
-
         binding.btnReportDate.setOnClickListener {
-            val allDates = allDates(toLocalDate(eventInformation.startDate), toLocalDate(eventInformation.endDate))
-            println("All dates: $allDates")
-
-            println(localDateToString(allDates))
-
-            val (unavailableDates) = calculateAvailableDates(allDates)
-            val toastMSG =
-                if(unavailableDates.isEmpty()) "Please select dates first!"
-                else if (doesAvailableContainUnavailable(unavailableDatesParent, unavailableDates)) "${getUnavailableDatesAsDays()} of the selected dates are unavailable"
-                else { unavailableDates.forEach{if(!unavailableDatesParent.contains(it))unavailableDatesParent.add(it)}; "Dates reported successfully!"}
-            Toast.makeText(context, toastMSG , Toast.LENGTH_SHORT).show()
+            val allDates = mutableListOf<LocalDateTime>()
+            lifecycleScope.launchWhenStarted {
+                 Api.getAvailableDates(eventInformation.eventId).data?.forEach{allDates.add(it)}
+                val (unavailableDates, availableDates) = calculateAvailableDates(eventModel = eventInformation,allDates)
+                val toastMSG =
+                    if(unavailableDates.isEmpty()) "Please select dates first!"
+                    else {
+                        lifecycleScope.launch {
+                            Api.updateAvailableDates(eventInformation.eventId, availableDates)
+                        } ; "Dates reported successfully!" }
+                Toast.makeText(context, toastMSG , Toast.LENGTH_SHORT).show()
+            }
         }
 
         return binding.root
     }
 
-    private fun doesAvailableContainUnavailable(unavailableDates: MutableList<LocalDate>,availableDates: MutableList<LocalDate>):Boolean{
-        availableDates.forEach{return (unavailableDates.contains(it))}
-        return false
+    /**
+     * @return      - Returns a long as a LocalDateTime
+     */
+    private fun toLocalDateTime(long: Long): LocalDateTime {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(long), TimeZone.getDefault().toZoneId())
     }
 
-    private fun localDateToString(datesList: MutableList<LocalDate>) : MutableList<String> {
-        val stringDates = mutableListOf<String>()
-        calculateAvailableDates(datesList).first.forEach{ stringDates.add("\"$it\"") }
-        return stringDates
-    }
-
+    /**
+     * Gets the EventModel of the current Event from the EventActivity
+     */
     private fun getEventModelFromParcel():EventModel? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO, EventModel::class.java)
-    } else
-        arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
+    } else arguments?.getParcelable(Globals.Constants.LABEL_PARCEL_INFO)
 
     /**
      * Takes a Long and returns a list of the year, moth and day of that Long
@@ -95,21 +91,6 @@ class DateReportFragment : Fragment() {
         Globals.Utils.formatDate("MM", date).toInt(),
         Globals.Utils.formatDate("dd", date).toInt()
     )
-    private fun getUnavailableDatesAsDays():MutableList<Int> {
-        val retList = mutableListOf<Int>()
-        unavailableDatesParent.forEach{retList.add(it.dayOfMonth) }
-        return retList
-    }
-
-    /**
-     * Turns a Long into a java LocalDate and returns it
-     *
-     * @param long  - The Long to be returned as LocalDate
-     * @return      - Turns a Long into a LocalDate and returns it
-     */
-    private fun toLocalDate(long: Long): LocalDate {
-        return Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate()
-    }
 
     /**
      * Returns a mutable list of all the dates between a startDate and an endDate
@@ -118,7 +99,7 @@ class DateReportFragment : Fragment() {
      * @param endDate       - The end date of the Event
      * @return              - Returns all dates between startDate and endDate as a mutable list of LocalDates
      */
-    private fun allDates(startDate: LocalDate, endDate: LocalDate): MutableList<LocalDate> {
+    private fun allDates(startDate: LocalDateTime, endDate: LocalDateTime): MutableList<LocalDateTime> {
         val numOfDaysBetween: Long = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1))
         return Stream.iterate(startDate) { date -> date.plusDays(1) }.limit(numOfDaysBetween).collect(
             Collectors.toList())
@@ -128,16 +109,20 @@ class DateReportFragment : Fragment() {
      * Removes the unavailable dates from all dates that are available
      *
      * @param allDates          - A mutable list of all LocalDates between startDate and endDate
-     * @return                  - Returns alldates after it has removed all unavailable dates
+     * @return                  - Returns allDates after it has removed all unavailable dates (returns available dates)
      */
-    private fun calculateAvailableDates(allDates: MutableList<LocalDate>): Pair<MutableList<LocalDate>,MutableList<LocalDate>> {
-        val availableDates : MutableList<LocalDate> = allDates
-        val unavailableDates : MutableList<LocalDate> = mutableListOf()
+    private fun calculateAvailableDates(eventModel: EventModel,allDates: MutableList<LocalDateTime>) : Pair<List<LocalDateTime>, List<LocalDateTime>> {
+        val unavailableDates = allDates(toLocalDateTime(eventModel.startDate), toLocalDateTime(eventModel.endDate))
+        unavailableDates.removeAll(allDates)
+        val availableDates : MutableList<LocalDateTime> = allDates
+
         for(date in binding.calendarView.selectedDates) {
-            unavailableDates.add(toLocalDate(date.date.toEpochDay()*86400000))
+            val wrapDate = toLocalDateTime(date.date.toEpochDay()*86400000)
+            if(!availableDates.contains(wrapDate) && unavailableDates.contains(wrapDate)){
+                availableDates.add(wrapDate); unavailableDates.remove(wrapDate)
+            }
         }
-        unavailableDates.forEach{ if(availableDates.contains(it)) availableDates.remove(it) }
-        return Pair(availableDates, unavailableDates)
+        return Pair(unavailableDates, availableDates)
     }
 
 }
